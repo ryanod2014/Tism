@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tism - UX Mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-surface: #12121a;
+      --bg-elevated: #1a1a26;
+      --bg-hover: #222233;
+      --border: #2a2a3e;
+      --border-bright: #3d3d5c;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --text-muted: #555566;
+      --accent-cyan: #00d4ff;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-pink: #ec4899;
+      --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #a855f7 100%);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Outfit', -apple-system, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      padding: 40px;
+      min-height: 100vh;
+    }
+
+    .mockups-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .mockups-header h1 {
+      font-size: 32px;
+      margin-bottom: 12px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .mockups-header p {
+      color: var(--text-secondary);
+      font-size: 16px;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .mockup-section {
+      margin-bottom: 80px;
+    }
+
+    .mockup-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mockup-title .number {
+      background: var(--gradient-primary);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--bg-deep);
+    }
+
+    .mockup-description {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 24px;
+      padding-left: 44px;
+    }
+
+    .mockup-pros-cons {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 24px;
+      padding-left: 44px;
+    }
+
+    .pros, .cons {
+      font-size: 13px;
+    }
+
+    .pros strong { color: var(--accent-green); }
+    .cons strong { color: var(--accent-red); }
+
+    .pros ul, .cons ul {
+      list-style: none;
+      margin-top: 6px;
+    }
+
+    .pros li::before { content: "✓ "; color: var(--accent-green); }
+    .cons li::before { content: "✗ "; color: var(--accent-red); }
+
+    .mockup-frame {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ============================================
+       VARIATION 1: UNIFIED CHAT WITH MODE TOGGLE
+       ============================================ */
+    .v1-container {
+      display: flex;
+      height: 600px;
+    }
+
+    .v1-sidebar {
+      width: 280px;
+      background: var(--bg-elevated);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .v1-sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .v1-sidebar-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .v1-mode-toggle {
+      display: flex;
+      background: var(--bg-deep);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+    }
+
+    .v1-mode-btn {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .v1-mode-btn.active {
+      background: var(--accent-cyan);
+      color: var(--bg-deep);
+    }
+
+    .v1-threads {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .v1-thread-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .v1-thread-item:hover { background: var(--bg-hover); }
+    .v1-thread-item.active { background: rgba(0, 212, 255, 0.1); border-left: 3px solid var(--accent-cyan); }
+
+    .v1-thread-from { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
+    .v1-thread-subject { font-size: 13px; font-weight: 500; }
+    .v1-thread-badge { font-size: 10px; background: rgba(239, 68, 68, 0.2); color: var(--accent-red); padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
+
+    .v1-chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .v1-chat-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+
+    .v1-chat-context {
+      background: rgba(0, 212, 255, 0.08);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .v1-context-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .v1-context-text strong {
+      color: var(--accent-cyan);
+    }
+
+    .v1-context-dismiss {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .v1-chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .v1-message {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .v1-message-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .v1-message-content {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 80%;
+    }
+
+    .v1-message.user .v1-message-content {
+      background: rgba(0, 212, 255, 0.15);
+      margin-left: auto;
+    }
+
+    .v1-chat-input-area {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .v1-input-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .v1-input {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      color: var(--text-primary);
+      font-size: 14px;
+      resize: none;
+      font-family: inherit;
+    }
+
+    .v1-input:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+    }
+
+    .v1-send-btn {
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 12px 20px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* ============================================
+       VARIATION 2: SINGLE CHAT WITH SMART INPUT
+       ============================================ */
+    .v2-container {
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .v2-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .v2-header h2 {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .v2-header p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .v2-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .v2-message-group {
+      margin-bottom: 24px;
+    }
+
+    .v2-group-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .v2-group-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+    }
+
+    .v2-group-info { flex: 1; }
+    .v2-group-from { font-size: 12px; font-weight: 600; }
+    .v2-group-topic { font-size: 11px; color: var(--text-muted); }
+    .v2-group-badge { font-size: 10px; background: rgba(239, 68, 68, 0.2); color: var(--accent-red); padding: 2px 8px; border-radius: 10px; }
+
+    .v2-reply-btn {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      color: var(--text-primary);
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .v2-reply-btn:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .v2-bubble {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .v2-input-area {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .v2-input-context {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      background: rgba(0, 212, 255, 0.08);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+    }
+
+    .v2-input-context-icon { font-size: 14px; }
+    .v2-input-context-text { flex: 1; color: var(--text-secondary); }
+    .v2-input-context-text strong { color: var(--accent-cyan); }
+    .v2-input-context-clear { background: none; border: none; color: var(--text-muted); cursor: pointer; }
+
+    .v2-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .v2-input {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .v2-input:focus { outline: none; border-color: var(--accent-cyan); }
+
+    .v2-send {
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 14px 24px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ============================================
+       VARIATION 3: CHAT-FIRST WITH FLOATING INBOX
+       ============================================ */
+    .v3-container {
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .v3-main-chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .v3-chat-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .v3-chat-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .v3-luna-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .v3-luna-info h3 { font-size: 15px; font-weight: 600; }
+    .v3-luna-info p { font-size: 11px; color: var(--text-muted); }
+
+    .v3-inbox-toggle {
+      position: relative;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .v3-inbox-badge {
+      background: var(--accent-red);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .v3-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .v3-welcome {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .v3-welcome-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .v3-welcome h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .v3-welcome p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 400px;
+      margin: 0 auto 20px;
+      line-height: 1.6;
+    }
+
+    .v3-quick-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .v3-quick-action {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 20px;
+      color: var(--text-primary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .v3-quick-action:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .v3-quick-action.has-badge {
+      position: relative;
+    }
+
+    .v3-quick-action .badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: var(--accent-red);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .v3-input-area {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .v3-input-wrapper {
+      display: flex;
+      gap: 12px;
+    }
+
+    .v3-input {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 20px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .v3-input::placeholder { color: var(--text-muted); }
+    .v3-input:focus { outline: none; border-color: var(--accent-cyan); }
+
+    .v3-send {
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 14px 24px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Floating inbox panel */
+    .v3-floating-inbox {
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      width: 340px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      overflow: hidden;
+    }
+
+    .v3-floating-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .v3-floating-title { font-size: 14px; font-weight: 600; }
+    .v3-floating-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; }
+
+    .v3-floating-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .v3-floating-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .v3-floating-item:hover { background: var(--bg-hover); }
+
+    .v3-floating-from { font-size: 11px; color: var(--text-secondary); margin-bottom: 2px; }
+    .v3-floating-subject { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+    .v3-floating-badge { font-size: 9px; background: rgba(239, 68, 68, 0.2); color: var(--accent-red); padding: 2px 6px; border-radius: 4px; }
+
+    /* ============================================
+       VARIATION 4: TABBED INTERFACE
+       ============================================ */
+    .v4-container {
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .v4-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      background: var(--bg-elevated);
+    }
+
+    .v4-tab {
+      padding: 16px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .v4-tab.active {
+      color: var(--text-primary);
+    }
+
+    .v4-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+    }
+
+    .v4-tab-badge {
+      background: var(--accent-red);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .v4-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .v4-new-request {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .v4-new-header {
+      padding: 24px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .v4-pm-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 12px;
+    }
+
+    .v4-new-header h3 { font-size: 18px; margin-bottom: 4px; }
+    .v4-new-header p { font-size: 13px; color: var(--text-secondary); }
+
+    .v4-chat-area {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .v4-suggestion-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .v4-chip {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .v4-chip:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .v4-input-area {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .v4-input-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .v4-input {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 20px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .v4-input:focus { outline: none; border-color: var(--accent-cyan); }
+
+    .v4-send {
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 14px 24px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ============================================
+       VARIATION 5: COMMAND-STYLE UNIFIED INPUT
+       ============================================ */
+    .v5-container {
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .v5-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .v5-pm-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-elevated);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+    }
+
+    .v5-pm-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .v5-pm-name { font-size: 13px; font-weight: 500; }
+    .v5-pm-role { font-size: 11px; color: var(--text-muted); }
+
+    .v5-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .v5-system-msg {
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .v5-system-msg strong { color: var(--accent-purple); }
+
+    .v5-pending-section {
+      margin-bottom: 24px;
+    }
+
+    .v5-pending-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .v5-pending-count {
+      background: var(--accent-red);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    .v5-pending-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .v5-pending-card:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .v5-pending-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+
+    .v5-pending-from { font-size: 12px; color: var(--text-secondary); }
+    .v5-pending-badge { font-size: 10px; background: rgba(239, 68, 68, 0.2); color: var(--accent-red); padding: 2px 6px; border-radius: 4px; }
+
+    .v5-pending-subject { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+    .v5-pending-preview { font-size: 12px; color: var(--text-muted); }
+
+    .v5-input-area {
+      padding: 20px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+
+    .v5-input-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      gap: 16px;
+    }
+
+    .v5-input-hint code {
+      background: var(--bg-deep);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-cyan);
+    }
+
+    .v5-input-wrapper {
+      display: flex;
+      gap: 12px;
+    }
+
+    .v5-input {
+      flex: 1;
+      background: var(--bg-deep);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      color: var(--text-primary);
+      font-size: 15px;
+      font-family: inherit;
+    }
+
+    .v5-input:focus { outline: none; border-color: var(--accent-cyan); }
+
+    .v5-input::placeholder { color: var(--text-muted); }
+
+    .v5-send {
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 16px 28px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    /* ============================================
+       VARIATION 6: MOBILE-INSPIRED SIMPLE CHAT
+       ============================================ */
+    .v6-container {
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .v6-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-elevated);
+    }
+
+    .v6-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .v6-info { flex: 1; }
+    .v6-name { font-size: 15px; font-weight: 600; }
+    .v6-status { font-size: 12px; color: var(--accent-green); display: flex; align-items: center; gap: 4px; }
+    .v6-status::before { content: ''; width: 6px; height: 6px; background: var(--accent-green); border-radius: 50%; }
+
+    .v6-inbox-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      color: var(--text-primary);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+
+    .v6-inbox-btn .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-red);
+      border-radius: 50%;
+      position: absolute;
+      top: -2px;
+      right: -2px;
+    }
+
+    .v6-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .v6-msg {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .v6-msg.them { align-items: flex-start; }
+    .v6-msg.me { align-items: flex-end; }
+
+    .v6-bubble {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .v6-msg.them .v6-bubble {
+      background: var(--bg-elevated);
+      border-bottom-left-radius: 4px;
+    }
+
+    .v6-msg.me .v6-bubble {
+      background: var(--accent-cyan);
+      color: var(--bg-deep);
+      border-bottom-right-radius: 4px;
+    }
+
+    .v6-time {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      padding: 0 4px;
+    }
+
+    .v6-notification {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin: 16px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .v6-notification-text {
+      font-size: 13px;
+      color: var(--accent-amber);
+    }
+
+    .v6-notification-btn {
+      background: var(--accent-amber);
+      color: var(--bg-deep);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .v6-input-area {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+
+    .v6-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .v6-input {
+      flex: 1;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 12px 20px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .v6-input:focus { outline: none; border-color: var(--accent-cyan); }
+
+    .v6-send {
+      width: 44px;
+      height: 44px;
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: 50%;
+      color: var(--bg-deep);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="mockups-header">
+    <h1>🎨 UX Mockup Variations</h1>
+    <p>
+      Exploring simpler ways to handle the dual purpose of responding to team questions 
+      AND creating new requests — without the confusion of separate flows. The key insight: 
+      users are chatting with a PM (Luna) who creates tickets, not directly coding with an AI.
+    </p>
+  </div>
+
+  <!-- ============================================
+       VARIATION 1: UNIFIED CHAT WITH MODE TOGGLE
+       ============================================ -->
+  <div class="mockup-section">
+    <div class="mockup-title">
+      <span class="number">1</span>
+      Unified Chat with Mode Toggle
+    </div>
+    <p class="mockup-description">
+      Single chat interface with an explicit mode toggle. When in "Respond" mode, selecting a 
+      thread pins the context at the top. When in "New Request" mode, it's a fresh conversation.
+    </p>
+    <div class="mockup-pros-cons">
+      <div class="pros">
+        <strong>Pros</strong>
+        <ul>
+          <li>Clear about current mode</li>
+          <li>Same chat experience either way</li>
+          <li>Context is always visible</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <strong>Cons</strong>
+        <ul>
+          <li>Requires mode switching</li>
+          <li>Still two mental models</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mockup-frame">
+      <div class="v1-container">
+        <div class="v1-sidebar">
+          <div class="v1-sidebar-header">
+            <div class="v1-sidebar-title">What would you like to do?</div>
+            <div class="v1-mode-toggle">
+              <button class="v1-mode-btn">New Request</button>
+              <button class="v1-mode-btn active">Respond</button>
+            </div>
+          </div>
+          <div class="v1-threads">
+            <div class="v1-thread-item active">
+              <div class="v1-thread-from">Marcus · Backend Dev</div>
+              <div class="v1-thread-subject">Billing flow decision needed</div>
+              <span class="v1-thread-badge">Blocker</span>
+            </div>
+            <div class="v1-thread-item">
+              <div class="v1-thread-from">Sophia · Frontend Dev</div>
+              <div class="v1-thread-subject">Chart library selection</div>
+            </div>
+            <div class="v1-thread-item">
+              <div class="v1-thread-from">Alex · Full Stack</div>
+              <div class="v1-thread-subject">Auth token refresh timing</div>
+            </div>
+          </div>
+        </div>
+        <div class="v1-chat">
+          <div class="v1-chat-header">
+            <div class="v1-chat-context">
+              <span class="v1-context-text">
+                Responding to <strong>Marcus</strong> about <strong>Billing flow decision</strong>
+              </span>
+              <button class="v1-context-dismiss">×</button>
+            </div>
+          </div>
+          <div class="v1-chat-messages">
+            <div class="v1-message">
+              <div class="v1-message-avatar">M</div>
+              <div class="v1-message-content">
+                Should users see pricing before or after signup? The signup form is ready but I need to know the flow.
+              </div>
+            </div>
+          </div>
+          <div class="v1-chat-input-area">
+            <div class="v1-input-wrapper">
+              <textarea class="v1-input" placeholder="Type your response to Marcus..."></textarea>
+              <button class="v1-send-btn">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       VARIATION 2: SINGLE CHAT WITH SMART INPUT
+       ============================================ -->
+  <div class="mockup-section">
+    <div class="mockup-title">
+      <span class="number">2</span>
+      Single Stream with Inline Reply Buttons
+    </div>
+    <p class="mockup-description">
+      All messages appear in one scrolling stream. Each pending question has a "Reply" button. 
+      Clicking it sets the reply context. Typing without selecting anyone starts a new request.
+    </p>
+    <div class="mockup-pros-cons">
+      <div class="pros">
+        <strong>Pros</strong>
+        <ul>
+          <li>Single unified stream</li>
+          <li>Very intuitive "reply" pattern</li>
+          <li>No mode switching needed</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <strong>Cons</strong>
+        <ul>
+          <li>Can get long/cluttered</li>
+          <li>Need to scroll to find questions</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mockup-frame">
+      <div class="v2-container">
+        <div class="v2-header">
+          <h2>Luna · Your Project Manager</h2>
+          <p>I coordinate with the dev team and bring questions to you</p>
+        </div>
+        <div class="v2-messages">
+          <div class="v2-message-group">
+            <div class="v2-group-header">
+              <img class="v2-group-avatar" src="https://i.pravatar.cc/80?img=12" alt="Marcus">
+              <div class="v2-group-info">
+                <div class="v2-group-from">Marcus · Backend Dev</div>
+                <div class="v2-group-topic">Billing flow decision</div>
+              </div>
+              <span class="v2-group-badge">Blocker</span>
+              <button class="v2-reply-btn">↩ Reply</button>
+            </div>
+            <div class="v2-bubble">
+              Should users see pricing before or after signup? This is blocking me from finishing the checkout flow.
+            </div>
+          </div>
+
+          <div class="v2-message-group">
+            <div class="v2-group-header">
+              <img class="v2-group-avatar" src="https://i.pravatar.cc/80?img=5" alt="Sophia">
+              <div class="v2-group-info">
+                <div class="v2-group-from">Sophia · Frontend Dev</div>
+                <div class="v2-group-topic">Chart library selection</div>
+              </div>
+              <button class="v2-reply-btn">↩ Reply</button>
+            </div>
+            <div class="v2-bubble">
+              Recharts vs Chart.js for the analytics dashboard? Recharts is more React-native but Chart.js has more examples.
+            </div>
+          </div>
+        </div>
+        <div class="v2-input-area">
+          <div class="v2-input-context">
+            <span class="v2-input-context-icon">↩</span>
+            <span class="v2-input-context-text">Replying to <strong>Marcus</strong> about billing flow</span>
+            <button class="v2-input-context-clear">×</button>
+          </div>
+          <div class="v2-input-row">
+            <input type="text" class="v2-input" placeholder="Type your response...">
+            <button class="v2-send">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       VARIATION 3: CHAT-FIRST WITH FLOATING INBOX
+       ============================================ -->
+  <div class="mockup-section">
+    <div class="mockup-title">
+      <span class="number">3</span>
+      Chat-First with Floating Inbox
+    </div>
+    <p class="mockup-description">
+      Primary experience is chatting with Luna (the PM). Pending questions appear as a floating 
+      inbox panel that can be toggled. Selecting a question injects it into the chat as context.
+    </p>
+    <div class="mockup-pros-cons">
+      <div class="pros">
+        <strong>Pros</strong>
+        <ul>
+          <li>Feels like one simple chat</li>
+          <li>Inbox is secondary, not equal</li>
+          <li>Clear PM personality</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <strong>Cons</strong>
+        <ul>
+          <li>Floating panel adds complexity</li>
+          <li>May miss urgent questions</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mockup-frame">
+      <div class="v3-container">
+        <div class="v3-main-chat">
+          <div class="v3-chat-header">
+            <div class="v3-chat-title">
+              <div class="v3-luna-avatar">👩‍💼</div>
+              <div class="v3-luna-info">
+                <h3>Luna</h3>
+                <p>Your Project Manager</p>
+              </div>
+            </div>
+            <button class="v3-inbox-toggle">
+              📥 Inbox
+              <span class="v3-inbox-badge">3</span>
+            </button>
+          </div>
+          <div class="v3-messages">
+            <div class="v3-welcome">
+              <div class="v3-welcome-icon">👋</div>
+              <h3>Hey! I'm Luna, your PM.</h3>
+              <p>
+                Tell me what you want to build and I'll coordinate with the dev team. 
+                They'll escalate any questions they have to me, and I'll bring them to you.
+              </p>
+              <div class="v3-quick-actions">
+                <button class="v3-quick-action">🚀 Start a new project</button>
+                <button class="v3-quick-action">✏️ Request a change</button>
+                <button class="v3-quick-action has-badge">
+                  📥 Answer questions
+                  <span class="badge">3</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="v3-input-area">
+            <div class="v3-input-wrapper">
+              <input type="text" class="v3-input" placeholder="Tell me what you need...">
+              <button class="v3-send">Send</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating inbox panel -->
+        <div class="v3-floating-inbox">
+          <div class="v3-floating-header">
+            <span class="v3-floating-title">Questions from the team</span>
+            <button class="v3-floating-close">×</button>
+          </div>
+          <div class="v3-floating-list">
+            <div class="v3-floating-item">
+              <div class="v3-floating-from">Marcus · Backend Dev</div>
+              <div class="v3-floating-subject">Billing flow decision needed</div>
+              <span class="v3-floating-badge">Blocker</span>
+            </div>
+            <div class="v3-floating-item">
+              <div class="v3-floating-from">Sophia · Frontend Dev</div>
+              <div class="v3-floating-subject">Chart library selection</div>
+            </div>
+            <div class="v3-floating-item">
+              <div class="v3-floating-from">Alex · Full Stack</div>
+              <div class="v3-floating-subject">Auth token refresh timing</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       VARIATION 4: TABBED INTERFACE
+       ============================================ -->
+  <div class="mockup-section">
+    <div class="mockup-title">
+      <span class="number">4</span>
+      Simple Tab Navigation
+    </div>
+    <p class="mockup-description">
+      Two clear tabs: "New Request" and "Team Questions". Each is a full-page experience. 
+      The badge on Team Questions shows pending items. Clean separation without complexity.
+    </p>
+    <div class="mockup-pros-cons">
+      <div class="pros">
+        <strong>Pros</strong>
+        <ul>
+          <li>Dead simple mental model</li>
+          <li>Badge draws attention</li>
+          <li>Full screen for each</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <strong>Cons</strong>
+        <ul>
+          <li>Still two separate modes</li>
+          <li>More similar to current design</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mockup-frame">
+      <div class="v4-container">
+        <div class="v4-tabs">
+          <button class="v4-tab active">✨ New Request</button>
+          <button class="v4-tab">
+            📥 Team Questions
+            <span class="v4-tab-badge">3</span>
+          </button>
+        </div>
+        <div class="v4-content">
+          <div class="v4-new-request">
+            <div class="v4-new-header">
+              <div class="v4-pm-avatar">👩‍💼</div>
+              <h3>What would you like to build?</h3>
+              <p>I'm Luna, your PM. I'll create tickets and coordinate with the dev team.</p>
+            </div>
+            <div class="v4-chat-area">
+              <div class="v4-suggestion-chips">
+                <button class="v4-chip">Add a new feature</button>
+                <button class="v4-chip">Fix a bug</button>
+                <button class="v4-chip">Improve something</button>
+                <button class="v4-chip">Design change</button>
+              </div>
+            </div>
+            <div class="v4-input-area">
+              <div class="v4-input-row">
+                <input type="text" class="v4-input" placeholder="Describe what you need...">
+                <button class="v4-send">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       VARIATION 5: COMMAND-STYLE UNIFIED INPUT
+       ============================================ -->
+  <div class="mockup-section">
+    <div class="mockup-title">
+      <span class="number">5</span>
+      Everything in One View
+    </div>
+    <p class="mockup-description">
+      Pending questions appear as clickable cards in the main view. One input handles both: 
+      typing normally sends a new request, clicking a card first sets the reply context.
+      Most like other AI coding tools, but with pending questions surfaced inline.
+    </p>
+    <div class="mockup-pros-cons">
+      <div class="pros">
+        <strong>Pros</strong>
+        <ul>
+          <li>Single view, no tabs/modes</li>
+          <li>Questions are visible inline</li>
+          <li>Most like other AI chat tools</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <strong>Cons</strong>
+        <ul>
+          <li>Requires learning the pattern</li>
+          <li>Could get cluttered</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mockup-frame">
+      <div class="v5-container">
+        <div class="v5-header">
+          <div class="v5-pm-badge">
+            <span class="v5-pm-dot"></span>
+            <span class="v5-pm-name">Luna</span>
+            <span class="v5-pm-role">· PM</span>
+          </div>
+        </div>
+        <div class="v5-messages">
+          <div class="v5-system-msg">
+            <strong>👋 Hey!</strong> I'm Luna, your project manager. Tell me what you need and I'll 
+            coordinate with the dev team. If they have questions, I'll surface them here for you to answer.
+          </div>
+
+          <div class="v5-pending-section">
+            <div class="v5-pending-header">
+              <span>⏳ Waiting for your input</span>
+              <span class="v5-pending-count">3</span>
+            </div>
+            <div class="v5-pending-card">
+              <div class="v5-pending-top">
+                <span class="v5-pending-from">Marcus · Backend Dev</span>
+                <span class="v5-pending-badge">Blocker</span>
+              </div>
+              <div class="v5-pending-subject">Billing flow decision needed</div>
+              <div class="v5-pending-preview">Should users see pricing before or after signup?</div>
+            </div>
+            <div class="v5-pending-card">
+              <div class="v5-pending-top">
+                <span class="v5-pending-from">Sophia · Frontend Dev</span>
+              </div>
+              <div class="v5-pending-subject">Chart library selection</div>
+              <div class="v5-pending-preview">Recharts vs Chart.js for analytics?</div>
+            </div>
+          </div>
+        </div>
+        <div class="v5-input-area">
+          <div class="v5-input-hint">
+            <span>Type to <code>start a new request</code></span>
+            <span>or click a question above to <code>reply</code></span>
+          </div>
+          <div class="v5-input-wrapper">
+            <input type="text" class="v5-input" placeholder="What would you like to build?">
+            <button class="v5-send">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       VARIATION 6: MOBILE-INSPIRED SIMPLE CHAT
+       ============================================ -->
+  <div class="mockup-section">
+    <div class="mockup-title">
+      <span class="number">6</span>
+      WhatsApp-Style Direct Chat
+    </div>
+    <p class="mockup-description">
+      Maximum simplicity: just a direct chat with Luna. When there are pending questions, 
+      a notification banner appears inline. Everything is conversation, no separate views at all.
+    </p>
+    <div class="mockup-pros-cons">
+      <div class="pros">
+        <strong>Pros</strong>
+        <ul>
+          <li>Instantly familiar UX</li>
+          <li>No learning curve</li>
+          <li>Questions as notifications</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <strong>Cons</strong>
+        <ul>
+          <li>Less structured for many questions</li>
+          <li>May not scale well</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mockup-frame">
+      <div class="v6-container">
+        <div class="v6-header">
+          <div class="v6-avatar">👩‍💼</div>
+          <div class="v6-info">
+            <div class="v6-name">Luna · Project Manager</div>
+            <div class="v6-status">Online</div>
+          </div>
+          <button class="v6-inbox-btn">
+            📥 3
+            <span class="dot"></span>
+          </button>
+        </div>
+        <div class="v6-messages">
+          <div class="v6-msg them">
+            <div class="v6-bubble">
+              Hey! 👋 I'm Luna, your project manager. I coordinate with the dev team and bring you any questions they have. What can I help you build today?
+            </div>
+            <span class="v6-time">10:30 AM</span>
+          </div>
+          <div class="v6-msg me">
+            <div class="v6-bubble">
+              I need a billing system with Stripe integration
+            </div>
+            <span class="v6-time">10:32 AM</span>
+          </div>
+          <div class="v6-msg them">
+            <div class="v6-bubble">
+              Great! I'll get Marcus started on that. I've created tickets for the Stripe integration, checkout flow, and billing dashboard. I'll keep you updated on progress!
+            </div>
+            <span class="v6-time">10:33 AM</span>
+          </div>
+
+          <div class="v6-notification">
+            <span class="v6-notification-text">⚠️ Marcus needs a decision on billing flow</span>
+            <button class="v6-notification-btn">Answer</button>
+          </div>
+
+          <div class="v6-msg them">
+            <div class="v6-bubble">
+              Also, Sophia is making good progress on the frontend. She has a question about chart libraries when you get a chance.
+            </div>
+            <span class="v6-time">10:45 AM</span>
+          </div>
+        </div>
+        <div class="v6-input-area">
+          <div class="v6-input-row">
+            <input type="text" class="v6-input" placeholder="Message Luna...">
+            <button class="v6-send">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

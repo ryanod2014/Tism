@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tism - Threaded Chat + Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-surface: #12121a;
+      --bg-elevated: #1a1a26;
+      --bg-hover: #222233;
+      --border: #2a2a3e;
+      --border-bright: #3d3d5c;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --text-muted: #555566;
+      --accent-cyan: #00d4ff;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-pink: #ec4899;
+      --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #a855f7 100%);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Outfit', -apple-system, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      grid-template-rows: 56px 1fr;
+      height: 100vh;
+    }
+
+    /* ========== HEADER ========== */
+    .header {
+      grid-column: 1 / -1;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-btn {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 18px;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+    }
+
+    .back-btn:hover { background: var(--bg-elevated); }
+
+    .header-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+    }
+
+    .project-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .view-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .view-tabs-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .view-tabs-buttons {
+      display: flex;
+      background: var(--bg-deep);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+    }
+
+    .view-tab {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      text-decoration: none;
+    }
+
+    .view-tab.active {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-btn {
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-btn.primary {
+      background: var(--gradient-primary);
+      border: none;
+      color: var(--bg-deep);
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    /* ========== CHAT PANEL ========== */
+    .chat-panel {
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-panel-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pm-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .pm-name { font-size: 14px; font-weight: 600; }
+    .pm-status { font-size: 11px; color: var(--accent-green); }
+
+    .new-request-btn {
+      padding: 8px 14px;
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* ========== PINNED SECTION ========== */
+    .pinned-section {
+      background: rgba(245, 158, 11, 0.05);
+      border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+      padding: 12px 16px;
+      flex-shrink: 0;
+    }
+
+    .pinned-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .pinned-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-amber);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pinned-count {
+      background: var(--accent-amber);
+      color: var(--bg-deep);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .pinned-items {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .pinned-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent-amber);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .pinned-item:hover { background: var(--bg-elevated); border-color: var(--accent-amber); }
+    .pinned-item.active { background: var(--bg-elevated); border-color: var(--accent-cyan); border-left-color: var(--accent-cyan); }
+    .pinned-item.urgent { border-left-color: var(--accent-red); }
+
+    .pinned-item-content { flex: 1; min-width: 0; }
+
+    .pinned-item-title {
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .pinned-item-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pinned-item-badge {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+
+    .pinned-item-badge.blocker { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+
+    /* ========== MESSAGES FEED ========== */
+    .messages-wrapper {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .messages-container {
+      padding: 16px;
+    }
+
+    .date-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .date-divider::before,
+    .date-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .message {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      margin: 0 -10px 6px;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s;
+    }
+
+    .message:hover { background: var(--bg-elevated); }
+    .message.clickable { cursor: pointer; }
+
+    .message-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    div.message-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    div.message-avatar.you { background: var(--accent-cyan); font-size: 13px; font-weight: 600; color: var(--bg-deep); }
+
+    .message-content { flex: 1; min-width: 0; }
+
+    .message-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+
+    .message-author { font-size: 13px; font-weight: 600; }
+    .message-author.luna { color: var(--accent-purple); }
+    .message-author.you { color: var(--accent-cyan); }
+    .message-author.dev { color: var(--accent-green); }
+
+    .message-time { font-size: 10px; color: var(--text-muted); }
+
+    .message-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+
+    .message-badge.update { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+    .message-badge.blocker { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+
+    /* Message that needs input - highlighted */
+    .message.needs-input {
+      background: rgba(245, 158, 11, 0.05);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: var(--radius-md);
+      margin: 0 0 12px 0;
+      padding: 14px;
+    }
+
+    .message.needs-input:hover {
+      background: rgba(245, 158, 11, 0.08);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    /* Quick answer buttons */
+    .message-quick-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .quick-answer {
+      padding: 8px 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quick-answer:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.1);
+    }
+
+    .quick-discuss {
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      color: var(--accent-cyan);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    .quick-discuss:hover {
+      text-decoration: underline;
+    }
+
+    .message-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .message-text strong { color: var(--text-primary); }
+
+    .thread-preview {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 4px 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      color: var(--accent-cyan);
+    }
+
+    /* ========== CHAT INPUT ========== */
+    .chat-input-area {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .chat-input-container {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      overflow: hidden;
+    }
+
+    .chat-input-container:focus-within { border-color: var(--accent-cyan); }
+
+    .chat-input-field {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 12px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .chat-input-field:focus { outline: none; }
+
+    .chat-send-btn {
+      background: var(--accent-cyan);
+      border: none;
+      padding: 12px 16px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* ========== PREVIEW AREA ========== */
+    .preview-area {
+      background: var(--bg-deep);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .preview-toolbar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .browser-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .browser-nav {
+      display: flex;
+      gap: 4px;
+    }
+
+    .nav-btn {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .nav-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    .url-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      min-width: 300px;
+    }
+
+    .url-icon { font-size: 10px; }
+
+    .preview-context {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px;
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: var(--radius-sm);
+    }
+
+    .preview-context-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .preview-context-value {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent-cyan);
+    }
+
+    .preview-frame {
+      flex: 1;
+      background: #fff;
+      margin: 20px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+
+    /* Demo dashboard inside preview */
+    .demo-dashboard {
+      height: 100%;
+      display: flex;
+      background: #f8fafc;
+    }
+
+    .demo-sidebar {
+      width: 200px;
+      background: #1e293b;
+      padding: 20px 0;
+    }
+
+    .demo-logo {
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      padding: 0 20px 20px;
+      border-bottom: 1px solid #334155;
+      margin-bottom: 20px;
+    }
+
+    .demo-nav-item {
+      padding: 10px 20px;
+      color: #94a3b8;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .demo-nav-item:hover { background: #334155; color: white; }
+    .demo-nav-item.active { background: #3b82f6; color: white; }
+
+    .demo-main {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .demo-page-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 24px;
+    }
+
+    /* Billing page demo */
+    .billing-demo {
+      display: none;
+    }
+
+    .billing-demo.active { display: block; }
+
+    .billing-question-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border: 2px dashed var(--accent-amber);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      max-width: 400px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+
+    .billing-question-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .billing-question-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .billing-question-subtext {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    .billing-options {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .billing-option {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 2px solid #e2e8f0;
+      background: white;
+      color: #1e293b;
+      transition: all 0.15s;
+    }
+
+    .billing-option:hover {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+
+    /* Analytics page demo */
+    .analytics-demo {
+      display: none;
+    }
+
+    .analytics-demo.active { display: block; }
+
+    .demo-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .demo-stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .demo-stat-label {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .demo-stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .demo-stat-change {
+      font-size: 12px;
+      color: #10b981;
+      margin-top: 4px;
+    }
+
+    .demo-chart {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Thread panel - expands from clicked item, full width, partial height */
+    .thread-overlay {
+      position: fixed;
+      left: 0;
+      width: 380px;
+      background: var(--bg-elevated);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      box-shadow: 5px 0 30px rgba(0,0,0,0.3);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      
+      /* Start state - small, will be positioned by JS */
+      top: 200px;
+      bottom: 100px;
+      opacity: 0;
+      transform: scale(0.8);
+      transform-origin: top center;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .thread-overlay.open {
+      top: 120px;  /* Leave header visible */
+      bottom: 0;   /* Cover all the way to bottom */
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+
+    /* Dim overlay behind thread */
+    .chat-panel-dimmer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 10, 15, 0.7);
+      z-index: 50;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+      cursor: pointer;
+      backdrop-filter: blur(2px);
+    }
+
+    .chat-panel-dimmer.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Fade the chat content when thread is open */
+    .chat-panel.thread-open .messages-wrapper,
+    .chat-panel.thread-open .chat-input-area {
+      opacity: 0.3;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .thread-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .thread-title { font-size: 14px; font-weight: 600; }
+
+    .thread-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    .thread-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    .thread-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    /* Original message styling */
+    .thread-original {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .thread-original-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .thread-original-message {
+      display: flex;
+      gap: 12px;
+    }
+
+    .thread-original-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    .thread-original-content { flex: 1; }
+
+    .thread-original-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .thread-original-author {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-purple);
+    }
+
+    .thread-original-time {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .thread-original-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .thread-original-text strong {
+      color: var(--text-primary);
+    }
+
+    /* Replies divider */
+    .thread-replies-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .thread-replies-divider::before,
+    .thread-replies-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .thread-reply {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .thread-reply-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    .thread-reply-content { flex: 1; }
+
+    .thread-reply-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .thread-reply-author { font-size: 12px; font-weight: 600; }
+    .thread-reply-author.luna { color: var(--accent-purple); }
+    .thread-reply-author.dev { color: var(--accent-green); }
+
+    .thread-reply-time { font-size: 10px; color: var(--text-muted); }
+
+    .thread-reply-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .thread-input-area {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .thread-input-container {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      overflow: hidden;
+    }
+
+    .thread-input-field {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 10px 12px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .thread-input-field:focus { outline: none; }
+
+    .thread-send-btn {
+      background: var(--accent-cyan);
+      border: none;
+      padding: 10px 16px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <a class="back-btn" href="#">←</a>
+        <div class="header-divider"></div>
+        <div class="project-title">SaaS Dashboard</div>
+      </div>
+
+      <div class="header-center">
+        <div class="view-tabs">
+          <span class="view-tabs-label">View:</span>
+          <div class="view-tabs-buttons">
+            <button class="view-tab active">Preview</button>
+            <button class="view-tab">Pipeline</button>
+            <button class="view-tab">Live</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button class="header-btn primary">🚀 Launch</button>
+        <div class="avatar">RO</div>
+      </div>
+    </header>
+
+    <!-- Chat Panel (Left) -->
+    <aside class="chat-panel" style="position: relative;">
+      <div class="chat-panel-dimmer" id="chatDimmer" onclick="closeThread()"></div>
+      <div class="chat-panel-header">
+        <div class="chat-panel-title">
+          <img class="pm-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+          <div>
+            <div class="pm-name">Luna</div>
+            <div class="pm-status">Your PM</div>
+          </div>
+        </div>
+        <button class="new-request-btn">✨ New Request</button>
+      </div>
+
+      <!-- Messages Feed -->
+      <div class="messages-wrapper">
+        <div class="messages-container">
+          <div class="date-divider">Today</div>
+
+          <!-- Luna surfacing a pending question -->
+          <div class="message needs-input clickable" onclick="selectThread('billing')">
+            <img class="message-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+            <div class="message-content">
+              <div class="message-header">
+                <span class="message-author luna">Luna</span>
+                <span class="message-time">Just now</span>
+                <span class="message-badge blocker">Needs your input</span>
+              </div>
+              <div class="message-text">
+                <strong>Marcus is blocked and needs your decision:</strong> Should users see pricing before or after signup? He's ready to build either flow.
+              </div>
+              <div class="message-quick-actions">
+                <button class="quick-answer" onclick="event.stopPropagation();">Before signup</button>
+                <button class="quick-answer" onclick="event.stopPropagation();">After signup</button>
+                <button class="quick-discuss" onclick="selectThread('billing'); event.stopPropagation();">Discuss →</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="message">
+            <img class="message-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+            <div class="message-content">
+              <div class="message-header">
+                <span class="message-author luna">Luna</span>
+                <span class="message-time">9:30 AM</span>
+                <span class="message-badge update">Update</span>
+              </div>
+              <div class="message-text">
+                🎉 <strong>Marcus finished Stripe integration!</strong> Payments working in dev.
+              </div>
+            </div>
+          </div>
+
+          <div class="message clickable" onclick="selectThread('analytics')">
+            <img class="message-avatar" src="https://i.pravatar.cc/80?img=5" alt="Sophia">
+            <div class="message-content">
+              <div class="message-header">
+                <span class="message-author dev">Sophia</span>
+                <span class="message-time">8:15 AM</span>
+              </div>
+              <div class="message-text">
+                Which chart library should we use for the analytics dashboard? Recharts or Chart.js?
+              </div>
+              <div class="thread-preview">📋 1 ticket · 3 replies</div>
+            </div>
+          </div>
+
+          <div class="message clickable">
+            <div class="message-avatar you">Y</div>
+            <div class="message-content">
+              <div class="message-header">
+                <span class="message-author you">You</span>
+                <span class="message-time">8:00 AM</span>
+              </div>
+              <div class="message-text">
+                I need an analytics dashboard with user signups, revenue, and feature usage.
+              </div>
+              <div class="thread-preview">📋 2 tickets · 5 replies</div>
+            </div>
+          </div>
+
+          <div class="date-divider">Yesterday</div>
+
+          <div class="message clickable">
+            <div class="message-avatar you">Y</div>
+            <div class="message-content">
+              <div class="message-header">
+                <span class="message-author you">You</span>
+                <span class="message-time">2:30 PM</span>
+              </div>
+              <div class="message-text">
+                I need a billing system with Stripe, subscriptions, and invoices.
+              </div>
+              <div class="thread-preview">📋 3 tickets · 6 replies</div>
+            </div>
+          </div>
+
+          <div class="message">
+            <img class="message-avatar" src="https://i.pravatar.cc/80?img=33" alt="Alex">
+            <div class="message-content">
+              <div class="message-header">
+                <span class="message-author dev">Alex</span>
+                <span class="message-time">11:00 AM</span>
+                <span class="message-badge update">Update</span>
+              </div>
+              <div class="message-text">
+                ✅ <strong>User authentication is complete!</strong> Login, signup, password reset all working.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div class="chat-input-area">
+        <div class="chat-input-container">
+          <input type="text" class="chat-input-field" placeholder="Message Luna...">
+          <button class="chat-send-btn">Send</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Preview Area (Right) -->
+    <main class="preview-area">
+      <div class="preview-toolbar">
+        <div class="browser-controls">
+          <div class="browser-nav">
+            <button class="nav-btn">←</button>
+            <button class="nav-btn">→</button>
+            <button class="nav-btn">↻</button>
+          </div>
+          <div class="url-bar">
+            <span class="url-icon">🔒</span>
+            <span class="url-text" id="urlText">preview.tism.app/checkout</span>
+          </div>
+        </div>
+
+        <div class="preview-context">
+          <span class="preview-context-label">Showing:</span>
+          <span class="preview-context-value" id="previewContext">Checkout Page (Billing Flow)</span>
+        </div>
+      </div>
+
+      <div class="preview-frame" style="position: relative;">
+        <!-- Billing Page Demo -->
+        <div class="billing-demo active" id="billingDemo">
+          <div class="demo-dashboard">
+            <div class="demo-sidebar">
+              <div class="demo-logo">Acme SaaS</div>
+              <div class="demo-nav-item">Dashboard</div>
+              <div class="demo-nav-item">Users</div>
+              <div class="demo-nav-item active">Billing</div>
+              <div class="demo-nav-item">Settings</div>
+            </div>
+            <div class="demo-main">
+              <div class="demo-page-title">Checkout</div>
+              <!-- Question overlay -->
+              <div class="billing-question-overlay">
+                <div class="billing-question-icon">🤔</div>
+                <div class="billing-question-text">Decision Needed</div>
+                <div class="billing-question-subtext">Should users see pricing before or after signup?</div>
+                <div class="billing-options">
+                  <button class="billing-option">Before Signup</button>
+                  <button class="billing-option">After Signup</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Page Demo -->
+        <div class="analytics-demo" id="analyticsDemo">
+          <div class="demo-dashboard">
+            <div class="demo-sidebar">
+              <div class="demo-logo">Acme SaaS</div>
+              <div class="demo-nav-item">Dashboard</div>
+              <div class="demo-nav-item">Users</div>
+              <div class="demo-nav-item">Billing</div>
+              <div class="demo-nav-item active">Analytics</div>
+              <div class="demo-nav-item">Settings</div>
+            </div>
+            <div class="demo-main">
+              <div class="demo-page-title">Analytics</div>
+              <div class="demo-stats">
+                <div class="demo-stat-card">
+                  <div class="demo-stat-label">Page Views</div>
+                  <div class="demo-stat-value">284,392</div>
+                  <div class="demo-stat-change">↑ 18% from last week</div>
+                </div>
+                <div class="demo-stat-card">
+                  <div class="demo-stat-label">Unique Users</div>
+                  <div class="demo-stat-value">12,847</div>
+                  <div class="demo-stat-change">↑ 12% from last week</div>
+                </div>
+                <div class="demo-stat-card">
+                  <div class="demo-stat-label">Conversion Rate</div>
+                  <div class="demo-stat-value">3.2%</div>
+                  <div class="demo-stat-change">↑ 0.4% from last week</div>
+                </div>
+              </div>
+              <div class="demo-chart">
+                📊 Chart placeholder (Recharts vs Chart.js decision pending)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Thread Overlay Panel -->
+    <div class="thread-overlay" id="threadOverlay">
+      <div class="thread-header">
+        <div class="thread-title">Thread: Billing Flow</div>
+        <button class="thread-close" onclick="closeThread()">×</button>
+      </div>
+
+      <div class="thread-messages">
+        <!-- Original message that started thread -->
+        <div class="thread-original">
+          <div class="thread-original-label">Original message</div>
+          <div class="thread-original-message">
+            <img class="thread-original-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+            <div class="thread-original-content">
+              <div class="thread-original-header">
+                <span class="thread-original-author">Luna</span>
+                <span class="thread-original-time">10:30 AM</span>
+              </div>
+              <div class="thread-original-text">
+                <strong>Marcus needs a decision on the billing flow.</strong> He's ready to build the checkout page but needs to know the user journey.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Replies divider -->
+        <div class="thread-replies-divider">
+          <span>3 replies</span>
+        </div>
+
+        <!-- Thread replies -->
+        <div class="thread-reply">
+          <img class="thread-reply-avatar" src="https://i.pravatar.cc/40?img=12" alt="Marcus">
+          <div class="thread-reply-content">
+            <div class="thread-reply-header">
+              <span class="thread-reply-author dev">Marcus</span>
+              <span class="thread-reply-time">10:32 AM</span>
+            </div>
+            <div class="thread-reply-text">
+              Should users see pricing before or after signup? I've got both flows ready to go.
+            </div>
+          </div>
+        </div>
+
+        <div class="thread-reply">
+          <img class="thread-reply-avatar" src="https://i.pravatar.cc/40?img=23" alt="Luna">
+          <div class="thread-reply-content">
+            <div class="thread-reply-header">
+              <span class="thread-reply-author luna">Luna</span>
+              <span class="thread-reply-time">10:33 AM</span>
+            </div>
+            <div class="thread-reply-text">
+              Good question. Let me get input on this.
+            </div>
+          </div>
+        </div>
+
+        <div class="thread-reply">
+          <img class="thread-reply-avatar" src="https://i.pravatar.cc/40?img=12" alt="Marcus">
+          <div class="thread-reply-content">
+            <div class="thread-reply-header">
+              <span class="thread-reply-author dev">Marcus</span>
+              <span class="thread-reply-time">10:35 AM</span>
+            </div>
+            <div class="thread-reply-text">
+              My suggestion: after signup to capture emails first. But totally up to you!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="thread-input-area">
+        <div class="thread-input-container">
+          <input type="text" class="thread-input-field" placeholder="Reply...">
+          <button class="thread-send-btn">Reply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function selectThread(type) {
+      const clickedElement = event.currentTarget;
+      const rect = clickedElement.getBoundingClientRect();
+      const threadOverlay = document.getElementById('threadOverlay');
+      
+      // Update pinned items
+      document.querySelectorAll('.pinned-item').forEach(item => item.classList.remove('active'));
+      clickedElement.classList.add('active');
+
+      // Position thread to expand from clicked item
+      const startTop = rect.top;
+      threadOverlay.style.transformOrigin = `center ${rect.top - 56}px`;
+      
+      // Update preview based on thread type
+      const billingDemo = document.getElementById('billingDemo');
+      const analyticsDemo = document.getElementById('analyticsDemo');
+      const urlText = document.getElementById('urlText');
+      const previewContext = document.getElementById('previewContext');
+      const threadTitle = document.querySelector('.thread-title');
+
+      if (type === 'billing') {
+        billingDemo.classList.add('active');
+        analyticsDemo.classList.remove('active');
+        urlText.textContent = 'preview.tism.app/checkout';
+        previewContext.textContent = 'Checkout Page (Billing Flow)';
+        threadTitle.textContent = 'Thread: Billing Flow';
+      } else if (type === 'analytics' || type === 'charts') {
+        billingDemo.classList.remove('active');
+        analyticsDemo.classList.add('active');
+        urlText.textContent = 'preview.tism.app/analytics';
+        previewContext.textContent = 'Analytics Dashboard';
+        threadTitle.textContent = 'Thread: Chart Library';
+      }
+
+      // Open thread overlay with slight delay for smooth animation
+      requestAnimationFrame(() => {
+        threadOverlay.classList.add('open');
+        document.getElementById('chatDimmer').classList.add('active');
+        document.querySelector('.chat-panel').classList.add('thread-open');
+      });
+    }
+
+    function closeThread() {
+      document.getElementById('threadOverlay').classList.remove('open');
+      document.getElementById('chatDimmer').classList.remove('active');
+      document.querySelector('.chat-panel').classList.remove('thread-open');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeThread();
+    });
+  </script>
+</body>
+</html>

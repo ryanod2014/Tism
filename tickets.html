@@ -228,6 +228,291 @@
       color: var(--accent-green);
     }
 
+    /* ========== SLACK-STYLE CHAT PANEL ========== */
+    .chat-panel {
+      grid-row: 2;
+      grid-column: 1;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .chat-panel-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pm-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .pm-name { font-size: 14px; font-weight: 600; }
+    .pm-status { font-size: 11px; color: var(--accent-green); }
+
+    .new-request-btn {
+      padding: 8px 14px;
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .messages-wrapper {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .messages-container {
+      padding: 16px;
+    }
+
+    .date-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .date-divider::before,
+    .date-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .slack-message {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      margin: 0 -10px 6px;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s;
+    }
+
+    .slack-message:hover { background: var(--bg-elevated); }
+    .slack-message.clickable { cursor: pointer; }
+
+    .slack-message-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    div.slack-message-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    div.slack-message-avatar.you { 
+      background: var(--accent-cyan); 
+      font-size: 13px; 
+      font-weight: 600; 
+      color: var(--bg-deep); 
+    }
+
+    .slack-message-content { flex: 1; min-width: 0; }
+
+    .slack-message-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+
+    .slack-message-author { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+
+    .slack-message-time { font-size: 10px; color: var(--text-muted); }
+
+    .slack-message-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+
+    .slack-message-badge.critical { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+    .slack-message-badge.done { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+    .slack-message-badge.pending { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); }
+
+    .slack-message.needs-input {
+      background: rgba(245, 158, 11, 0.05);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: var(--radius-md);
+      margin: 0 0 12px 0;
+      padding: 14px;
+    }
+
+    .slack-message.needs-input:hover {
+      background: rgba(245, 158, 11, 0.08);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .slack-message-quick-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .quick-answer {
+      padding: 8px 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quick-answer:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.1);
+    }
+
+    .quick-discuss {
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      color: var(--accent-cyan);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    .slack-message-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .slack-message-text strong { color: var(--text-primary); }
+
+    .thread-preview {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 4px 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .thread-preview svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    .slack-message.unread {
+      border-left: 3px solid var(--accent-cyan);
+      padding-left: 12px;
+      margin-left: -15px;
+    }
+
+    .slack-message.unread .thread-preview {
+      color: var(--accent-cyan);
+      border-color: rgba(0, 212, 255, 0.3);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .unread-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .reply-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .reply-btn:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .slack-chat-input-area {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .slack-chat-input-container {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      overflow: hidden;
+    }
+
+    .slack-chat-input-container:focus-within { border-color: var(--accent-cyan); }
+
+    .slack-chat-input-field {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 12px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .slack-chat-input-field:focus { outline: none; }
+
+    .slack-chat-send-btn {
+      background: var(--accent-cyan);
+      border: none;
+      padding: 12px 16px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
     .header {
       grid-column: 1 / -1;
       background: var(--bg-surface);
@@ -692,90 +977,130 @@
       </div>
     </header>
 
-    <!-- Left Panel - Inbox -->
-    <aside class="inbox-panel">
-      <div class="inbox-header">
-        <div class="inbox-title">
-          📥 PM Inbox
-          <span class="inbox-badge">5</span>
+    <!-- Left Panel - Slack-Style Chat -->
+    <aside class="chat-panel" id="chatPanel">
+      <div class="chat-panel-header">
+        <div class="chat-panel-title">
+          <img class="pm-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+          <div>
+            <div class="pm-name">Luna</div>
+            <div class="pm-status">Your PM</div>
+          </div>
         </div>
-        <button class="new-ticket-btn" onclick="createNewRequest()">+ New Request</button>
       </div>
 
-      <div class="inbox-list">
-        <div class="inbox-item unread">
-          <img class="item-avatar" src="https://i.pravatar.cc/80?img=12" alt="Marcus">
-          <div class="item-content">
-            <div class="item-from">Marcus · Backend Dev</div>
-            <div class="item-header">
-              <span class="item-subject">🚨 Billing flow decision needed</span>
-              <span class="item-time">2 min ago</span>
+      <!-- Messages Feed -->
+      <div class="messages-wrapper">
+        <div class="messages-container">
+          <div class="date-divider">Today</div>
+
+          <!-- Billing decision thread - critical, pending, UNREAD -->
+          <div class="slack-message clickable unread">
+            <img class="slack-message-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+            <div class="slack-message-content">
+              <div class="slack-message-header">
+                <span class="slack-message-author">Luna</span>
+                <span class="slack-message-time">Just now</span>
+                <span class="slack-message-badge critical">Critical</span>
+                <span class="slack-message-badge pending">Pending</span>
+                <div class="unread-dot"></div>
+              </div>
+              <div class="slack-message-text">
+                <strong>Marcus needs a decision:</strong> Should users see pricing before or after signup?
+              </div>
+              <div class="thread-preview"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 3 replies</div>
             </div>
-            <div class="item-preview">Should users see pricing before or after signup?</div>
-            <div class="item-badges">
-              <span class="item-badge blocker">Blocker</span>
+          </div>
+
+          <!-- Chart library thread - pending, UNREAD -->
+          <div class="slack-message clickable unread">
+            <img class="slack-message-avatar" src="https://i.pravatar.cc/80?img=5" alt="Sophia">
+            <div class="slack-message-content">
+              <div class="slack-message-header">
+                <span class="slack-message-author">Sophia</span>
+                <span class="slack-message-time">8:15 AM</span>
+                <span class="slack-message-badge pending">Pending</span>
+                <div class="unread-dot"></div>
+              </div>
+              <div class="slack-message-text">
+                Which chart library should we use for the analytics dashboard? Recharts or Chart.js?
+              </div>
+              <div class="thread-preview"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 2 replies</div>
+            </div>
+          </div>
+
+          <!-- Analytics request - done -->
+          <div class="slack-message clickable">
+            <div class="slack-message-avatar you">Y</div>
+            <div class="slack-message-content">
+              <div class="slack-message-header">
+                <span class="slack-message-author">You</span>
+                <span class="slack-message-time">8:00 AM</span>
+                <span class="slack-message-badge done">Done</span>
+              </div>
+              <div class="slack-message-text">
+                I need an analytics dashboard with user signups, revenue, and feature usage.
+              </div>
+              <div class="thread-preview"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 5 replies</div>
+            </div>
+          </div>
+
+          <div class="date-divider">Yesterday</div>
+
+          <!-- Billing request - done -->
+          <div class="slack-message clickable">
+            <div class="slack-message-avatar you">Y</div>
+            <div class="slack-message-content">
+              <div class="slack-message-header">
+                <span class="slack-message-author">You</span>
+                <span class="slack-message-time">2:30 PM</span>
+                <span class="slack-message-badge done">Done</span>
+              </div>
+              <div class="slack-message-text">
+                I need a billing system with Stripe, subscriptions, and invoices.
+              </div>
+              <div class="thread-preview"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 6 replies</div>
+            </div>
+          </div>
+
+          <!-- Auth complete - no replies yet -->
+          <div class="slack-message">
+            <img class="slack-message-avatar" src="https://i.pravatar.cc/80?img=33" alt="Alex">
+            <div class="slack-message-content">
+              <div class="slack-message-header">
+                <span class="slack-message-author">Alex</span>
+                <span class="slack-message-time">11:00 AM</span>
+                <span class="slack-message-badge done">Done</span>
+              </div>
+              <div class="slack-message-text">
+                User authentication is complete! Login, signup, password reset all working.
+              </div>
+              <button class="reply-btn"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Reply</button>
+            </div>
+          </div>
+
+          <!-- Welcome message - no replies -->
+          <div class="slack-message">
+            <img class="slack-message-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+            <div class="slack-message-content">
+              <div class="slack-message-header">
+                <span class="slack-message-author">Luna</span>
+                <span class="slack-message-time">9:00 AM</span>
+              </div>
+              <div class="slack-message-text">
+                Welcome to your new project! I'm Luna, your AI Project Manager. I'll coordinate with the dev team and keep you updated.
+              </div>
+              <button class="reply-btn"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Reply</button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="inbox-item unread">
-          <img class="item-avatar" src="https://i.pravatar.cc/80?img=5" alt="Sophia">
-          <div class="item-content">
-            <div class="item-from">Sophia · Frontend Dev</div>
-            <div class="item-header">
-              <span class="item-subject">Chart library selection</span>
-              <span class="item-time">15 min ago</span>
-            </div>
-            <div class="item-preview">Which chart library should we use for analytics?</div>
-            <div class="item-badges">
-              <span class="item-badge decision">Decision</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="inbox-item">
-          <img class="item-avatar" src="https://i.pravatar.cc/80?img=33" alt="Alex">
-          <div class="item-content">
-            <div class="item-from">Alex · Full Stack</div>
-            <div class="item-header">
-              <span class="item-subject">✅ Auth flow complete</span>
-              <span class="item-time">1 hour ago</span>
-            </div>
-            <div class="item-preview">User authentication is ready and tested.</div>
-            <div class="item-badges">
-              <span class="item-badge update">Update</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="inbox-item">
-          <img class="item-avatar" src="https://i.pravatar.cc/80?img=59" alt="Jordan">
-          <div class="item-content">
-            <div class="item-from">Jordan · Database Eng</div>
-            <div class="item-header">
-              <span class="item-subject">Database schema review</span>
-              <span class="item-time">2 hours ago</span>
-            </div>
-            <div class="item-preview">I've set up the initial tables for users and billing...</div>
-            <div class="item-badges">
-              <span class="item-badge update">Update</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="inbox-item">
-          <img class="item-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
-          <div class="item-content">
-            <div class="item-from">Luna · Project Manager</div>
-            <div class="item-header">
-              <span class="item-subject">Project kickoff 🚀</span>
-              <span class="item-time">Yesterday</span>
-            </div>
-            <div class="item-preview">Welcome to your new project! I'll be your PM agent...</div>
-            <div class="item-badges">
-              <span class="item-badge update">Update</span>
-            </div>
-          </div>
+      <!-- Input -->
+      <div class="slack-chat-input-area">
+        <div class="slack-chat-input-container">
+          <input type="text" class="slack-chat-input-field" placeholder="Message Luna...">
+          <button class="slack-chat-send-btn">Send</button>
         </div>
       </div>
     </aside>

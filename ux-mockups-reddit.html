@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tism - Reddit-Style Threaded UX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-surface: #12121a;
+      --bg-elevated: #1a1a26;
+      --bg-hover: #222233;
+      --border: #2a2a3e;
+      --border-bright: #3d3d5c;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --text-muted: #555566;
+      --accent-cyan: #00d4ff;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-pink: #ec4899;
+      --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #a855f7 100%);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Outfit', -apple-system, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      padding: 40px;
+      min-height: 100vh;
+    }
+
+    .mockups-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .mockups-header h1 {
+      font-size: 32px;
+      margin-bottom: 12px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .mockups-header p {
+      color: var(--text-secondary);
+      font-size: 16px;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .mockup-section {
+      margin-bottom: 100px;
+    }
+
+    .mockup-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mockup-title .number {
+      background: var(--gradient-primary);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--bg-deep);
+    }
+
+    .mockup-description {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 24px;
+      padding-left: 44px;
+      max-width: 800px;
+    }
+
+    .mockup-frame {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ============================================
+       VARIATION A: PURE REDDIT STYLE
+       ============================================ */
+    .va-container {
+      min-height: 700px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .va-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .va-header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .va-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .va-header-text h3 { font-size: 16px; font-weight: 600; }
+    .va-header-text p { font-size: 12px; color: var(--text-muted); }
+
+    .va-new-post-btn {
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 10px 20px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .va-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+
+    .va-tab {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s;
+    }
+
+    .va-tab:hover { color: var(--text-secondary); }
+    .va-tab.active { background: var(--bg-surface); color: var(--text-primary); }
+
+    .va-tab .count {
+      background: var(--accent-red);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 6px;
+    }
+
+    .va-feed {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 24px;
+    }
+
+    .va-thread {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .va-thread.needs-response {
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+
+    .va-thread-header {
+      padding: 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .va-thread-header:hover { background: var(--bg-hover); }
+
+    .va-thread-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .va-thread-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+    }
+
+    .va-thread-from { color: var(--text-secondary); font-weight: 500; }
+    .va-thread-time { color: var(--text-muted); }
+    .va-thread-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+    .va-thread-badge.blocker { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+    .va-thread-badge.your-request { background: rgba(0, 212, 255, 0.2); color: var(--accent-cyan); }
+    .va-thread-badge.needs-input { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); }
+
+    .va-thread-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .va-thread-preview {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .va-thread-footer {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .va-thread-stat {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .va-thread-expand {
+      margin-left: auto;
+      color: var(--accent-cyan);
+    }
+
+    /* Expanded thread */
+    .va-thread-replies {
+      border-top: 1px solid var(--border);
+      background: var(--bg-surface);
+    }
+
+    .va-reply {
+      padding: 14px 16px 14px 40px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .va-reply:last-child { border-bottom: none; }
+
+    .va-reply::before {
+      content: '';
+      position: absolute;
+      left: 24px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .va-reply-dot {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: 2px solid var(--border);
+    }
+
+    .va-reply.luna .va-reply-dot { border-color: var(--accent-purple); }
+    .va-reply.user .va-reply-dot { border-color: var(--accent-cyan); }
+    .va-reply.dev .va-reply-dot { border-color: var(--accent-green); }
+
+    .va-reply-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .va-reply-from { font-weight: 600; }
+    .va-reply.luna .va-reply-from { color: var(--accent-purple); }
+    .va-reply.user .va-reply-from { color: var(--accent-cyan); }
+    .va-reply.dev .va-reply-from { color: var(--accent-green); }
+
+    .va-reply-time { color: var(--text-muted); }
+
+    .va-reply-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .va-reply-input-area {
+      padding: 12px 16px 12px 40px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .va-reply-input {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .va-reply-input:focus { outline: none; border-color: var(--accent-cyan); }
+
+    .va-reply-send {
+      background: var(--accent-cyan);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      color: var(--bg-deep);
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* ============================================
+       VARIATION B: SLACK-STYLE THREADS
+       ============================================ */
+    .vb-container {
+      min-height: 700px;
+      display: flex;
+    }
+
+    .vb-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+    }
+
+    .vb-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .vb-channel-icon {
+      font-size: 20px;
+    }
+
+    .vb-channel-name {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .vb-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    .vb-message {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      transition: background 0.15s;
+    }
+
+    .vb-message:hover { background: var(--bg-elevated); }
+
+    .vb-message.has-thread { cursor: pointer; }
+
+    .vb-msg-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      flex-shrink: 0;
+    }
+
+    .vb-msg-avatar.luna {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .vb-msg-avatar.user {
+      background: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--bg-deep);
+    }
+
+    .vb-msg-content { flex: 1; }
+
+    .vb-msg-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .vb-msg-name { font-size: 14px; font-weight: 600; }
+    .vb-msg-time { font-size: 11px; color: var(--text-muted); }
+
+    .vb-msg-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .vb-msg-thread-preview {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      color: var(--accent-cyan);
+      cursor: pointer;
+    }
+
+    .vb-msg-thread-preview:hover { background: var(--bg-hover); }
+
+    .vb-thread-avatars {
+      display: flex;
+    }
+
+    .vb-thread-avatars img {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      margin-right: -6px;
+      border: 2px solid var(--bg-elevated);
+    }
+
+    .vb-msg-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+
+    .vb-msg-badge.needs-reply { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); }
+
+    .vb-input-area {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .vb-input-wrapper {
+      display: flex;
+      gap: 10px;
+    }
+
+    .vb-input {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .vb-input:focus { outline: none; border-color: var(--accent-cyan); }
+
+    .vb-send {
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 12px 20px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Thread panel */
+    .vb-thread-panel {
+      width: 380px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-elevated);
+    }
+
+    .vb-thread-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .vb-thread-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .vb-thread-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .vb-thread-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .vb-thread-original {
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .vb-thread-msg {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .vb-thread-msg-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .vb-thread-msg-content { flex: 1; }
+
+    .vb-thread-msg-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .vb-thread-msg-name { font-size: 13px; font-weight: 600; }
+    .vb-thread-msg-time { font-size: 10px; color: var(--text-muted); }
+
+    .vb-thread-msg-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .vb-thread-input {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .vb-thread-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .vb-thread-input-field {
+      flex: 1;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .vb-thread-input-field:focus { outline: none; border-color: var(--accent-cyan); }
+
+    .vb-thread-send {
+      background: var(--accent-cyan);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      color: var(--bg-deep);
+      font-weight: 500;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* ============================================
+       VARIATION C: COMPACT THREADED (HN-STYLE)
+       ============================================ */
+    .vc-container {
+      min-height: 700px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vc-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-elevated);
+    }
+
+    .vc-header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .vc-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vc-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .vc-logo-text { font-weight: 600; font-size: 16px; }
+
+    .vc-nav {
+      display: flex;
+      gap: 4px;
+    }
+
+    .vc-nav-item {
+      padding: 6px 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+    }
+
+    .vc-nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .vc-nav-item.active { color: var(--accent-cyan); }
+
+    .vc-new-btn {
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 8px 16px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .vc-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+    }
+
+    .vc-thread {
+      margin-bottom: 24px;
+    }
+
+    .vc-thread-root {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .vc-votes {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding-top: 2px;
+    }
+
+    .vc-vote-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 10px;
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    .vc-vote-btn:hover { color: var(--accent-cyan); }
+
+    .vc-vote-count {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .vc-thread-content { flex: 1; }
+
+    .vc-thread-header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .vc-thread-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .vc-thread-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .vc-thread-badge.question { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); }
+    .vc-thread-badge.request { background: rgba(0, 212, 255, 0.2); color: var(--accent-cyan); }
+    .vc-thread-badge.blocker { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+
+    .vc-thread-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .vc-thread-meta a {
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    .vc-thread-meta a:hover { text-decoration: underline; }
+
+    .vc-thread-body {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .vc-thread-actions {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+    }
+
+    .vc-action {
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .vc-action:hover { color: var(--text-secondary); }
+
+    /* Nested replies */
+    .vc-replies {
+      margin-left: 24px;
+      padding-left: 16px;
+      border-left: 2px solid var(--border);
+    }
+
+    .vc-reply {
+      padding: 12px 0;
+    }
+
+    .vc-reply-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .vc-reply-author {
+      font-weight: 600;
+    }
+
+    .vc-reply-author.luna { color: var(--accent-purple); }
+    .vc-reply-author.dev { color: var(--accent-green); }
+    .vc-reply-author.you { color: var(--accent-cyan); }
+
+    .vc-reply-time { color: var(--text-muted); }
+
+    .vc-reply-body {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .vc-reply-actions {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+    }
+
+    .vc-reply-input {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .vc-reply-field {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .vc-reply-field:focus { outline: none; border-color: var(--accent-cyan); }
+
+    .vc-reply-submit {
+      background: var(--accent-cyan);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      color: var(--bg-deep);
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* ============================================
+       VARIATION D: DISCORD-STYLE WITH THREADS
+       ============================================ */
+    .vd-container {
+      min-height: 700px;
+      display: flex;
+    }
+
+    .vd-sidebar {
+      width: 240px;
+      background: var(--bg-elevated);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vd-sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .vd-project-name {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .vd-channels {
+      flex: 1;
+      padding: 12px 8px;
+    }
+
+    .vd-channel-group {
+      margin-bottom: 16px;
+    }
+
+    .vd-channel-group-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 4px 8px;
+      margin-bottom: 4px;
+    }
+
+    .vd-channel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .vd-channel:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .vd-channel.active { background: var(--bg-surface); color: var(--text-primary); }
+
+    .vd-channel-icon { font-size: 16px; }
+
+    .vd-channel-unread {
+      margin-left: auto;
+      background: var(--accent-red);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .vd-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vd-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vd-header-icon { font-size: 20px; color: var(--text-muted); }
+    .vd-header-title { font-size: 15px; font-weight: 600; }
+    .vd-header-desc { font-size: 12px; color: var(--text-muted); margin-left: 12px; padding-left: 12px; border-left: 1px solid var(--border); }
+
+    .vd-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    .vd-date-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .vd-date-divider::before,
+    .vd-date-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .vd-date-divider span {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .vd-message {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding: 8px;
+      border-radius: var(--radius-md);
+    }
+
+    .vd-message:hover { background: var(--bg-elevated); }
+
+    .vd-msg-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .vd-msg-avatar.luna {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .vd-msg-content { flex: 1; }
+
+    .vd-msg-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .vd-msg-name { font-size: 14px; font-weight: 600; }
+    .vd-msg-name.luna { color: var(--accent-purple); }
+    .vd-msg-name.dev { color: var(--accent-green); }
+    .vd-msg-time { font-size: 11px; color: var(--text-muted); }
+
+    .vd-msg-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .vd-msg-thread-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 6px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      color: var(--accent-cyan);
+      cursor: pointer;
+    }
+
+    .vd-msg-thread-btn:hover { border-color: var(--accent-cyan); }
+
+    .vd-msg-thread-btn .avatars {
+      display: flex;
+    }
+
+    .vd-msg-thread-btn .avatars img {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      margin-right: -4px;
+    }
+
+    .vd-msg-thread-btn .badge {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--accent-amber);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 4px;
+    }
+
+    .vd-input-area {
+      padding: 16px 20px;
+    }
+
+    .vd-input-wrapper {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 4px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .vd-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 12px 14px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .vd-input:focus { outline: none; }
+
+    .vd-send {
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 10px 18px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Thread sidebar */
+    .vd-thread-panel {
+      width: 400px;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vd-thread-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .vd-thread-title-area h4 { font-size: 14px; font-weight: 600; }
+    .vd-thread-title-area p { font-size: 11px; color: var(--text-muted); }
+
+    .vd-thread-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .vd-thread-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .vd-thread-original {
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .vd-thread-msg {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .vd-thread-msg-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .vd-thread-msg-content { flex: 1; }
+
+    .vd-thread-msg-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .vd-thread-msg-name { font-size: 13px; font-weight: 600; }
+    .vd-thread-msg-time { font-size: 10px; color: var(--text-muted); }
+
+    .vd-thread-msg-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .vd-thread-input {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .vd-thread-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .vd-thread-input-field {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .vd-thread-input-field:focus { outline: none; border-color: var(--accent-cyan); }
+
+    .vd-thread-send {
+      background: var(--accent-cyan);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      color: var(--bg-deep);
+      font-weight: 500;
+      font-size: 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="mockups-header">
+    <h1>🧵 Reddit/Thread-Style UX Mockups</h1>
+    <p>
+      Threaded conversations keep topics organized without mixing conversations.
+      Each thread is self-contained — your requests, team questions, and all replies
+      stay nested together. One feed, many threads.
+    </p>
+  </div>
+
+  <!-- ============================================
+       VARIATION A: PURE REDDIT STYLE
+       ============================================ -->
+  <div class="mockup-section">
+    <div class="mockup-title">
+      <span class="number">A</span>
+      Reddit-Style Threaded Feed
+    </div>
+    <p class="mockup-description">
+      Classic Reddit layout: all threads in a single feed. Your requests AND team questions
+      appear as top-level posts. Click to expand and see the full conversation. Reply inline
+      without leaving the feed. Tabs to filter by type.
+    </p>
+    <div class="mockup-frame">
+      <div class="va-container">
+        <div class="va-header">
+          <div class="va-header-left">
+            <div class="va-avatar">👩‍💼</div>
+            <div class="va-header-text">
+              <h3>Luna's Threads</h3>
+              <p>Your requests & team questions</p>
+            </div>
+          </div>
+          <button class="va-new-post-btn">
+            <span>✨</span> New Request
+          </button>
+        </div>
+        <div class="va-tabs">
+          <button class="va-tab active">All</button>
+          <button class="va-tab">My Requests</button>
+          <button class="va-tab">
+            Needs Response
+            <span class="count">2</span>
+          </button>
+          <button class="va-tab">Completed</button>
+        </div>
+        <div class="va-feed">
+          <!-- Thread 1: Question needing response (expanded) -->
+          <div class="va-thread needs-response">
+            <div class="va-thread-header">
+              <div class="va-thread-meta">
+                <img class="va-thread-avatar" src="https://i.pravatar.cc/48?img=12" alt="Marcus">
+                <span class="va-thread-from">Marcus · Backend Dev</span>
+                <span class="va-thread-time">· 10 min ago</span>
+                <span class="va-thread-badge blocker">Blocker</span>
+                <span class="va-thread-badge needs-input">Needs your input</span>
+              </div>
+              <div class="va-thread-title">Billing flow: pricing before or after signup?</div>
+              <div class="va-thread-preview">
+                The signup form is ready. I need to know if users should see pricing before signing up or after. This is blocking checkout development.
+              </div>
+              <div class="va-thread-footer">
+                <span class="va-thread-stat">💬 3 replies</span>
+                <span class="va-thread-stat">👁 Ticket #T-103</span>
+                <span class="va-thread-expand">▼ Expanded</span>
+              </div>
+            </div>
+            <div class="va-thread-replies">
+              <div class="va-reply luna">
+                <div class="va-reply-dot"></div>
+                <div class="va-reply-header">
+                  <span class="va-reply-from">Luna</span>
+                  <span class="va-reply-time">8 min ago</span>
+                </div>
+                <div class="va-reply-content">
+                  Good question, Marcus. I'll get an answer from the team lead.
+                </div>
+              </div>
+              <div class="va-reply dev">
+                <div class="va-reply-dot"></div>
+                <div class="va-reply-header">
+                  <span class="va-reply-from">Marcus</span>
+                  <span class="va-reply-time">5 min ago</span>
+                </div>
+                <div class="va-reply-content">
+                  My suggestion: after signup. We can capture emails first and reduce friction. But happy to go either way.
+                </div>
+              </div>
+              <div class="va-reply-input-area">
+                <input type="text" class="va-reply-input" placeholder="Type your reply...">
+                <button class="va-reply-send">Reply</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thread 2: Your request (collapsed) -->
+          <div class="va-thread">
+            <div class="va-thread-header">
+              <div class="va-thread-meta">
+                <span class="va-thread-badge your-request">Your Request</span>
+                <span class="va-thread-time">· 2 hours ago</span>
+              </div>
+              <div class="va-thread-title">Build billing system with Stripe integration</div>
+              <div class="va-thread-preview">
+                Need a complete billing flow: Stripe checkout, subscription management, invoices...
+              </div>
+              <div class="va-thread-footer">
+                <span class="va-thread-stat">💬 5 replies</span>
+                <span class="va-thread-stat">🎯 3 tickets created</span>
+                <span class="va-thread-expand">▶ 5 replies</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thread 3: Another question (collapsed) -->
+          <div class="va-thread needs-response">
+            <div class="va-thread-header">
+              <div class="va-thread-meta">
+                <img class="va-thread-avatar" src="https://i.pravatar.cc/48?img=5" alt="Sophia">
+                <span class="va-thread-from">Sophia · Frontend Dev</span>
+                <span class="va-thread-time">· 1 hour ago</span>
+                <span class="va-thread-badge needs-input">Needs your input</span>
+              </div>
+              <div class="va-thread-title">Chart library: Recharts or Chart.js?</div>
+              <div class="va-thread-preview">
+                For the analytics dashboard — Recharts is more React-native but Chart.js has more documentation...
+              </div>
+              <div class="va-thread-footer">
+                <span class="va-thread-stat">💬 2 replies</span>
+                <span class="va-thread-expand">▶ 2 replies</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thread 4: Completed (collapsed) -->
+          <div class="va-thread">
+            <div class="va-thread-header">
+              <div class="va-thread-meta">
+                <span class="va-thread-badge your-request">Your Request</span>
+                <span class="va-thread-time">· Yesterday</span>
+              </div>
+              <div class="va-thread-title">User authentication with login/signup</div>
+              <div class="va-thread-preview">
+                ✅ Completed — Marcus finished the auth API with JWT tokens, password reset, etc.
+              </div>
+              <div class="va-thread-footer">
+                <span class="va-thread-stat">💬 8 replies</span>
+                <span class="va-thread-stat">✅ Done</span>
+                <span class="va-thread-expand">▶ 8 replies</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       VARIATION B: SLACK-STYLE THREADS
+       ============================================ -->
+  <div class="mockup-section">
+    <div class="mockup-title">
+      <span class="number">B</span>
+      Slack-Style Threads in Panel
+    </div>
+    <p class="mockup-description">
+      Main channel shows all messages chronologically. Click any message to open its 
+      thread in a side panel. Replies stay contained. Thread indicator shows who 
+      replied and if it needs your response.
+    </p>
+    <div class="mockup-frame">
+      <div class="vb-container">
+        <div class="vb-main">
+          <div class="vb-header">
+            <span class="vb-channel-icon">#</span>
+            <span class="vb-channel-name">billing-project</span>
+          </div>
+          <div class="vb-messages">
+            <div class="vb-message has-thread">
+              <div class="vb-msg-avatar luna">👩‍💼</div>
+              <div class="vb-msg-content">
+                <div class="vb-msg-header">
+                  <span class="vb-msg-name">Luna</span>
+                  <span class="vb-msg-time">10:30 AM</span>
+                </div>
+                <div class="vb-msg-text">
+                  Hey! Marcus has a question about the billing flow that's blocking him. Can you take a look?
+                </div>
+                <div class="vb-msg-thread-preview">
+                  <div class="avatars">
+                    <img src="https://i.pravatar.cc/32?img=12" alt="Marcus">
+                    <img src="https://i.pravatar.cc/32?img=23" alt="Luna">
+                  </div>
+                  3 replies
+                  <span class="vb-msg-badge needs-reply">Needs reply</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="vb-message">
+              <div class="vb-msg-avatar user">Y</div>
+              <div class="vb-msg-content">
+                <div class="vb-msg-header">
+                  <span class="vb-msg-name">You</span>
+                  <span class="vb-msg-time">Yesterday</span>
+                </div>
+                <div class="vb-msg-text">
+                  I need a billing system with Stripe integration, subscription management, and invoicing.
+                </div>
+                <div class="vb-msg-thread-preview">
+                  <div class="avatars">
+                    <img src="https://i.pravatar.cc/32?img=23" alt="Luna">
+                    <img src="https://i.pravatar.cc/32?img=12" alt="Marcus">
+                  </div>
+                  5 replies · Last reply 2 hours ago
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vb-input-area">
+            <div class="vb-input-wrapper">
+              <input type="text" class="vb-input" placeholder="Message #billing-project (or start a new request)">
+              <button class="vb-send">Send</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thread panel -->
+        <div class="vb-thread-panel">
+          <div class="vb-thread-header">
+            <div class="vb-thread-title">Thread</div>
+            <button class="vb-thread-close">×</button>
+          </div>
+          <div class="vb-thread-messages">
+            <div class="vb-thread-original">
+              <div class="vb-thread-msg">
+                <div class="vb-thread-msg-avatar vb-msg-avatar luna">👩‍💼</div>
+                <div class="vb-thread-msg-content">
+                  <div class="vb-thread-msg-header">
+                    <span class="vb-thread-msg-name">Luna</span>
+                    <span class="vb-thread-msg-time">10:30 AM</span>
+                  </div>
+                  <div class="vb-thread-msg-text">
+                    Hey! Marcus has a question about the billing flow that's blocking him. Can you take a look?
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="vb-thread-msg">
+              <img class="vb-thread-msg-avatar" src="https://i.pravatar.cc/32?img=12" alt="Marcus">
+              <div class="vb-thread-msg-content">
+                <div class="vb-thread-msg-header">
+                  <span class="vb-thread-msg-name">Marcus</span>
+                  <span class="vb-thread-msg-time">10:32 AM</span>
+                </div>
+                <div class="vb-thread-msg-text">
+                  Should users see pricing before or after signup? The form is ready but I need to know the flow.
+                </div>
+              </div>
+            </div>
+
+            <div class="vb-thread-msg">
+              <img class="vb-thread-msg-avatar" src="https://i.pravatar.cc/32?img=12" alt="Marcus">
+              <div class="vb-thread-msg-content">
+                <div class="vb-thread-msg-header">
+                  <span class="vb-thread-msg-name">Marcus</span>
+                  <span class="vb-thread-msg-time">10:35 AM</span>
+                </div>
+                <div class="vb-thread-msg-text">
+                  My suggestion: after signup to reduce friction. But let me know!
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vb-thread-input">
+            <div class="vb-thread-input-row">
+              <input type="text" class="vb-thread-input-field" placeholder="Reply in thread...">
+              <button class="vb-thread-send">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       VARIATION C: COMPACT THREADED (HN-STYLE)
+       ============================================ -->
+  <div class="mockup-section">
+    <div class="mockup-title">
+      <span class="number">C</span>
+      Hacker News Style (Compact Nested)
+    </div>
+    <p class="mockup-description">
+      Ultra-compact threaded view like Hacker News. Posts and replies nest with 
+      indentation. Everything on one page. Reply buttons inline. Great for 
+      scanning many items quickly.
+    </p>
+    <div class="mockup-frame">
+      <div class="vc-container">
+        <div class="vc-header">
+          <div class="vc-header-left">
+            <div class="vc-logo">
+              <div class="vc-logo-icon">T</div>
+              <span class="vc-logo-text">Tism</span>
+            </div>
+            <nav class="vc-nav">
+              <a href="#" class="vc-nav-item active">all</a>
+              <a href="#" class="vc-nav-item">requests</a>
+              <a href="#" class="vc-nav-item">questions (2)</a>
+              <a href="#" class="vc-nav-item">done</a>
+            </nav>
+          </div>
+          <button class="vc-new-btn">+ New Request</button>
+        </div>
+        <div class="vc-content">
+          <!-- Thread 1 -->
+          <div class="vc-thread">
+            <div class="vc-thread-root">
+              <div class="vc-votes">
+                <button class="vc-vote-btn">▲</button>
+                <span class="vc-vote-count">!</span>
+              </div>
+              <div class="vc-thread-content">
+                <div class="vc-thread-header">
+                  <span class="vc-thread-title">Billing flow: pricing before or after signup?</span>
+                  <span class="vc-thread-badge question">question</span>
+                  <span class="vc-thread-badge blocker">blocker</span>
+                </div>
+                <div class="vc-thread-meta">
+                  by <a href="#">Marcus</a> · 10 min ago · 3 comments · re: <a href="#">Ticket #T-103</a>
+                </div>
+                <div class="vc-thread-body">
+                  The signup form is ready. I need to know if users should see pricing before signing up or after. This is blocking checkout development.
+                </div>
+                <div class="vc-thread-actions">
+                  <a class="vc-action">reply</a>
+                </div>
+
+                <!-- Nested replies -->
+                <div class="vc-replies">
+                  <div class="vc-reply">
+                    <div class="vc-reply-header">
+                      <span class="vc-reply-author luna">Luna</span>
+                      <span class="vc-reply-time">· 8 min ago</span>
+                    </div>
+                    <div class="vc-reply-body">Good question. I'll get an answer from the team lead.</div>
+                    <div class="vc-reply-actions">
+                      <a class="vc-action">reply</a>
+                    </div>
+                  </div>
+                  <div class="vc-reply">
+                    <div class="vc-reply-header">
+                      <span class="vc-reply-author dev">Marcus</span>
+                      <span class="vc-reply-time">· 5 min ago</span>
+                    </div>
+                    <div class="vc-reply-body">My suggestion: after signup to reduce friction. Happy to go either way though!</div>
+                    <div class="vc-reply-actions">
+                      <a class="vc-action">reply</a>
+                    </div>
+                  </div>
+                  <div class="vc-reply-input">
+                    <input type="text" class="vc-reply-field" placeholder="Your reply...">
+                    <button class="vc-reply-submit">Reply</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thread 2 -->
+          <div class="vc-thread">
+            <div class="vc-thread-root">
+              <div class="vc-votes">
+                <button class="vc-vote-btn">▲</button>
+                <span class="vc-vote-count">3</span>
+              </div>
+              <div class="vc-thread-content">
+                <div class="vc-thread-header">
+                  <span class="vc-thread-title">Build billing system with Stripe integration</span>
+                  <span class="vc-thread-badge request">your request</span>
+                </div>
+                <div class="vc-thread-meta">
+                  by <a href="#">you</a> · 2 hours ago · 5 comments · 3 tickets created
+                </div>
+                <div class="vc-thread-actions">
+                  <a class="vc-action">5 comments</a>
+                  <a class="vc-action">view tickets</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thread 3 -->
+          <div class="vc-thread">
+            <div class="vc-thread-root">
+              <div class="vc-votes">
+                <button class="vc-vote-btn">▲</button>
+                <span class="vc-vote-count">?</span>
+              </div>
+              <div class="vc-thread-content">
+                <div class="vc-thread-header">
+                  <span class="vc-thread-title">Chart library: Recharts or Chart.js?</span>
+                  <span class="vc-thread-badge question">question</span>
+                </div>
+                <div class="vc-thread-meta">
+                  by <a href="#">Sophia</a> · 1 hour ago · 2 comments
+                </div>
+                <div class="vc-thread-actions">
+                  <a class="vc-action">reply</a>
+                  <a class="vc-action">2 comments</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thread 4 -->
+          <div class="vc-thread">
+            <div class="vc-thread-root">
+              <div class="vc-votes">
+                <button class="vc-vote-btn">▲</button>
+                <span class="vc-vote-count">✓</span>
+              </div>
+              <div class="vc-thread-content">
+                <div class="vc-thread-header">
+                  <span class="vc-thread-title">User authentication with login/signup</span>
+                  <span class="vc-thread-badge request">your request</span>
+                </div>
+                <div class="vc-thread-meta">
+                  by <a href="#">you</a> · yesterday · 8 comments · ✅ completed
+                </div>
+                <div class="vc-thread-actions">
+                  <a class="vc-action">8 comments</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       VARIATION D: DISCORD-STYLE WITH THREADS
+       ============================================ -->
+  <div class="mockup-section">
+    <div class="mockup-title">
+      <span class="number">D</span>
+      Discord-Style Channels + Threads
+    </div>
+    <p class="mockup-description">
+      Each project/request gets its own channel. Within channels, individual topics 
+      become threads that open in a side panel. Familiar Discord UX — channels 
+      for organization, threads for focused discussion.
+    </p>
+    <div class="mockup-frame">
+      <div class="vd-container">
+        <div class="vd-sidebar">
+          <div class="vd-sidebar-header">
+            <div class="vd-project-name">
+              <span>🚀</span> My SaaS App
+            </div>
+          </div>
+          <div class="vd-channels">
+            <div class="vd-channel-group">
+              <div class="vd-channel-group-title">Active</div>
+              <div class="vd-channel active">
+                <span class="vd-channel-icon">#</span>
+                billing-system
+                <span class="vd-channel-unread">2</span>
+              </div>
+              <div class="vd-channel">
+                <span class="vd-channel-icon">#</span>
+                analytics-dashboard
+              </div>
+            </div>
+            <div class="vd-channel-group">
+              <div class="vd-channel-group-title">Completed</div>
+              <div class="vd-channel">
+                <span class="vd-channel-icon">#</span>
+                user-auth
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="vd-main">
+          <div class="vd-header">
+            <span class="vd-header-icon">#</span>
+            <span class="vd-header-title">billing-system</span>
+            <span class="vd-header-desc">Stripe integration, checkout, invoicing</span>
+          </div>
+          <div class="vd-messages">
+            <div class="vd-date-divider"><span>Today</span></div>
+
+            <div class="vd-message">
+              <div class="vd-msg-avatar luna">👩‍💼</div>
+              <div class="vd-msg-content">
+                <div class="vd-msg-header">
+                  <span class="vd-msg-name luna">Luna</span>
+                  <span class="vd-msg-time">10:30 AM</span>
+                </div>
+                <div class="vd-msg-text">
+                  Marcus has a question that's blocking the checkout flow. 👇
+                </div>
+                <div class="vd-msg-thread-btn">
+                  <div class="avatars">
+                    <img src="https://i.pravatar.cc/32?img=12" alt="Marcus">
+                  </div>
+                  3 replies
+                  <span class="badge">Needs answer</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="vd-message">
+              <div class="vd-msg-avatar luna">👩‍💼</div>
+              <div class="vd-msg-content">
+                <div class="vd-msg-header">
+                  <span class="vd-msg-name luna">Luna</span>
+                  <span class="vd-msg-time">9:15 AM</span>
+                </div>
+                <div class="vd-msg-text">
+                  Good news! Marcus finished the Stripe integration. Moving on to the checkout UI now.
+                </div>
+              </div>
+            </div>
+
+            <div class="vd-date-divider"><span>Yesterday</span></div>
+
+            <div class="vd-message">
+              <div class="vd-msg-avatar luna">👩‍💼</div>
+              <div class="vd-msg-content">
+                <div class="vd-msg-header">
+                  <span class="vd-msg-name luna">Luna</span>
+                  <span class="vd-msg-time">2:30 PM</span>
+                </div>
+                <div class="vd-msg-text">
+                  Started! I've assigned Marcus to the Stripe integration. He'll tackle subscriptions and invoicing. Will keep you posted.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vd-input-area">
+            <div class="vd-input-wrapper">
+              <input type="text" class="vd-input" placeholder="Message #billing-system">
+              <button class="vd-send">Send</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thread panel -->
+        <div class="vd-thread-panel">
+          <div class="vd-thread-header">
+            <div class="vd-thread-title-area">
+              <h4>Thread</h4>
+              <p>#billing-system</p>
+            </div>
+            <button class="vd-thread-close">×</button>
+          </div>
+          <div class="vd-thread-messages">
+            <div class="vd-thread-original">
+              <div class="vd-thread-msg">
+                <div class="vd-thread-msg-avatar vd-msg-avatar luna">👩‍💼</div>
+                <div class="vd-thread-msg-content">
+                  <div class="vd-thread-msg-header">
+                    <span class="vd-thread-msg-name">Luna</span>
+                    <span class="vd-thread-msg-time">10:30 AM</span>
+                  </div>
+                  <div class="vd-thread-msg-text">
+                    Marcus has a question that's blocking the checkout flow. 👇
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="vd-thread-msg">
+              <img class="vd-thread-msg-avatar" src="https://i.pravatar.cc/32?img=12" alt="Marcus">
+              <div class="vd-thread-msg-content">
+                <div class="vd-thread-msg-header">
+                  <span class="vd-thread-msg-name">Marcus</span>
+                  <span class="vd-thread-msg-time">10:32 AM</span>
+                </div>
+                <div class="vd-thread-msg-text">
+                  Should users see pricing before or after signup? The form is ready but I need to know the flow.
+                </div>
+              </div>
+            </div>
+
+            <div class="vd-thread-msg">
+              <img class="vd-thread-msg-avatar" src="https://i.pravatar.cc/32?img=12" alt="Marcus">
+              <div class="vd-thread-msg-content">
+                <div class="vd-thread-msg-header">
+                  <span class="vd-thread-msg-name">Marcus</span>
+                  <span class="vd-thread-msg-time">10:35 AM</span>
+                </div>
+                <div class="vd-thread-msg-text">
+                  Suggestion: after signup to capture emails first. But let me know your preference!
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vd-thread-input">
+            <div class="vd-thread-input-row">
+              <input type="text" class="vd-thread-input-field" placeholder="Reply...">
+              <button class="vd-thread-send">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

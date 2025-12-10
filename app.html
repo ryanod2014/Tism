@@ -63,7 +63,7 @@
       background: var(--border);
       cursor: col-resize;
       position: relative;
-      z-index: 10;
+      z-index: 200;
       transition: background 0.15s;
     }
 
@@ -77,8 +77,9 @@
       position: absolute;
       top: 0;
       bottom: 0;
-      left: -4px;
-      right: -4px;
+      left: -8px;
+      right: -8px;
+      z-index: 200;
     }
 
     .header-left {
@@ -201,6 +202,18 @@
 
     .view-tabs {
       display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .view-tabs-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .view-tabs-buttons {
+      display: flex;
       background: var(--bg-deep);
       border-radius: var(--radius-sm);
       padding: 3px;
@@ -295,6 +308,7 @@
       flex-direction: column;
       overflow: hidden;
       position: relative;
+      z-index: 1;
     }
 
     .inbox-header {
@@ -501,19 +515,18 @@
     .chat-view {
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
+      left: 100%;
+      width: 100%;
       bottom: 0;
       background: var(--bg-surface);
       display: flex;
       flex-direction: column;
-      transform: translateX(100%);
-      transition: transform 0.25s ease;
+      transition: left 0.25s ease;
       z-index: 10;
     }
 
     .chat-view.active {
-      transform: translateX(0);
+      left: 0;
     }
 
     .chat-header {
@@ -1178,6 +1191,852 @@
       justify-content: center;
     }
 
+    /* ========== SLACK-STYLE CHAT PANEL ========== */
+    .chat-panel {
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .chat-panel-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pm-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .pm-name { font-size: 14px; font-weight: 600; }
+    .pm-status { font-size: 11px; color: var(--accent-green); }
+
+    .new-request-btn {
+      padding: 8px 14px;
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* Messages Feed */
+    .messages-wrapper {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .messages-container {
+      padding: 16px;
+    }
+
+    .date-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .date-divider::before,
+    .date-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .slack-message {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      margin: 0 -10px 6px;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+
+    .slack-message:hover { background: var(--bg-elevated); }
+    .slack-message:active { background: var(--bg-surface); }
+
+    .slack-message-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    div.slack-message-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    div.slack-message-avatar.you { 
+      background: var(--accent-cyan); 
+      font-size: 13px; 
+      font-weight: 600; 
+      color: var(--bg-deep); 
+    }
+
+    .slack-message-content { flex: 1; min-width: 0; }
+
+    .slack-message-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+
+    .slack-message-author { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+
+    .slack-message-time { font-size: 10px; color: var(--text-muted); }
+
+    .slack-message-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+
+    .slack-message-badge.critical { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+    .slack-message-badge.done { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+    .slack-message-badge.pending { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); }
+
+    /* Message that needs input - highlighted */
+    .slack-message.needs-input {
+      background: rgba(245, 158, 11, 0.05);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: var(--radius-md);
+      margin: 0 0 12px 0;
+      padding: 14px;
+    }
+
+    .slack-message.needs-input:hover {
+      background: rgba(245, 158, 11, 0.08);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    /* Quick answer buttons */
+    .slack-message-quick-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .quick-answer {
+      padding: 8px 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quick-answer:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.1);
+    }
+
+    .quick-discuss {
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      color: var(--accent-cyan);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    .quick-discuss:hover {
+      text-decoration: underline;
+    }
+
+    .slack-message-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .slack-message-text strong { color: var(--text-primary); }
+
+    .thread-preview {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 4px 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .thread-preview svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    .thread-preview.clickable {
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .thread-preview.clickable:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    /* Unread thread indicator */
+    .slack-message.unread {
+      border-left: 3px solid var(--accent-cyan);
+      padding-left: 12px;
+      margin-left: -15px;
+    }
+
+    .slack-message.unread .thread-preview {
+      color: var(--accent-cyan);
+      border-color: rgba(0, 212, 255, 0.3);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .unread-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .reply-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .reply-btn:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    /* Decision Actions Row */
+    .decision-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .decision-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .decision-btn:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .decision-btn.accept:hover {
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+      background: rgba(34, 197, 94, 0.05);
+    }
+
+    .decision-btn.delete:hover {
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    .decision-btn svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    .decision-confirmed {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 4px 10px;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: var(--radius-sm);
+    }
+
+    .decision-confirmed svg {
+      width: 12px;
+      height: 12px;
+      stroke: var(--accent-green);
+    }
+
+    .decision-confirmed span {
+      font-size: 11px;
+      color: var(--accent-green);
+    }
+
+    /* Chat Input */
+    .slack-chat-input-area {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .slack-chat-input-container {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .slack-chat-input-container:focus-within { border-color: var(--accent-cyan); }
+
+    .slack-chat-input-field {
+      width: 100%;
+      background: transparent;
+      border: none;
+      padding: 12px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      min-height: 20px;
+      max-height: 120px;
+      overflow-y: auto;
+      outline: none;
+      line-height: 1.5;
+    }
+
+    .slack-chat-input-field:empty::before {
+      content: attr(data-placeholder);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .slack-chat-input-field:focus { outline: none; }
+
+    /* Inline element pill */
+    .inline-element-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      margin: 0 2px;
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(168, 85, 247, 0.2));
+      border: 1px solid rgba(0, 212, 255, 0.4);
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent-cyan);
+      vertical-align: middle;
+      cursor: default;
+      user-select: all;
+    }
+
+    .inline-element-pill svg {
+      width: 12px;
+      height: 12px;
+      stroke: var(--accent-cyan);
+      fill: none;
+    }
+
+    .slack-chat-input-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-surface);
+    }
+
+    .slack-input-tools {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .slack-tool-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .slack-tool-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-secondary);
+    }
+
+    .slack-tool-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    .slack-tool-btn.tool-diagram:hover {
+      color: var(--accent-purple);
+      background: rgba(168, 85, 247, 0.1);
+    }
+
+    .slack-tool-divider {
+      width: 1px;
+      height: 16px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    .slack-chat-send-btn {
+      background: var(--accent-cyan);
+      border: none;
+      padding: 6px 12px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+
+    .slack-chat-send-btn:hover {
+      background: #00e5ff;
+    }
+
+    .slack-chat-send-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    /* Attachments area above input */
+    .slack-attachments {
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 12px;
+    }
+
+    .slack-attachments.visible {
+      display: flex;
+    }
+
+    /* Element reference pill */
+    .element-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(168, 85, 247, 0.15));
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-primary);
+      animation: pillPop 0.2s ease;
+    }
+
+    @keyframes pillPop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .element-pill-icon {
+      width: 18px;
+      height: 18px;
+      background: rgba(0, 212, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .element-pill-icon svg {
+      width: 10px;
+      height: 10px;
+      stroke: var(--accent-cyan);
+      fill: none;
+    }
+
+    .element-pill-name {
+      font-weight: 500;
+    }
+
+    .element-pill-remove {
+      width: 16px;
+      height: 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 2px;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .element-pill-remove:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+    }
+
+    /* Diagram attachment pill */
+    .diagram-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-primary);
+      animation: pillPop 0.2s ease;
+    }
+
+    .diagram-pill-icon {
+      width: 18px;
+      height: 18px;
+      background: rgba(168, 85, 247, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .diagram-pill-icon svg {
+      width: 10px;
+      height: 10px;
+      stroke: var(--accent-purple);
+      fill: none;
+    }
+
+    .diagram-pill-meta {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .diagram-pill-remove {
+      width: 16px;
+      height: 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 2px;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .diagram-pill-remove:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+    }
+
+    /* Thread panel overlay - positioned within chat panel */
+    .thread-overlay {
+      position: absolute;
+      right: 0;
+      width: 100%;
+      top: 60px;
+      bottom: 0;
+      background: var(--bg-elevated);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      box-shadow: -5px 0 30px rgba(0,0,0,0.3);
+      overflow: hidden;
+      transform: translateX(100%);
+      pointer-events: none;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .thread-overlay.open {
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    /* Dim overlay behind thread */
+    .chat-panel-dimmer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 10, 15, 0.7);
+      z-index: 50;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: all 0.2s;
+      backdrop-filter: blur(2px);
+    }
+
+    .chat-panel-dimmer.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    /* Fade chat content when thread is open */
+    .chat-panel.thread-open .messages-wrapper,
+    .chat-panel.thread-open .slack-chat-input-area {
+      opacity: 0.3;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .thread-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .thread-title { font-size: 14px; font-weight: 600; }
+
+    .thread-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    .thread-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    .thread-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    /* Original message styling */
+    .thread-original {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .thread-original-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .thread-original-message {
+      display: flex;
+      gap: 12px;
+    }
+
+    .thread-original-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    .thread-original-content { flex: 1; }
+
+    .thread-original-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .thread-original-author {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-purple);
+    }
+
+    .thread-original-time {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .thread-original-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .thread-original-text strong {
+      color: var(--text-primary);
+    }
+
+    /* Replies divider */
+    .thread-replies-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .thread-replies-divider::before,
+    .thread-replies-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .thread-reply {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .thread-reply-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    .thread-reply-content { flex: 1; }
+
+    .thread-reply-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .thread-reply-author { font-size: 12px; font-weight: 600; }
+    .thread-reply-author.luna { color: var(--accent-purple); }
+    .thread-reply-author.dev { color: var(--accent-green); }
+
+    .thread-reply-time { font-size: 10px; color: var(--text-muted); }
+
+    .thread-reply-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .thread-input-area {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .thread-input-container {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      overflow: hidden;
+    }
+
+    .thread-input-field {
+      flex: 1;
+      background: transparent;
+      min-height: 20px;
+      border: none;
+      padding: 10px 12px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .thread-input-field:focus { outline: none; }
+
+    .thread-input-field:empty::before {
+      content: attr(data-placeholder);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .thread-send-btn {
+      background: var(--accent-cyan);
+      border: none;
+      padding: 10px 16px;
+      color: var(--bg-deep);
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
     /* ========== MAIN - PREVIEW AREA ========== */
     .preview-area {
       display: flex;
@@ -1288,13 +2147,18 @@
 
     /* Preview State Dropdown */
     .preview-state {
+      display: flex;
+      gap: 8px;
+    }
+
+    .state-dropdown-wrapper {
       position: relative;
     }
 
     .state-trigger {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       padding: 6px 12px;
       background: var(--bg-elevated);
       border: 1px solid var(--border);
@@ -1307,6 +2171,10 @@
 
     .state-trigger:hover {
       border-color: var(--text-muted);
+    }
+
+    .state-trigger-label {
+      color: var(--text-muted);
     }
 
     .state-dot {
@@ -1332,15 +2200,15 @@
     .state-chevron {
       font-size: 10px;
       color: var(--text-muted);
-      margin-left: 4px;
+      margin-left: 2px;
     }
 
     .state-dropdown {
       position: absolute;
       top: calc(100% + 8px);
       right: 0;
-      width: 360px;
-      max-height: 500px;
+      width: 280px;
+      max-height: 400px;
       overflow-y: auto;
       background: var(--bg-surface);
       border: 1px solid var(--border);
@@ -1348,10 +2216,12 @@
       box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
       z-index: 100;
       display: none;
+      pointer-events: none;
     }
 
     .state-dropdown.open {
       display: block;
+      pointer-events: auto;
     }
 
     .state-section {
@@ -2827,147 +3697,261 @@
 
       <div class="header-right">
         <div class="view-tabs">
-          <button class="view-tab active">Preview</button>
-          <a class="view-tab" href="tickets.html">Pipeline</a>
-          <a class="view-tab" href="live.html">Live</a>
+          <span class="view-tabs-label">View:</span>
+          <div class="view-tabs-buttons">
+            <button class="view-tab active">Preview</button>
+            <a class="view-tab" href="tickets.html">Pipeline</a>
+            <a class="view-tab" href="live.html">Live</a>
+          </div>
         </div>
         <button class="header-btn primary" onclick="openLaunchModal()">🚀 Launch</button>
         <div class="avatar">RO</div>
       </div>
     </header>
 
-    <!-- Left Panel - Inbox -->
-    <aside class="inbox-panel">
-      <div class="inbox-header">
-        <div class="inbox-title">
-          📥 PM Inbox
-          <span class="inbox-badge">5</span>
-        </div>
-        <button class="new-ticket-btn" onclick="createNewRequest()">+ New Request</button>
-      </div>
-
-      <!-- Inbox List View -->
-      <div class="inbox-list" id="inboxList">
-        <div class="inbox-item unread" onclick="openThread(0)">
-          <img class="item-avatar" src="https://i.pravatar.cc/80?img=12" alt="Marcus">
-          <div class="item-content">
-            <div class="item-from">Marcus · Backend Dev</div>
-            <div class="item-header">
-              <span class="item-subject">🚨 Billing flow decision needed</span>
-              <span class="item-time">2 min ago</span>
-            </div>
-            <div class="item-preview">Should users see pricing before or after signup?</div>
-            <div class="item-badges">
-              <span class="item-badge blocker">Blocker</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="inbox-item unread" onclick="openThread(1)">
-          <img class="item-avatar" src="https://i.pravatar.cc/80?img=5" alt="Sophia">
-          <div class="item-content">
-            <div class="item-from">Sophia · Frontend Dev</div>
-            <div class="item-header">
-              <span class="item-subject">Chart library selection</span>
-              <span class="item-time">15 min ago</span>
-            </div>
-            <div class="item-preview">Which chart library should we use for analytics?</div>
-            <div class="item-badges">
-              <span class="item-badge decision">Decision</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="inbox-item" onclick="openThread(2)">
-          <img class="item-avatar" src="https://i.pravatar.cc/80?img=33" alt="Alex">
-          <div class="item-content">
-            <div class="item-from">Alex · Full Stack</div>
-            <div class="item-header">
-              <span class="item-subject">✅ Auth flow complete</span>
-              <span class="item-time">1 hour ago</span>
-            </div>
-            <div class="item-preview">User authentication is ready and tested.</div>
-            <div class="item-badges">
-              <span class="item-badge update">Update</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="inbox-item" onclick="openThread(3)">
-          <img class="item-avatar" src="https://i.pravatar.cc/80?img=59" alt="Jordan">
-          <div class="item-content">
-            <div class="item-from">Jordan · Database Eng</div>
-            <div class="item-header">
-              <span class="item-subject">Database schema review</span>
-              <span class="item-time">2 hours ago</span>
-            </div>
-            <div class="item-preview">I've set up the initial tables for users and billing...</div>
-            <div class="item-badges">
-              <span class="item-badge update">Update</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="inbox-item" onclick="openThread(4)">
-          <img class="item-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
-          <div class="item-content">
-            <div class="item-from">Luna · Project Manager</div>
-            <div class="item-header">
-              <span class="item-subject">Project kickoff 🚀</span>
-              <span class="item-time">Yesterday</span>
-            </div>
-            <div class="item-preview">Welcome to your new project! I'll be your PM agent...</div>
-            <div class="item-badges">
-              <span class="item-badge update">Update</span>
-            </div>
+    <!-- Left Panel - Slack-Style Chat -->
+    <aside class="chat-panel" id="chatPanel">
+      <div class="chat-panel-dimmer" id="chatDimmer" onclick="closeSlackThread()"></div>
+      <div class="chat-panel-header">
+        <div class="chat-panel-title">
+          <img class="pm-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+          <div>
+            <div class="pm-name">Luna</div>
+            <div class="pm-status">Your PM</div>
           </div>
         </div>
       </div>
 
-      <!-- Chat View (slides in when clicking an item) -->
-      <div class="chat-view" id="chatView">
-        <div class="chat-header">
-          <button class="back-btn" onclick="closeThread()">←</button>
-          <div class="chat-thread-info">
-            <div class="chat-thread-subject" id="threadSubject">Billing flow decision</div>
-            <div class="chat-thread-meta" id="threadMeta">Marcus · Backend Dev</div>
+      <!-- Messages Feed -->
+      <div class="messages-wrapper">
+        <div class="messages-container">
+          <div class="date-divider">Today</div>
+
+          <!-- Billing decision thread - critical, pending, UNREAD -->
+          <div class="slack-message unread" data-suggestion="After signup" data-thread="billing" onclick="openMessageThread(this)">
+            <img class="slack-message-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+            <div class="slack-message-content">
+              <div class="slack-message-header">
+                <span class="slack-message-author">Luna</span>
+                <span class="slack-message-time">Just now</span>
+                <span class="slack-message-badge critical">Critical</span>
+                <span class="slack-message-badge pending">Pending</span>
+                <div class="unread-dot"></div>
+              </div>
+              <div class="slack-message-text">
+                <strong>Marcus needs a decision:</strong> Should users see pricing before or after signup? I'd suggest <strong>after signup</strong> to capture emails first.
+              </div>
+              <div class="decision-actions">
+                <button class="decision-btn" onclick="selectSlackThread('billing')"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Discuss</button>
+                <button class="decision-btn accept" onclick="acceptSuggestion(this)"><svg viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Accept suggestion</button>
+                <button class="decision-btn" onclick="addToBacklog(this, 'Billing flow')"><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Remind me later</button>
+                <button class="decision-btn delete" onclick="deleteDecision(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart library thread - pending, UNREAD -->
+          <div class="slack-message unread" data-suggestion="Recharts" data-thread="charts" onclick="openMessageThread(this)">
+            <img class="slack-message-avatar" src="https://i.pravatar.cc/80?img=5" alt="Sophia">
+            <div class="slack-message-content">
+              <div class="slack-message-header">
+                <span class="slack-message-author">Sophia</span>
+                <span class="slack-message-time">8:15 AM</span>
+                <span class="slack-message-badge pending">Pending</span>
+                <div class="unread-dot"></div>
+              </div>
+              <div class="slack-message-text">
+                Which chart library for analytics? I'd recommend <strong>Recharts</strong> — it's more React-native and lighter weight.
+              </div>
+              <div class="decision-actions">
+                <button class="decision-btn" onclick="selectSlackThread('charts')"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Discuss</button>
+                <button class="decision-btn accept" onclick="acceptSuggestion(this)"><svg viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Accept suggestion</button>
+                <button class="decision-btn" onclick="addToBacklog(this, 'Chart library')"><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Remind me later</button>
+                <button class="decision-btn delete" onclick="deleteDecision(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analytics request - done -->
+          <div class="slack-message" data-thread="analytics" onclick="openMessageThread(this)">
+            <div class="slack-message-avatar you">Y</div>
+            <div class="slack-message-content">
+              <div class="slack-message-header">
+                <span class="slack-message-author">You</span>
+                <span class="slack-message-time">8:00 AM</span>
+                <span class="slack-message-badge done">Done</span>
+              </div>
+              <div class="slack-message-text">
+                I need an analytics dashboard with user signups, revenue, and feature usage.
+              </div>
+              <div class="thread-preview"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 5 replies</div>
+            </div>
+          </div>
+
+          <div class="date-divider">Yesterday</div>
+
+          <!-- Billing request - done -->
+          <div class="slack-message" data-thread="billingrequest" onclick="openMessageThread(this)">
+            <div class="slack-message-avatar you">Y</div>
+            <div class="slack-message-content">
+              <div class="slack-message-header">
+                <span class="slack-message-author">You</span>
+                <span class="slack-message-time">2:30 PM</span>
+                <span class="slack-message-badge done">Done</span>
+              </div>
+              <div class="slack-message-text">
+                I need a billing system with Stripe, subscriptions, and invoices.
+              </div>
+              <div class="thread-preview"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 6 replies</div>
+            </div>
+          </div>
+
+          <!-- Auth complete -->
+          <div class="slack-message" data-thread="auth" onclick="openMessageThread(this)">
+            <img class="slack-message-avatar" src="https://i.pravatar.cc/80?img=33" alt="Alex">
+            <div class="slack-message-content">
+              <div class="slack-message-header">
+                <span class="slack-message-author">Alex</span>
+                <span class="slack-message-time">11:00 AM</span>
+                <span class="slack-message-badge done">Done</span>
+              </div>
+              <div class="slack-message-text">
+                User authentication is complete! Login, signup, password reset all working.
+              </div>
+            </div>
+          </div>
+
+          <!-- Welcome message -->
+          <div class="slack-message" data-thread="welcome" onclick="openMessageThread(this)">
+            <img class="slack-message-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+            <div class="slack-message-content">
+              <div class="slack-message-header">
+                <span class="slack-message-author">Luna</span>
+                <span class="slack-message-time">9:00 AM</span>
+              </div>
+              <div class="slack-message-text">
+                Welcome to your new project! I'm Luna, your AI Project Manager. I'll coordinate with the dev team and keep you updated.
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div class="chat-messages" id="chatMessages">
-          <!-- Messages will be populated by JS -->
+      <!-- Input -->
+      <div class="slack-chat-input-area">
+        <div class="slack-attachments" id="slackAttachments">
+          <!-- Element and diagram pills will be inserted here -->
         </div>
-
-        <div class="chat-input-area">
-          <div id="diagramAttachment" style="display: none;"></div>
-          <div class="chat-input-wrapper">
-            <div class="chat-input" contenteditable="true" id="chatInput" data-placeholder="Type your reply..."></div>
-            <button class="chat-send" onclick="sendReply()">→</button>
-          </div>
-          <div class="chat-input-tools">
-            <button class="chat-tool-btn" onclick="openDiagramEditor()" title="Create Diagram">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="7" height="7" rx="1"/>
-                <rect x="14" y="3" width="7" height="7" rx="1"/>
-                <rect x="8" y="14" width="8" height="7" rx="1"/>
-                <path d="M6.5 10v2.5a1 1 0 001 1h9a1 1 0 001-1V10"/>
-                <path d="M12 13.5V14"/>
-              </svg>
-            </button>
-            <button class="chat-tool-btn" title="Attach File">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
-              </svg>
-            </button>
-            <button class="chat-tool-btn" title="Code Snippet">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="16,18 22,12 16,6"/>
-                <polyline points="8,6 2,12 8,18"/>
-              </svg>
+        <div class="slack-chat-input-container">
+          <div class="slack-chat-input-field" contenteditable="true" data-placeholder="Message Luna..." id="slackChatInput"></div>
+          <div class="slack-chat-input-toolbar">
+            <div class="slack-input-tools">
+              <button class="slack-tool-btn" title="Attach file">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+              <button class="slack-tool-btn tool-diagram" title="Create diagram" onclick="openDiagramEditor()">
+                <svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor">
+                  <rect x="2" y="2" width="6" height="6" rx="1"/>
+                  <rect x="16" y="2" width="6" height="6" rx="1"/>
+                  <rect x="2" y="16" width="6" height="6" rx="1"/>
+                  <line x1="8" y1="5" x2="16" y2="5"/>
+                  <line x1="5" y1="8" x2="5" y2="16"/>
+                  <circle cx="19" cy="19" r="3"/>
+                  <line x1="17" y1="17" x2="8" y2="8"/>
+                </svg>
+              </button>
+            </div>
+            <button class="slack-chat-send-btn" onclick="sendSlackMessage()">
+              <svg viewBox="0 0 24 24" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Send
             </button>
           </div>
         </div>
       </div>
+
+      <!-- Thread Overlay Panel (inside chat panel) -->
+      <div class="thread-overlay" id="threadOverlay">
+      <div class="thread-header">
+        <div class="thread-title" id="slackThreadTitle">Thread: Billing Flow</div>
+        <button class="thread-close" onclick="closeSlackThread()">×</button>
+      </div>
+
+      <div class="thread-messages" id="slackThreadMessages">
+        <!-- Original message that started thread -->
+        <div class="thread-original">
+          <div class="thread-original-label">Original message</div>
+          <div class="thread-original-message">
+            <img class="thread-original-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+            <div class="thread-original-content">
+              <div class="thread-original-header">
+                <span class="thread-original-author">Luna</span>
+                <span class="thread-original-time">10:30 AM</span>
+              </div>
+              <div class="thread-original-text" id="slackThreadOriginal">
+                <strong>Marcus needs a decision on the billing flow.</strong> He's ready to build the checkout page but needs to know the user journey.
+              </div>
+              <div class="decision-actions" id="threadDecisionActions">
+                <button class="decision-btn accept" onclick="acceptSuggestionInThread(this)"><svg viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Accept suggestion</button>
+                <button class="decision-btn" onclick="addToBacklogInThread(this)"><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Remind me later</button>
+                <button class="decision-btn delete" onclick="deleteDecisionInThread(this)"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Replies divider -->
+        <div class="thread-replies-divider">
+          <span>3 replies</span>
+        </div>
+
+        <!-- Thread replies -->
+        <div class="thread-reply">
+          <img class="thread-reply-avatar" src="https://i.pravatar.cc/40?img=12" alt="Marcus">
+          <div class="thread-reply-content">
+            <div class="thread-reply-header">
+              <span class="thread-reply-author dev">Marcus</span>
+              <span class="thread-reply-time">10:32 AM</span>
+            </div>
+            <div class="thread-reply-text">
+              Should users see pricing before or after signup? I've got both flows ready to go.
+            </div>
+          </div>
+        </div>
+
+        <div class="thread-reply">
+          <img class="thread-reply-avatar" src="https://i.pravatar.cc/40?img=23" alt="Luna">
+          <div class="thread-reply-content">
+            <div class="thread-reply-header">
+              <span class="thread-reply-author luna">Luna</span>
+              <span class="thread-reply-time">10:33 AM</span>
+            </div>
+            <div class="thread-reply-text">
+              Good question. Let me get input on this.
+            </div>
+          </div>
+        </div>
+
+        <div class="thread-reply">
+          <img class="thread-reply-avatar" src="https://i.pravatar.cc/40?img=12" alt="Marcus">
+          <div class="thread-reply-content">
+            <div class="thread-reply-header">
+              <span class="thread-reply-author dev">Marcus</span>
+              <span class="thread-reply-time">10:35 AM</span>
+            </div>
+            <div class="thread-reply-text">
+              My suggestion: after signup to capture emails first. But totally up to you!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="thread-input-area">
+        <div class="thread-input-container">
+          <div class="thread-input-field" contenteditable="true" data-placeholder="Add to discussion..." id="threadChatInput"></div>
+          <button class="thread-send-btn">Send</button>
+        </div>
+      </div>
+    </div>
     </aside>
 
     <!-- Panel Resizer -->
@@ -2990,21 +3974,15 @@
 
         <!-- Preview State -->
         <div class="preview-state">
-          <div class="state-trigger" onclick="toggleStateDropdown()">
-            <span class="state-dot"></span>
-            <span class="state-label">Admin</span>
-            <span class="state-separator">•</span>
-            <span class="state-page">Dashboard</span>
-            <span class="state-chevron">▼</span>
-          </div>
-          <div class="state-dropdown" id="stateDropdown">
-            <div class="state-section">
-              <div class="section-header-toggle" onclick="toggleSection(this)">
-                <span class="section-chevron">›</span>
-                <span class="section-label">👑 User Role</span>
-                <span class="section-value">Admin</span>
-              </div>
-              <div class="section-contents">
+          <!-- User Role Dropdown -->
+          <div class="state-dropdown-wrapper">
+            <div class="state-trigger" onclick="toggleRoleDropdown()">
+              <span class="state-trigger-label">User Role:</span>
+              <span class="state-label" id="roleLabel">Admin</span>
+              <span class="state-chevron">▼</span>
+            </div>
+            <div class="state-dropdown" id="roleDropdown">
+              <div class="state-section">
                 <div class="state-option active" onclick="selectState(this, 'role')">
                   <div class="state-option-icon">👑</div>
                   <div class="state-option-content">
@@ -3030,126 +4008,136 @@
                   <span class="state-option-check">✓</span>
                 </div>
               </div>
+              <div class="state-section">
+                <div class="section-header-toggle" onclick="toggleSection(this)">
+                  <span class="section-chevron">›</span>
+                  <span class="section-label">🗃️ Test Data</span>
+                  <span class="section-value">3 fields</span>
+                </div>
+                <div class="section-contents">
+                  <div class="test-data-fields" id="testDataFields">
+                    <div class="test-data-row">
+                      <input type="text" class="test-data-key" value="billing_plan" placeholder="key">
+                      <input type="text" class="test-data-value" value="pro_6mo" placeholder="value">
+                      <button class="test-data-remove" onclick="removeTestDataRow(this)">×</button>
+                    </div>
+                    <div class="test-data-row">
+                      <input type="text" class="test-data-key" value="subscription_status" placeholder="key">
+                      <input type="text" class="test-data-value" value="active" placeholder="value">
+                      <button class="test-data-remove" onclick="removeTestDataRow(this)">×</button>
+                    </div>
+                    <div class="test-data-row">
+                      <input type="text" class="test-data-key" value="trial_days_left" placeholder="key">
+                      <input type="text" class="test-data-value" value="0" placeholder="value">
+                      <button class="test-data-remove" onclick="removeTestDataRow(this)">×</button>
+                    </div>
+                  </div>
+                  <button class="test-data-add" onclick="addTestDataRow()">+ Add Field</button>
+                </div>
+              </div>
             </div>
-            <div class="state-section">
-              <div class="section-header-toggle" onclick="toggleSection(this)">
-                <span class="section-chevron">›</span>
-                <span class="section-label">🗃️ Test Data</span>
-                <span class="section-value">3 fields</span>
-              </div>
-              <div class="section-contents">
-                <div class="test-data-fields" id="testDataFields">
-                  <div class="test-data-row">
-                    <input type="text" class="test-data-key" value="billing_plan" placeholder="key">
-                    <input type="text" class="test-data-value" value="pro_6mo" placeholder="value">
-                    <button class="test-data-remove" onclick="removeTestDataRow(this)">×</button>
-                  </div>
-                  <div class="test-data-row">
-                    <input type="text" class="test-data-key" value="subscription_status" placeholder="key">
-                    <input type="text" class="test-data-value" value="active" placeholder="value">
-                    <button class="test-data-remove" onclick="removeTestDataRow(this)">×</button>
-                  </div>
-                  <div class="test-data-row">
-                    <input type="text" class="test-data-key" value="trial_days_left" placeholder="key">
-                    <input type="text" class="test-data-value" value="0" placeholder="value">
-                    <button class="test-data-remove" onclick="removeTestDataRow(this)">×</button>
-                  </div>
-                </div>
-                <button class="test-data-add" onclick="addTestDataRow()">+ Add Field</button>
-              </div>
+          </div>
+
+          <!-- Page Dropdown -->
+          <div class="state-dropdown-wrapper">
+            <div class="state-trigger" onclick="togglePageDropdown()">
+              <span class="state-trigger-label">Page:</span>
+              <span class="state-label" id="pageLabel">Dashboard</span>
+              <span class="state-chevron">▼</span>
             </div>
-            <div class="state-section">
-              <div class="state-section-title">Pages</div>
-              <div class="feature-folder" onclick="toggleFolder(this)">
-                <span class="folder-icon">📁</span>
-                <span class="folder-name">Dashboard</span>
-                <span class="folder-chevron">›</span>
-              </div>
-              <div class="folder-contents">
-                <div class="state-option active" onclick="selectPage(this, 'Dashboard')">
-                  <div class="state-option-icon">📊</div>
-                  <div class="state-option-content">
-                    <div class="state-option-name">Dashboard</div>
-                    <div class="state-option-desc">Main overview page</div>
-                  </div>
-                  <span class="state-option-check">✓</span>
+            <div class="state-dropdown" id="pageDropdown">
+              <div class="state-section">
+                <div class="feature-folder" onclick="toggleFolder(this)">
+                  <span class="folder-icon">📁</span>
+                  <span class="folder-name">Dashboard</span>
+                  <span class="folder-chevron">›</span>
                 </div>
-                <div class="state-option" onclick="selectPage(this, 'Analytics')">
-                  <div class="state-option-icon">📈</div>
-                  <div class="state-option-content">
-                    <div class="state-option-name">Analytics</div>
-                    <div class="state-option-desc">Charts and metrics</div>
+                <div class="folder-contents">
+                  <div class="state-option active" onclick="selectPage(this, 'Dashboard')">
+                    <div class="state-option-icon">📊</div>
+                    <div class="state-option-content">
+                      <div class="state-option-name">Dashboard</div>
+                      <div class="state-option-desc">Main overview page</div>
+                    </div>
+                    <span class="state-option-check">✓</span>
                   </div>
-                  <span class="state-option-check">✓</span>
+                  <div class="state-option" onclick="selectPage(this, 'Analytics')">
+                    <div class="state-option-icon">📈</div>
+                    <div class="state-option-content">
+                      <div class="state-option-name">Analytics</div>
+                      <div class="state-option-desc">Charts and metrics</div>
+                    </div>
+                    <span class="state-option-check">✓</span>
+                  </div>
                 </div>
-              </div>
-              <div class="feature-folder" onclick="toggleFolder(this)">
-                <span class="folder-icon">📁</span>
-                <span class="folder-name">Users</span>
-                <span class="folder-chevron">›</span>
-              </div>
-              <div class="folder-contents collapsed">
-                <div class="state-option" onclick="selectPage(this, 'User List')">
-                  <div class="state-option-icon">👥</div>
-                  <div class="state-option-content">
-                    <div class="state-option-name">User List</div>
-                    <div class="state-option-desc">All users table</div>
-                  </div>
-                  <span class="state-option-check">✓</span>
+                <div class="feature-folder" onclick="toggleFolder(this)">
+                  <span class="folder-icon">📁</span>
+                  <span class="folder-name">Users</span>
+                  <span class="folder-chevron">›</span>
                 </div>
-                <div class="state-option" onclick="selectPage(this, 'User Profile')">
-                  <div class="state-option-icon">👤</div>
-                  <div class="state-option-content">
-                    <div class="state-option-name">User Profile</div>
-                    <div class="state-option-desc">Individual user view</div>
+                <div class="folder-contents collapsed">
+                  <div class="state-option" onclick="selectPage(this, 'User List')">
+                    <div class="state-option-icon">👥</div>
+                    <div class="state-option-content">
+                      <div class="state-option-name">User List</div>
+                      <div class="state-option-desc">All users table</div>
+                    </div>
+                    <span class="state-option-check">✓</span>
                   </div>
-                  <span class="state-option-check">✓</span>
+                  <div class="state-option" onclick="selectPage(this, 'User Profile')">
+                    <div class="state-option-icon">👤</div>
+                    <div class="state-option-content">
+                      <div class="state-option-name">User Profile</div>
+                      <div class="state-option-desc">Individual user view</div>
+                    </div>
+                    <span class="state-option-check">✓</span>
+                  </div>
                 </div>
-              </div>
-              <div class="feature-folder" onclick="toggleFolder(this)">
-                <span class="folder-icon">📁</span>
-                <span class="folder-name">Billing</span>
-                <span class="folder-chevron">›</span>
-              </div>
-              <div class="folder-contents collapsed">
-                <div class="state-option" onclick="selectPage(this, 'Plans')">
-                  <div class="state-option-icon">💳</div>
-                  <div class="state-option-content">
-                    <div class="state-option-name">Plans</div>
-                    <div class="state-option-desc">Subscription tiers</div>
-                  </div>
-                  <span class="state-option-check">✓</span>
+                <div class="feature-folder" onclick="toggleFolder(this)">
+                  <span class="folder-icon">📁</span>
+                  <span class="folder-name">Billing</span>
+                  <span class="folder-chevron">›</span>
                 </div>
-                <div class="state-option" onclick="selectPage(this, 'Invoices')">
-                  <div class="state-option-icon">🧾</div>
-                  <div class="state-option-content">
-                    <div class="state-option-name">Invoices</div>
-                    <div class="state-option-desc">Payment history</div>
+                <div class="folder-contents collapsed">
+                  <div class="state-option" onclick="selectPage(this, 'Plans')">
+                    <div class="state-option-icon">💳</div>
+                    <div class="state-option-content">
+                      <div class="state-option-name">Plans</div>
+                      <div class="state-option-desc">Subscription tiers</div>
+                    </div>
+                    <span class="state-option-check">✓</span>
                   </div>
-                  <span class="state-option-check">✓</span>
+                  <div class="state-option" onclick="selectPage(this, 'Invoices')">
+                    <div class="state-option-icon">🧾</div>
+                    <div class="state-option-content">
+                      <div class="state-option-name">Invoices</div>
+                      <div class="state-option-desc">Payment history</div>
+                    </div>
+                    <span class="state-option-check">✓</span>
+                  </div>
                 </div>
-              </div>
-              <div class="feature-folder" onclick="toggleFolder(this)">
-                <span class="folder-icon">📁</span>
-                <span class="folder-name">Settings</span>
-                <span class="folder-chevron">›</span>
-              </div>
-              <div class="folder-contents collapsed">
-                <div class="state-option" onclick="selectPage(this, 'General')">
-                  <div class="state-option-icon">⚙️</div>
-                  <div class="state-option-content">
-                    <div class="state-option-name">General</div>
-                    <div class="state-option-desc">App settings</div>
-                  </div>
-                  <span class="state-option-check">✓</span>
+                <div class="feature-folder" onclick="toggleFolder(this)">
+                  <span class="folder-icon">📁</span>
+                  <span class="folder-name">Settings</span>
+                  <span class="folder-chevron">›</span>
                 </div>
-                <div class="state-option" onclick="selectPage(this, 'Team')">
-                  <div class="state-option-icon">🏢</div>
-                  <div class="state-option-content">
-                    <div class="state-option-name">Team</div>
-                    <div class="state-option-desc">Team management</div>
+                <div class="folder-contents collapsed">
+                  <div class="state-option" onclick="selectPage(this, 'General')">
+                    <div class="state-option-icon">⚙️</div>
+                    <div class="state-option-content">
+                      <div class="state-option-name">General</div>
+                      <div class="state-option-desc">App settings</div>
+                    </div>
+                    <span class="state-option-check">✓</span>
                   </div>
-                  <span class="state-option-check">✓</span>
+                  <div class="state-option" onclick="selectPage(this, 'Team')">
+                    <div class="state-option-icon">🏢</div>
+                    <div class="state-option-content">
+                      <div class="state-option-name">Team</div>
+                      <div class="state-option-desc">Team management</div>
+                    </div>
+                    <span class="state-option-check">✓</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3186,7 +4174,7 @@
       <!-- Edit Mode Toggle -->
       <div class="edit-toggle" id="editToggle" onclick="toggleEditMode()">
         <span class="edit-toggle-icon">✏️</span>
-        <span class="edit-toggle-text">Click to Edit</span>
+        <span class="edit-toggle-text">Select Element</span>
         <span class="edit-toggle-hint">ESC to exit</span>
       </div>
     </main>
@@ -4072,6 +5060,315 @@
       setTimeout(() => toast.classList.remove('active'), 3000);
     }
 
+    // ========== DECISION FUNCTIONS ==========
+    function acceptSuggestion(btn) {
+      event.stopPropagation();
+      
+      const message = btn.closest('.slack-message');
+      const actionsContainer = btn.closest('.decision-actions');
+      const choice = message.dataset.suggestion;
+      
+      // Remove unread state
+      message.classList.remove('unread');
+      
+      // Update badge from pending to done
+      const pendingBadge = message.querySelector('.slack-message-badge.pending');
+      if (pendingBadge) {
+        pendingBadge.textContent = 'Done';
+        pendingBadge.classList.remove('pending');
+        pendingBadge.classList.add('done');
+      }
+      
+      // Remove critical badge if present
+      const criticalBadge = message.querySelector('.slack-message-badge.critical');
+      if (criticalBadge) criticalBadge.remove();
+      
+      // Remove unread dot
+      const unreadDot = message.querySelector('.unread-dot');
+      if (unreadDot) unreadDot.remove();
+      
+      // Replace actions with confirmation
+      actionsContainer.outerHTML = `
+        <div class="decision-confirmed">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span>${choice}</span>
+        </div>
+      `;
+      
+      showToast('Decision saved: ' + choice);
+    }
+
+    function deleteDecision(btn) {
+      event.stopPropagation();
+      
+      const message = btn.closest('.slack-message');
+      
+      // Animate out and remove the message
+      message.style.transition = 'all 0.3s ease';
+      message.style.opacity = '0';
+      message.style.transform = 'translateX(-20px)';
+      
+      setTimeout(() => {
+        message.remove();
+      }, 300);
+      
+      showToast('Decision deleted');
+    }
+
+    function addToBacklog(btn, title) {
+      event.stopPropagation();
+      
+      const message = btn.closest('.slack-message');
+      const actionsContainer = btn.closest('.decision-actions');
+      
+      // Update badge to show backlog
+      const pendingBadge = message.querySelector('.slack-message-badge.pending');
+      if (pendingBadge) {
+        pendingBadge.textContent = 'Backlog';
+        pendingBadge.style.background = 'rgba(136, 136, 160, 0.2)';
+        pendingBadge.style.color = 'var(--text-muted)';
+      }
+      
+      // Remove critical badge
+      const criticalBadge = message.querySelector('.slack-message-badge.critical');
+      if (criticalBadge) criticalBadge.remove();
+      
+      // Remove unread state
+      message.classList.remove('unread');
+      const unreadDot = message.querySelector('.unread-dot');
+      if (unreadDot) unreadDot.remove();
+      
+      // Remove actions
+      actionsContainer.remove();
+      
+      showToast('Added to backlog: ' + title);
+    }
+
+    // Thread-specific decision functions
+    function acceptSuggestionInThread(btn) {
+      event.stopPropagation();
+      const decisionActions = document.getElementById('threadDecisionActions');
+      const choice = decisionActions.dataset.suggestion;
+      
+      // Find and update the main message
+      updateMainMessageDecision(choice, 'done');
+      
+      // Replace actions with confirmation in thread
+      decisionActions.outerHTML = `
+        <div class="decision-confirmed" id="threadDecisionActions">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span>${choice}</span>
+        </div>
+      `;
+      
+      showToast('Decision saved: ' + choice);
+    }
+
+    function deleteDecisionInThread(btn) {
+      event.stopPropagation();
+      const decisionActions = document.getElementById('threadDecisionActions');
+      
+      // Find and delete the main message
+      let selector = '';
+      if (currentOpenThread === 'billing') {
+        selector = '.slack-message[data-suggestion="After signup"]';
+      } else if (currentOpenThread === 'charts') {
+        selector = '.slack-message[data-suggestion="Recharts"]';
+      }
+      
+      const message = document.querySelector(selector);
+      if (message) {
+        message.style.transition = 'all 0.3s ease';
+        message.style.opacity = '0';
+        message.style.transform = 'translateX(-20px)';
+        setTimeout(() => message.remove(), 300);
+      }
+      
+      // Close the thread
+      closeSlackThread();
+      
+      showToast('Decision deleted');
+    }
+
+    function addToBacklogInThread(btn) {
+      event.stopPropagation();
+      const decisionActions = document.getElementById('threadDecisionActions');
+      const title = decisionActions.dataset.title;
+      
+      // Find and update the main message
+      updateMainMessageDecision(null, 'backlog');
+      
+      // Hide actions in thread
+      decisionActions.style.display = 'none';
+      
+      showToast('Added to backlog: ' + title);
+    }
+
+    function updateMainMessageDecision(choice, action) {
+      // Find the relevant main message based on currentOpenThread
+      let selector = '';
+      if (currentOpenThread === 'billing') {
+        selector = '.slack-message[data-suggestion="After signup"]';
+      } else if (currentOpenThread === 'charts') {
+        selector = '.slack-message[data-suggestion="Recharts"]';
+      }
+      
+      const message = document.querySelector(selector);
+      if (!message) return;
+      
+      const actionsContainer = message.querySelector('.decision-actions');
+      
+      // Remove unread state
+      message.classList.remove('unread');
+      const unreadDot = message.querySelector('.unread-dot');
+      if (unreadDot) unreadDot.remove();
+      
+      if (action === 'done') {
+        // Update badge from pending to done
+        const pendingBadge = message.querySelector('.slack-message-badge.pending');
+        if (pendingBadge) {
+          pendingBadge.textContent = 'Done';
+          pendingBadge.classList.remove('pending');
+          pendingBadge.classList.add('done');
+        }
+        
+        // Remove critical badge if present
+        const criticalBadge = message.querySelector('.slack-message-badge.critical');
+        if (criticalBadge) criticalBadge.remove();
+        
+        // Replace actions with confirmation
+        if (actionsContainer) {
+          actionsContainer.outerHTML = `
+            <div class="decision-confirmed">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span>${choice}</span>
+            </div>
+          `;
+        }
+      } else if (action === 'skip') {
+        // Remove actions
+        if (actionsContainer) actionsContainer.remove();
+      } else if (action === 'backlog') {
+        // Update badge to backlog
+        const pendingBadge = message.querySelector('.slack-message-badge.pending');
+        if (pendingBadge) {
+          pendingBadge.textContent = 'Backlog';
+          pendingBadge.style.background = 'rgba(136, 136, 160, 0.2)';
+          pendingBadge.style.color = 'var(--text-muted)';
+        }
+        
+        // Remove critical badge
+        const criticalBadge = message.querySelector('.slack-message-badge.critical');
+        if (criticalBadge) criticalBadge.remove();
+        
+        // Remove actions
+        if (actionsContainer) actionsContainer.remove();
+      }
+    }
+
+    // ========== SLACK-STYLE THREAD FUNCTIONS ==========
+    let currentOpenThread = null;
+    
+    function openMessageThread(messageEl) {
+      // Don't open thread if clicking on a button inside the message
+      if (event.target.closest('button')) return;
+      
+      const threadType = messageEl.dataset.thread;
+      if (threadType) {
+        selectSlackThread(threadType);
+      }
+    }
+    
+    function selectSlackThread(type) {
+      const threadOverlay = document.getElementById('threadOverlay');
+      const chatPanel = document.getElementById('chatPanel');
+      const decisionActions = document.getElementById('threadDecisionActions');
+      
+      // Store current thread type
+      currentOpenThread = type;
+      
+      // Update thread content based on type
+      const slackThreadTitle = document.getElementById('slackThreadTitle');
+      const slackThreadOriginal = document.getElementById('slackThreadOriginal');
+      
+      // Thread content mapping
+      const threadContent = {
+        billing: {
+          title: 'Thread: Billing Flow',
+          message: '<strong>Marcus needs a decision on the billing flow.</strong> He\'s ready to build the checkout page but needs to know the user journey. I\'d suggest <strong>after signup</strong> to capture emails first.',
+          suggestion: 'After signup',
+          suggestionTitle: 'Billing flow',
+          hasDecision: true
+        },
+        charts: {
+          title: 'Thread: Chart Library',
+          message: '<strong>Sophia needs guidance on the chart library.</strong> Recharts is more React-native, Chart.js has broader community support. I\'d recommend <strong>Recharts</strong>.',
+          suggestion: 'Recharts',
+          suggestionTitle: 'Chart library',
+          hasDecision: true
+        },
+        analytics: {
+          title: 'Thread: Analytics Dashboard',
+          message: 'I need an analytics dashboard with user signups, revenue, and feature usage.',
+          hasDecision: false
+        },
+        billingrequest: {
+          title: 'Thread: Billing System',
+          message: 'I need a billing system with Stripe, subscriptions, and invoices.',
+          hasDecision: false
+        },
+        auth: {
+          title: 'Thread: Authentication',
+          message: 'User authentication is complete! Login, signup, password reset all working.',
+          hasDecision: false
+        },
+        welcome: {
+          title: 'Thread: Welcome',
+          message: 'Welcome to your new project! I\'m Luna, your AI Project Manager. I\'ll coordinate with the dev team and keep you updated.',
+          hasDecision: false
+        }
+      };
+      
+      const content = threadContent[type] || { title: 'Thread', message: 'Discussion thread', hasDecision: false };
+      
+      slackThreadTitle.textContent = content.title;
+      slackThreadOriginal.innerHTML = content.message;
+      
+      if (content.hasDecision && content.suggestion) {
+        decisionActions.dataset.suggestion = content.suggestion;
+        decisionActions.dataset.title = content.suggestionTitle;
+      }
+      
+      // Show/hide decision actions based on whether thread has pending decision
+      const threadHasDecision = content.hasDecision && 
+        document.querySelector(`.slack-message[data-thread="${type}"] .decision-actions`);
+      decisionActions.style.display = threadHasDecision ? 'flex' : 'none';
+      
+      // Open thread overlay
+      requestAnimationFrame(() => {
+        threadOverlay.classList.add('open');
+        document.getElementById('chatDimmer').classList.add('active');
+        chatPanel.classList.add('thread-open');
+      });
+    }
+
+    function closeSlackThread() {
+      document.getElementById('threadOverlay').classList.remove('open');
+      document.getElementById('chatDimmer').classList.remove('active');
+      document.getElementById('chatPanel').classList.remove('thread-open');
+    }
+
+    // Allow Escape key to close thread
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeSlackThread();
+    });
+
     function createNewRequest() {
       // Open a new conversation for creating a request
       const newThread = { 
@@ -4103,15 +5400,51 @@
       document.getElementById('chatInput').focus();
     }
 
-    // Enter to send
-    document.getElementById('chatInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendReply();
-      }
-    });
+    // Enter to send (old chat input - now using slack-style)
+    const oldChatInput = document.getElementById('chatInput');
+    if (oldChatInput) {
+      oldChatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendReply();
+        }
+      });
+    }
 
-    // Tab switching
+    // Slack-style input handling
+    const slackInput = document.getElementById('slackChatInput');
+    if (slackInput) {
+      // Enter to send, Shift+Enter for new line
+      slackInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendSlackMessage();
+        }
+      });
+      
+      // Prevent formatting paste
+      slackInput.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = e.clipboardData.getData('text/plain');
+        document.execCommand('insertText', false, text);
+      });
+    }
+
+    function sendSlackMessage() {
+      const input = document.getElementById('slackChatInput');
+      const text = input.innerText.trim();
+      if (!text && !pendingDiagramMermaid) return;
+      
+      // TODO: Actually send the message
+      showToast('Message sent');
+      input.innerHTML = '';
+      
+      // Clear diagram attachment
+      pendingDiagramMermaid = null;
+      updateAttachmentsDisplay();
+    }
+
+    // Tab switching (old inbox tabs)
     document.querySelectorAll('.inbox-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.inbox-tab').forEach(t => t.classList.remove('active'));
@@ -4130,12 +5463,12 @@
       
       if (editMode) {
         toggle.classList.add('active');
-        toggle.querySelector('.edit-toggle-text').textContent = 'Select an element';
+        toggle.querySelector('.edit-toggle-text').textContent = 'Click an element to reference it';
         frame.classList.add('edit-mode');
         initSelectableElements();
       } else {
         toggle.classList.remove('active');
-        toggle.querySelector('.edit-toggle-text').textContent = 'Click to Edit';
+        toggle.querySelector('.edit-toggle-text').textContent = 'Select Element';
         frame.classList.remove('edit-mode');
         clearSelection();
       }
@@ -4178,41 +5511,132 @@
       selectedElement = null;
     }
 
+    // Store cursor position before clicking away
+    let savedRange = null;
+    let savedInputId = null;
+    
+    function saveCursorPosition() {
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const mainInput = document.getElementById('slackChatInput');
+        const threadInput = document.getElementById('threadChatInput');
+        
+        if (mainInput && mainInput.contains(range.commonAncestorContainer)) {
+          savedRange = range.cloneRange();
+          savedInputId = 'slackChatInput';
+        } else if (threadInput && threadInput.contains(range.commonAncestorContainer)) {
+          savedRange = range.cloneRange();
+          savedInputId = 'threadChatInput';
+        }
+      }
+    }
+    
+    // Save cursor position whenever user is typing in inputs
+    document.addEventListener('selectionchange', () => {
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.id === 'slackChatInput' || activeEl.id === 'threadChatInput')) {
+        saveCursorPosition();
+      }
+    });
+    
     function openChatWithElement(name, desc) {
       // Exit edit mode
       toggleEditMode();
       
-      // If already in a chat, just add the attachment to that chat
-      const chatView = document.getElementById('chatView');
-      if (chatView.classList.contains('active') && currentThread !== null) {
-        showAttachmentInInput(name, desc);
-        document.getElementById('chatInput').focus();
-        return;
+      // Insert inline element pill at saved cursor position
+      insertInlineElementPill(name);
+    }
+    
+    function insertInlineElementPill(name) {
+      // Check if thread is open - use thread input, otherwise use main input
+      const threadOverlay = document.getElementById('threadOverlay');
+      let input;
+      let inputId;
+      
+      if (threadOverlay && threadOverlay.classList.contains('open')) {
+        input = document.getElementById('threadChatInput');
+        inputId = 'threadChatInput';
+      } else {
+        input = document.getElementById('slackChatInput');
+        inputId = 'slackChatInput';
       }
       
-      // Create thread with element attachment
-      const newThread = { 
-        subject: name, 
-        attachment: { name: name, desc: desc },
-        messages: [],
-        isNew: true
-      };
-      threads.unshift(newThread);
+      if (!input) return;
       
-      // Update all existing onclick handlers to point to correct indices
-      updateInboxIndices();
+      // Create the pill HTML
+      const pillHtml = `<span class="inline-element-pill" contenteditable="false" data-element="${name}"><svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>${name}</span>`;
       
-      // Add to inbox list
-      const inboxList = document.getElementById('inboxList');
-      const newItem = document.createElement('div');
-      newItem.className = 'inbox-item active';
-      newItem.setAttribute('data-thread-index', '0');
-      newItem.onclick = () => openThread(0);
-      newItem.innerHTML = '<div class="item-content"><div class="item-header"><span class="item-subject">' + name + '</span><span class="item-time">Just now</span></div><div class="item-preview">What would you like to change?</div></div>';
-      inboxList.insertBefore(newItem, inboxList.firstChild);
+      input.focus();
       
-      // Open thread with attachment visible
-      openThreadWithAttachment(0, name, desc);
+      const selection = window.getSelection();
+      let range;
+      
+      // Use saved range if it's for the correct input
+      if (savedRange && savedInputId === inputId) {
+        range = savedRange;
+        selection.removeAllRanges();
+        selection.addRange(range);
+      } else if (selection.rangeCount > 0 && input.contains(selection.anchorNode)) {
+        range = selection.getRangeAt(0);
+      } else {
+        // Place cursor at end
+        range = document.createRange();
+        range.selectNodeContents(input);
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      
+      // Insert the pill
+      range.deleteContents();
+      
+      const temp = document.createElement('div');
+      temp.innerHTML = pillHtml + '&nbsp;';
+      const frag = document.createDocumentFragment();
+      let lastNode;
+      while (temp.firstChild) {
+        lastNode = frag.appendChild(temp.firstChild);
+      }
+      range.insertNode(frag);
+      
+      // Move cursor after the pill
+      if (lastNode) {
+        range.setStartAfter(lastNode);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      
+      // Clear saved range
+      savedRange = null;
+      savedInputId = null;
+      
+      showToast(`Added ${name}`);
+    }
+    
+    function updateAttachmentsDisplay() {
+      const container = document.getElementById('slackAttachments');
+      container.innerHTML = '';
+      
+      // Add diagram pill if attached
+      if (pendingDiagramMermaid) {
+        const pill = document.createElement('div');
+        pill.className = 'diagram-pill';
+        pill.id = 'diagramPill';
+        pill.innerHTML = `
+          <div class="diagram-pill-icon">
+            <svg viewBox="0 0 24 24" stroke-width="2"><rect x="2" y="2" width="6" height="6" rx="1"/><rect x="16" y="2" width="6" height="6" rx="1"/><line x1="8" y1="5" x2="16" y2="5"/></svg>
+          </div>
+          <span>Diagram</span>
+          <span class="diagram-pill-meta" id="diagramPillMeta"></span>
+          <button class="diagram-pill-remove" onclick="removeSlackDiagramAttachment()">×</button>
+        `;
+        container.appendChild(pill);
+      }
+      
+      // Show/hide container
+      container.classList.toggle('visible', pendingDiagramMermaid);
     }
     
     function openThreadWithAttachment(index, elementName, elementDesc) {
@@ -4236,13 +5660,16 @@
     // Store saved cursor position for inserting tags
     let savedInputRange = null;
     
-    // Save cursor position when input loses focus
-    document.getElementById('chatInput').addEventListener('blur', function() {
-      const selection = window.getSelection();
-      if (selection.rangeCount > 0 && this.contains(selection.anchorNode)) {
-        savedInputRange = selection.getRangeAt(0).cloneRange();
-      }
-    });
+    // Save cursor position when input loses focus (old chat input)
+    const oldChatInputForBlur = document.getElementById('chatInput');
+    if (oldChatInputForBlur) {
+      oldChatInputForBlur.addEventListener('blur', function() {
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0 && this.contains(selection.anchorNode)) {
+          savedInputRange = selection.getRangeAt(0).cloneRange();
+        }
+      });
+    }
     
     function showAttachmentInInput(name, desc) {
       const input = document.getElementById('chatInput');
@@ -4304,10 +5731,19 @@
 
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && editMode) toggleEditMode(); });
 
-    // State Dropdown
-    function toggleStateDropdown() {
-      const dropdown = document.getElementById('stateDropdown');
-      dropdown.classList.toggle('open');
+    // State Dropdowns
+    function toggleRoleDropdown() {
+      const roleDropdown = document.getElementById('roleDropdown');
+      const pageDropdown = document.getElementById('pageDropdown');
+      pageDropdown.classList.remove('open');
+      roleDropdown.classList.toggle('open');
+    }
+
+    function togglePageDropdown() {
+      const roleDropdown = document.getElementById('roleDropdown');
+      const pageDropdown = document.getElementById('pageDropdown');
+      roleDropdown.classList.remove('open');
+      pageDropdown.classList.toggle('open');
     }
 
     // Section Toggle
@@ -4351,13 +5787,9 @@
       
       // Update trigger display
       const name = el.querySelector('.state-option-name').textContent;
-      const trigger = document.querySelector('.state-trigger');
       
       if (type === 'role') {
-        trigger.querySelector('.state-label').textContent = name;
-        // Update section header value
-        const sectionValue = section.querySelector('.section-value');
-        if (sectionValue) sectionValue.textContent = name;
+        document.getElementById('roleLabel').textContent = name;
       }
       
       showToast('Preview updated: ' + name);
@@ -4384,7 +5816,7 @@
       el.classList.add('active');
       
       // Update displays
-      document.querySelector('.state-page').textContent = pageName;
+      document.getElementById('pageLabel').textContent = pageName;
       
       // Update mock app nav highlight
       updateMockNavHighlight(pageName);
@@ -4416,7 +5848,7 @@
 
     function updatePreviewState(pageName, roleName, dbName) {
       // Update page display in state trigger
-      document.querySelector('.state-page').textContent = pageName;
+      document.getElementById('pageLabel').textContent = pageName;
       
       // Update page selection in dropdown
       document.querySelectorAll('.folder-contents .state-option').forEach(opt => {
@@ -4438,7 +5870,7 @@
       
       // Update role if provided
       if (roleName) {
-        document.querySelector('.state-label').textContent = roleName;
+        document.getElementById('roleLabel').textContent = roleName;
         // Update role selection in dropdown
         document.querySelectorAll('.state-section').forEach(section => {
           const title = section.querySelector('.state-section-title');
@@ -4480,48 +5912,57 @@
       }
     }
 
-    // Close dropdown when clicking outside
+    // Close dropdowns when clicking outside
     document.addEventListener('click', (e) => {
-      const dropdown = document.getElementById('stateDropdown');
-      const trigger = document.querySelector('.state-trigger');
-      if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
-        dropdown.classList.remove('open');
+      const roleDropdown = document.getElementById('roleDropdown');
+      const pageDropdown = document.getElementById('pageDropdown');
+      const triggers = document.querySelectorAll('.state-trigger');
+      
+      let clickedInsideDropdown = roleDropdown.contains(e.target) || pageDropdown.contains(e.target);
+      let clickedOnTrigger = false;
+      triggers.forEach(t => { if (t.contains(e.target)) clickedOnTrigger = true; });
+      
+      if (!clickedInsideDropdown && !clickedOnTrigger) {
+        roleDropdown.classList.remove('open');
+        pageDropdown.classList.remove('open');
       }
     });
 
     // ========== PROJECT TITLE EDITING ==========
     const projectTitle = document.getElementById('projectTitle');
-    let originalTitle = projectTitle.textContent;
+    if (projectTitle) {
+      let originalTitle = projectTitle.textContent;
 
-    projectTitle.addEventListener('focus', () => {
-      originalTitle = projectTitle.textContent;
-    });
+      projectTitle.addEventListener('focus', () => {
+        originalTitle = projectTitle.textContent;
+      });
 
-    projectTitle.addEventListener('blur', () => {
-      const newTitle = projectTitle.textContent.trim();
-      if (newTitle && newTitle !== originalTitle) {
-        showToast(`Project renamed to "${newTitle}"`);
-      } else if (!newTitle) {
-        projectTitle.textContent = originalTitle;
-      }
-    });
+      projectTitle.addEventListener('blur', () => {
+        const newTitle = projectTitle.textContent.trim();
+        if (newTitle && newTitle !== originalTitle) {
+          showToast(`Project renamed to "${newTitle}"`);
+        } else if (!newTitle) {
+          projectTitle.textContent = originalTitle;
+        }
+      });
 
-    projectTitle.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
+      projectTitle.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          projectTitle.blur();
+        }
+        if (e.key === 'Escape') {
+          projectTitle.textContent = originalTitle;
+          projectTitle.blur();
+        }
+      });
+
+      projectTitle.addEventListener('paste', (e) => {
         e.preventDefault();
-        projectTitle.blur();
-      }
-      if (e.key === 'Escape') {
-        projectTitle.textContent = originalTitle;
-        projectTitle.blur();
-      }
-    });
-
-    projectTitle.addEventListener('paste', (e) => {
-      e.preventDefault();
-      const text = e.clipboardData.getData('text/plain').replace(/\n/g, ' ');
-      document.execCommand('insertText', false, text);
-    });
+        const text = e.clipboardData.getData('text/plain').replace(/\n/g, ' ');
+        document.execCommand('insertText', false, text);
+      });
+    }
 
     // ========== PANEL RESIZER ==========
     const resizer = document.getElementById('panelResizer');
@@ -5283,17 +6724,28 @@
     function insertDiagramToChat() {
       if (!nodes.length) { showToast('Add nodes first'); return; }
       generateMermaid();
-      document.getElementById('diagramAttachment').style.display = 'block';
-      document.getElementById('diagramAttachment').innerHTML = `<div class="diagram-attachment"><span class="diagram-attachment-icon">📊</span><div class="diagram-attachment-info"><div class="diagram-attachment-title">Diagram</div><div class="diagram-attachment-meta">${nodes.length} nodes, ${lines.length} lines</div></div><button class="diagram-attachment-remove" onclick="removeDiagramAttachment()">×</button></div>`;
       closeDiagramEditor();
+      updateAttachmentsDisplay();
+      
+      // Update diagram meta after display update
+      setTimeout(() => {
+        const meta = document.getElementById('diagramPillMeta');
+        if (meta) meta.textContent = `(${nodes.length} nodes)`;
+      }, 10);
+      
       showToast('Diagram attached');
-      document.getElementById('chatInput').focus();
+      const input = document.querySelector('.slack-chat-input-field');
+      if (input) input.focus();
     }
 
-    function removeDiagramAttachment() {
-      document.getElementById('diagramAttachment').style.display = 'none';
-      document.getElementById('diagramAttachment').innerHTML = '';
+    function removeSlackDiagramAttachment() {
       pendingDiagramMermaid = null;
+      updateAttachmentsDisplay();
+    }
+
+    // Legacy function for compatibility
+    function removeDiagramAttachment() {
+      removeSlackDiagramAttachment();
     }
 
     function zoomDiagram(d) {
