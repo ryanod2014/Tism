@@ -1846,9 +1846,9 @@
       cursor: pointer;
     }
 
-    /* Fade chat content when thread is open */
+    /* Fade chat content when thread is open (but not thread's own input) */
     .chat-panel.thread-open .messages-wrapper,
-    .chat-panel.thread-open .slack-chat-input-area {
+    .chat-panel.thread-open > .slack-chat-input-area {
       opacity: 0.3;
       pointer-events: none;
       transition: opacity 0.2s;
@@ -2500,6 +2500,44 @@
       margin: 16px;
       border-radius: var(--radius-lg);
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Context banner for thread preview */
+    .preview-context-banner {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin: 0 16px;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      color: var(--accent-green);
+    }
+
+    .preview-context-banner.visible {
+      display: flex;
+    }
+
+    .preview-context-banner svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--accent-green);
+      fill: none;
+      flex-shrink: 0;
+    }
+
+    .preview-context-banner span {
+      flex: 1;
+    }
+
+    .preview-context-banner strong {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     }
 
@@ -3945,10 +3983,34 @@
         </div>
       </div>
 
-      <div class="thread-input-area">
-        <div class="thread-input-container">
+      <div class="slack-chat-input-area">
+        <div class="slack-attachments" id="threadAttachments">
+          <!-- Element and diagram pills will be inserted here -->
+        </div>
+        <div class="slack-chat-input-container">
           <div class="thread-input-field" contenteditable="true" data-placeholder="Add to discussion..." id="threadChatInput"></div>
-          <button class="thread-send-btn">Send</button>
+          <div class="slack-chat-input-toolbar">
+            <div class="slack-input-tools">
+              <button class="slack-tool-btn" title="Attach file">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+              <button class="slack-tool-btn tool-diagram" title="Create diagram" onclick="openDiagramEditor()">
+                <svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor">
+                  <rect x="2" y="2" width="6" height="6" rx="1"/>
+                  <rect x="16" y="2" width="6" height="6" rx="1"/>
+                  <rect x="2" y="16" width="6" height="6" rx="1"/>
+                  <line x1="8" y1="5" x2="16" y2="5"/>
+                  <line x1="5" y1="8" x2="5" y2="16"/>
+                  <circle cx="19" cy="19" r="3"/>
+                  <line x1="17" y1="17" x2="8" y2="8"/>
+                </svg>
+              </button>
+            </div>
+            <button class="slack-chat-send-btn" onclick="sendThreadMessage()">
+              <svg viewBox="0 0 24 24" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Send
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -4150,6 +4212,11 @@
             <span class="device-label" id="deviceLabel">Desktop</span>
           </button>
         </div>
+      </div>
+
+      <div class="preview-context-banner" id="previewContextBanner">
+        <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>Showing <strong id="contextPageName">Analytics</strong> — related to the thread you're viewing</span>
       </div>
 
       <div class="preview-frame">
@@ -5274,6 +5341,7 @@
 
     // ========== SLACK-STYLE THREAD FUNCTIONS ==========
     let currentOpenThread = null;
+    let previousPage = null;
     
     function openMessageThread(messageEl) {
       // Don't open thread if clicking on a button inside the message
@@ -5304,38 +5372,44 @@
           message: '<strong>Marcus needs a decision on the billing flow.</strong> He\'s ready to build the checkout page but needs to know the user journey. I\'d suggest <strong>after signup</strong> to capture emails first.',
           suggestion: 'After signup',
           suggestionTitle: 'Billing flow',
-          hasDecision: true
+          hasDecision: true,
+          page: 'Plans'
         },
         charts: {
           title: 'Thread: Chart Library',
           message: '<strong>Sophia needs guidance on the chart library.</strong> Recharts is more React-native, Chart.js has broader community support. I\'d recommend <strong>Recharts</strong>.',
           suggestion: 'Recharts',
           suggestionTitle: 'Chart library',
-          hasDecision: true
+          hasDecision: true,
+          page: 'Analytics'
         },
         analytics: {
           title: 'Thread: Analytics Dashboard',
           message: 'I need an analytics dashboard with user signups, revenue, and feature usage.',
-          hasDecision: false
+          hasDecision: false,
+          page: 'Analytics'
         },
         billingrequest: {
           title: 'Thread: Billing System',
           message: 'I need a billing system with Stripe, subscriptions, and invoices.',
-          hasDecision: false
+          hasDecision: false,
+          page: 'Plans'
         },
         auth: {
           title: 'Thread: Authentication',
           message: 'User authentication is complete! Login, signup, password reset all working.',
-          hasDecision: false
+          hasDecision: false,
+          page: 'User List'
         },
         welcome: {
           title: 'Thread: Welcome',
           message: 'Welcome to your new project! I\'m Luna, your AI Project Manager. I\'ll coordinate with the dev team and keep you updated.',
-          hasDecision: false
+          hasDecision: false,
+          page: 'Dashboard'
         }
       };
       
-      const content = threadContent[type] || { title: 'Thread', message: 'Discussion thread', hasDecision: false };
+      const content = threadContent[type] || { title: 'Thread', message: 'Discussion thread', hasDecision: false, page: 'Dashboard' };
       
       slackThreadTitle.textContent = content.title;
       slackThreadOriginal.innerHTML = content.message;
@@ -5350,6 +5424,12 @@
         document.querySelector(`.slack-message[data-thread="${type}"] .decision-actions`);
       decisionActions.style.display = threadHasDecision ? 'flex' : 'none';
       
+      // Save current page and switch preview to match thread context
+      if (content.page) {
+        previousPage = document.getElementById('pageLabel').textContent;
+        switchPreviewPage(content.page, true);
+      }
+      
       // Open thread overlay
       requestAnimationFrame(() => {
         threadOverlay.classList.add('open');
@@ -5362,6 +5442,14 @@
       document.getElementById('threadOverlay').classList.remove('open');
       document.getElementById('chatDimmer').classList.remove('active');
       document.getElementById('chatPanel').classList.remove('thread-open');
+      
+      // Restore previous page
+      if (previousPage) {
+        switchPreviewPage(previousPage);
+        previousPage = null;
+      }
+      
+      currentOpenThread = null;
     }
 
     // Allow Escape key to close thread
@@ -5430,6 +5518,25 @@
       });
     }
 
+    // Thread input handling
+    const threadInput = document.getElementById('threadChatInput');
+    if (threadInput) {
+      // Enter to send, Shift+Enter for new line
+      threadInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendThreadMessage();
+        }
+      });
+      
+      // Prevent formatting paste
+      threadInput.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = e.clipboardData.getData('text/plain');
+        document.execCommand('insertText', false, text);
+      });
+    }
+
     function sendSlackMessage() {
       const input = document.getElementById('slackChatInput');
       const text = input.innerText.trim();
@@ -5442,6 +5549,16 @@
       // Clear diagram attachment
       pendingDiagramMermaid = null;
       updateAttachmentsDisplay();
+    }
+
+    function sendThreadMessage() {
+      const input = document.getElementById('threadChatInput');
+      const text = input.innerText.trim();
+      if (!text) return;
+      
+      // TODO: Actually send the thread reply
+      showToast('Reply sent');
+      input.innerHTML = '';
     }
 
     // Tab switching (old inbox tabs)
@@ -5827,6 +5944,42 @@
       }
       
       showToast('Navigated to ' + pageName);
+    }
+    
+    function switchPreviewPage(pageName, showBanner = false) {
+      // Update page label
+      document.getElementById('pageLabel').textContent = pageName;
+      
+      // Update selection in dropdown
+      document.querySelectorAll('.folder-contents .state-option').forEach(opt => {
+        const optName = opt.querySelector('.state-option-name');
+        if (optName && optName.textContent === pageName) {
+          document.querySelectorAll('.folder-contents .state-option').forEach(o => o.classList.remove('active'));
+          opt.classList.add('active');
+        }
+      });
+      
+      // Update mock app nav highlight
+      updateMockNavHighlight(pageName);
+      
+      // Update mock body content
+      if (pageTemplates[pageName]) {
+        document.getElementById('mockBody').innerHTML = pageTemplates[pageName];
+        // Re-init selectable elements if in edit mode
+        if (editMode) {
+          initSelectableElements();
+        }
+      }
+      
+      // Show/hide context banner
+      const banner = document.getElementById('previewContextBanner');
+      const contextPageName = document.getElementById('contextPageName');
+      if (showBanner) {
+        contextPageName.textContent = pageName;
+        banner.classList.add('visible');
+      } else {
+        banner.classList.remove('visible');
+      }
     }
 
     function updateMockNavHighlight(pageName) {
