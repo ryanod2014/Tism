@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tism - Your Dev Teams</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-surface: #12121a;
+      --bg-elevated: #1a1a26;
+      --bg-hover: #222233;
+      --border: #2a2a3e;
+      --border-bright: #3d3d5c;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --text-muted: #555566;
+      --accent-cyan: #00d4ff;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-pink: #ec4899;
+      --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #a855f7 100%);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    /* Background pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        radial-gradient(ellipse at 20% 20%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+        linear-gradient(rgba(0, 212, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 60px 60px, 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========== HEADER ========== */
+    .header {
+      background: rgba(18, 18, 26, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .logo-text {
+      font-weight: 600;
+      font-size: 24px;
+      letter-spacing: -0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .inbox-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .inbox-btn:hover {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.15);
+    }
+
+    .inbox-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      min-width: 22px;
+      height: 22px;
+      background: var(--accent-red);
+      border-radius: 11px;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+      animation: pulse-badge 2s infinite;
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .avatar:hover {
+      transform: scale(1.05);
+    }
+
+    /* ========== MAIN CONTENT ========== */
+    .main {
+      flex: 1;
+      padding: 48px 60px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .welcome {
+      margin-bottom: 48px;
+    }
+
+    .welcome-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .welcome-title {
+      font-size: 36px;
+      font-weight: 600;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ========== SUGGESTED INBOX ========== */
+    .inbox-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      margin-bottom: 48px;
+    }
+
+    .inbox-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .inbox-section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .inbox-section-title span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--accent-red);
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .view-all {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .view-all:hover {
+      opacity: 0.8;
+    }
+
+    .inbox-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+
+    .inbox-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .inbox-card:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-2px);
+    }
+
+    .inbox-card.urgent {
+      border-left: 4px solid var(--accent-red);
+    }
+
+    .inbox-card.decision {
+      border-left: 4px solid var(--accent-amber);
+    }
+
+    .inbox-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .inbox-card-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .inbox-card-meta {
+      flex: 1;
+    }
+
+    .inbox-card-project {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .inbox-card-time {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .inbox-card-type {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .inbox-card-type.urgent {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+    }
+
+    .inbox-card-type.decision {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--accent-amber);
+    }
+
+    .inbox-card-body {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ========== PROJECTS GRID ========== */
+    .projects-section {
+      margin-bottom: 48px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .project-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-primary);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .project-card:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .project-card:hover::before {
+      opacity: 1;
+    }
+
+    .project-card.new {
+      background: transparent;
+      border: 2px dashed var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 240px;
+    }
+
+    .project-card.new:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.03);
+    }
+
+    .new-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 16px;
+      transition: all 0.2s;
+    }
+
+    .project-card.new:hover .new-icon {
+      background: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      color: var(--bg-deep);
+    }
+
+    .new-label {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    /* ========== PROJECT PREVIEW ========== */
+    .project-preview {
+      height: 160px;
+      background: #ffffff;
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .project-preview-content {
+      width: 100%;
+      height: 100%;
+      transform-origin: top left;
+      transform: scale(0.25);
+      width: 400%;
+      height: 400%;
+      pointer-events: none;
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+
+    /* Mini Dashboard Preview */
+    .mini-dashboard {
+      background: #f8fafc;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mini-header {
+      background: white;
+      padding: 12px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .mini-logo {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .mini-nav {
+      display: flex;
+      gap: 16px;
+    }
+
+    .mini-nav span {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .mini-nav span.active {
+      color: #0ea5e9;
+    }
+
+    .mini-avatar {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #8b5cf6, #d946ef);
+      border-radius: 50%;
+    }
+
+    .mini-body {
+      padding: 16px;
+      flex: 1;
+    }
+
+    .mini-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 12px;
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .mini-stat {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .mini-stat-label {
+      font-size: 9px;
+      color: #64748b;
+      margin-bottom: 2px;
+    }
+
+    .mini-stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .mini-chart {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .mini-chart-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .mini-chart-area {
+      height: 80px;
+      background: linear-gradient(180deg, rgba(14, 165, 233, 0.1) 0%, transparent 100%);
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .mini-chart-line {
+      position: absolute;
+      bottom: 30%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #0ea5e9, #8b5cf6);
+      border-radius: 1px;
+    }
+
+    /* Mini E-commerce Preview */
+    .mini-ecommerce {
+      background: #f8fafc;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mini-products {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .mini-product {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .mini-product-img {
+      height: 60px;
+      background: linear-gradient(135deg, #fef3c7, #fcd34d);
+    }
+
+    .mini-product-img.blue {
+      background: linear-gradient(135deg, #dbeafe, #60a5fa);
+    }
+
+    .mini-product-img.pink {
+      background: linear-gradient(135deg, #fce7f3, #f472b6);
+    }
+
+    .mini-product-info {
+      padding: 8px;
+    }
+
+    .mini-product-name {
+      font-size: 10px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 2px;
+    }
+
+    .mini-product-price {
+      font-size: 12px;
+      font-weight: 700;
+      color: #22c55e;
+    }
+
+    /* Mini Blog Preview */
+    .mini-blog {
+      background: #ffffff;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mini-blog-header {
+      background: #1e293b;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .mini-blog-logo {
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .mini-blog-nav span {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-left: 16px;
+    }
+
+    .mini-blog-body {
+      padding: 16px;
+      flex: 1;
+    }
+
+    .mini-blog-featured {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .mini-blog-featured-img {
+      width: 120px;
+      height: 80px;
+      background: linear-gradient(135deg, #c4b5fd, #a78bfa);
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .mini-blog-featured-content {
+      flex: 1;
+    }
+
+    .mini-blog-tag {
+      font-size: 9px;
+      color: #8b5cf6;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .mini-blog-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+
+    .mini-blog-excerpt {
+      font-size: 10px;
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    .mini-blog-posts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .mini-blog-post {
+      background: #f8fafc;
+      border-radius: 6px;
+      padding: 8px;
+    }
+
+    .mini-blog-post-title {
+      font-size: 10px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+
+    .mini-blog-post-date {
+      font-size: 8px;
+      color: #94a3b8;
+    }
+
+    .project-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .project-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 4px 10px;
+      background: var(--bg-deep);
+      border-radius: 20px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .status-dot.active {
+      background: var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.idle {
+      background: var(--text-muted);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+      50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
+    }
+
+    .project-name {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .project-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .project-inbox {
+      margin: 12px 0;
+    }
+
+    .inbox-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .inbox-indicator.urgent {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--accent-red);
+    }
+
+    .inbox-indicator.urgent .inbox-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-red);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    .inbox-indicator.decision {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-amber);
+    }
+
+    .inbox-indicator.decision .inbox-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-amber);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    .inbox-indicator.clear {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--accent-green);
+    }
+
+    .inbox-indicator.clear .inbox-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+    }
+
+    .project-url {
+      padding-top: 16px;
+      margin-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .project-url .url-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .project-agents {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .agent-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      background: var(--bg-deep);
+      border-radius: 20px;
+      font-size: 11px;
+    }
+
+    .agent-pill .working-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+    }
+
+    /* ========== TOAST ========== */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--accent-green);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 1001;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+
+    .toast.active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast-icon {
+      font-size: 20px;
+    }
+
+    .toast-text {
+      font-size: 14px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-bright);
+    }
+
+    /* ========== SEARCH & SORT CONTROLS ========== */
+    .projects-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      max-width: 320px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 16px 10px 42px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .sort-dropdown {
+      position: relative;
+    }
+
+    .sort-trigger {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .sort-trigger:hover {
+      border-color: var(--border-bright);
+      color: var(--text-primary);
+    }
+
+    .sort-trigger .sort-icon {
+      font-size: 14px;
+    }
+
+    .sort-trigger .sort-chevron {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+
+    .sort-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 200px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+      z-index: 100;
+      display: none;
+      overflow: hidden;
+    }
+
+    .sort-menu.open {
+      display: block;
+    }
+
+    .sort-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .sort-option:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .sort-option.active {
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--accent-cyan);
+    }
+
+    .sort-option .check {
+      opacity: 0;
+      font-size: 12px;
+    }
+
+    .sort-option.active .check {
+      opacity: 1;
+    }
+
+    /* ========== PROJECT TYPE BADGE ========== */
+    .project-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: capitalize;
+    }
+
+    .project-type-badge.webapp {
+      background: rgba(0, 212, 255, 0.15);
+      color: var(--accent-cyan);
+    }
+
+    .project-type-badge.ecommerce {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--accent-green);
+    }
+
+    .project-type-badge.blog {
+      background: rgba(168, 85, 247, 0.15);
+      color: var(--accent-purple);
+    }
+
+    .project-type-badge.funnel {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-amber);
+    }
+
+    .project-type-badge.landing {
+      background: rgba(236, 72, 153, 0.15);
+      color: var(--accent-pink);
+    }
+
+    .project-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .no-results-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .no-results-text {
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+    }
+
+    .no-results-hint {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <a class="logo" href="home.html">
+        <div class="logo-icon">T</div>
+        <span class="logo-text">Tism</span>
+      </a>
+
+      <div class="header-actions">
+        <button class="inbox-btn" onclick="location.href='app.html'">
+          📥 Team Updates
+          <span class="inbox-badge">5</span>
+        </button>
+        <div class="avatar" onclick="showToast('Profile settings coming soon')">RO</div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Projects Grid -->
+      <section class="projects-section">
+        <div class="section-header">
+          <h2 class="section-title">Manage Your Dev Teams</h2>
+          <div class="projects-controls">
+            <div class="search-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" class="search-input" id="projectSearch" placeholder="Search teams..." oninput="filterProjects()">
+            </div>
+            <div class="sort-dropdown">
+              <button class="sort-trigger" onclick="toggleSortMenu()">
+                <span class="sort-icon">↕️</span>
+                <span id="sortLabel">Date Modified</span>
+                <span class="sort-chevron">▼</span>
+              </button>
+              <div class="sort-menu" id="sortMenu">
+                <div class="sort-option active" data-sort="modified" onclick="selectSort(this, 'modified')">
+                  Date Modified
+                  <span class="check">✓</span>
+                </div>
+                <div class="sort-option" data-sort="created" onclick="selectSort(this, 'created')">
+                  Date Created
+                  <span class="check">✓</span>
+                </div>
+                <div class="sort-option" data-sort="name" onclick="selectSort(this, 'name')">
+                  Name (A-Z)
+                  <span class="check">✓</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="projects-grid">
+          <!-- New Team Card -->
+          <div class="project-card new" onclick="location.href='new-project.html'">
+            <div class="new-icon">+</div>
+            <div class="new-label">Recruit Team for New Project</div>
+          </div>
+
+          <!-- SaaS Dashboard -->
+          <div class="project-card" data-name="SaaS Dashboard" data-type="webapp" data-created="2024-11-15" data-modified="2024-12-10" onclick="location.href='app.html'">
+            <div class="project-preview">
+              <div class="project-preview-content">
+                <div class="mini-dashboard">
+                  <div class="mini-header">
+                    <div class="mini-logo">Acme Dashboard</div>
+                    <div class="mini-nav">
+                      <span class="active">Dashboard</span>
+                      <span>Users</span>
+                      <span>Analytics</span>
+                      <span>Billing</span>
+                    </div>
+                    <div class="mini-avatar"></div>
+                  </div>
+                  <div class="mini-body">
+                    <div class="mini-title">Dashboard Overview</div>
+                    <div class="mini-stats">
+                      <div class="mini-stat">
+                        <div class="mini-stat-label">Total Users</div>
+                        <div class="mini-stat-value">12,847</div>
+                      </div>
+                      <div class="mini-stat">
+                        <div class="mini-stat-label">Active Now</div>
+                        <div class="mini-stat-value">1,294</div>
+                      </div>
+                      <div class="mini-stat">
+                        <div class="mini-stat-label">Revenue</div>
+                        <div class="mini-stat-value">$48.2K</div>
+                      </div>
+                      <div class="mini-stat">
+                        <div class="mini-stat-label">Churn Rate</div>
+                        <div class="mini-stat-value">2.4%</div>
+                      </div>
+                    </div>
+                    <div class="mini-chart">
+                      <div class="mini-chart-title">Revenue Over Time</div>
+                      <div class="mini-chart-area">
+                        <div class="mini-chart-line"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="project-meta-row">
+              <span class="project-type-badge webapp">💻 Web App</span>
+              <div class="project-status">
+                <span class="status-dot active"></span>
+                <span>2 devs active</span>
+              </div>
+            </div>
+            <div class="project-header">
+              <div class="project-name">SaaS Dashboard</div>
+            </div>
+            <div class="project-desc">Analytics dashboard with user management, billing, and real-time metrics.</div>
+            <div class="project-inbox">
+              <div class="inbox-indicator urgent">
+                <span class="inbox-dot"></span>
+                <span class="inbox-count">Team needs 2 decisions</span>
+              </div>
+            </div>
+            <div class="project-agents">
+              <div class="agent-pill">
+                <span class="working-dot"></span>
+                🛠️ Builder coding...
+              </div>
+              <div class="agent-pill">
+                <span class="working-dot"></span>
+                🎨 Designer on standby
+              </div>
+            </div>
+            <div class="project-url">
+              <span class="url-text">acme-dashboard.tism.app</span>
+            </div>
+          </div>
+
+          <!-- E-commerce Store -->
+          <div class="project-card" data-name="E-commerce Store" data-type="ecommerce" data-created="2024-11-20" data-modified="2024-12-09" onclick="showToast('Opening E-commerce project...')">
+            <div class="project-preview">
+              <div class="project-preview-content">
+                <div class="mini-ecommerce">
+                  <div class="mini-header">
+                    <div class="mini-logo">ShopNow</div>
+                    <div class="mini-nav">
+                      <span class="active">Products</span>
+                      <span>Cart (3)</span>
+                      <span>Orders</span>
+                    </div>
+                    <div class="mini-avatar"></div>
+                  </div>
+                  <div class="mini-body">
+                    <div class="mini-title">Featured Products</div>
+                    <div class="mini-products">
+                      <div class="mini-product">
+                        <div class="mini-product-img"></div>
+                        <div class="mini-product-info">
+                          <div class="mini-product-name">Wireless Headphones</div>
+                          <div class="mini-product-price">$149.99</div>
+                        </div>
+                      </div>
+                      <div class="mini-product">
+                        <div class="mini-product-img blue"></div>
+                        <div class="mini-product-info">
+                          <div class="mini-product-name">Smart Watch</div>
+                          <div class="mini-product-price">$299.00</div>
+                        </div>
+                      </div>
+                      <div class="mini-product">
+                        <div class="mini-product-img pink"></div>
+                        <div class="mini-product-info">
+                          <div class="mini-product-name">Bluetooth Speaker</div>
+                          <div class="mini-product-price">$79.99</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="project-meta-row">
+              <span class="project-type-badge ecommerce">🛒 E-commerce</span>
+              <div class="project-status">
+                <span class="status-dot active"></span>
+                <span>2 devs active</span>
+              </div>
+            </div>
+            <div class="project-header">
+              <div class="project-name">E-commerce Store</div>
+            </div>
+            <div class="project-desc">Full-featured online store with cart, checkout, and inventory management.</div>
+            <div class="project-inbox">
+              <div class="inbox-indicator decision">
+                <span class="inbox-dot"></span>
+                <span class="inbox-count">Team needs your input</span>
+              </div>
+            </div>
+            <div class="project-agents">
+              <div class="agent-pill">
+                <span class="working-dot"></span>
+                🛠️ Builder coding...
+              </div>
+              <div class="agent-pill">
+                🧪 QA ready
+              </div>
+            </div>
+            <div class="project-url">
+              <span class="url-text">shopnow.tism.app</span>
+            </div>
+          </div>
+
+          <!-- Blog Platform -->
+          <div class="project-card" data-name="Blog Platform" data-type="blog" data-created="2024-10-28" data-modified="2024-12-05" onclick="showToast('Opening Blog project...')">
+            <div class="project-preview">
+              <div class="project-preview-content">
+                <div class="mini-blog">
+                  <div class="mini-blog-header">
+                    <div class="mini-blog-logo">The Blog</div>
+                    <div class="mini-blog-nav">
+                      <span>Home</span>
+                      <span>Articles</span>
+                      <span>About</span>
+                    </div>
+                  </div>
+                  <div class="mini-blog-body">
+                    <div class="mini-blog-featured">
+                      <div class="mini-blog-featured-img"></div>
+                      <div class="mini-blog-featured-content">
+                        <div class="mini-blog-tag">Featured</div>
+                        <div class="mini-blog-title">Building Modern Web Applications with AI</div>
+                        <div class="mini-blog-excerpt">Learn how artificial intelligence is transforming the way we build and deploy web applications...</div>
+                      </div>
+                    </div>
+                    <div class="mini-blog-posts">
+                      <div class="mini-blog-post">
+                        <div class="mini-blog-post-title">Getting Started with React 19</div>
+                        <div class="mini-blog-post-date">Dec 8, 2024</div>
+                      </div>
+                      <div class="mini-blog-post">
+                        <div class="mini-blog-post-title">CSS Grid vs Flexbox</div>
+                        <div class="mini-blog-post-date">Dec 5, 2024</div>
+                      </div>
+                      <div class="mini-blog-post">
+                        <div class="mini-blog-post-title">TypeScript Best Practices</div>
+                        <div class="mini-blog-post-date">Dec 1, 2024</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="project-meta-row">
+              <span class="project-type-badge blog">📝 Blog</span>
+              <div class="project-status">
+                <span class="status-dot idle"></span>
+                <span>Team on standby</span>
+              </div>
+            </div>
+            <div class="project-header">
+              <div class="project-name">Blog Platform</div>
+            </div>
+            <div class="project-desc">Content management system with markdown support and SEO optimization.</div>
+            <div class="project-inbox">
+              <div class="inbox-indicator clear">
+                <span class="inbox-dot"></span>
+                <span class="inbox-count">Team is all set</span>
+              </div>
+            </div>
+            <div class="project-agents">
+              <div class="agent-pill">
+                🤖 PM monitoring
+              </div>
+              <div class="agent-pill">
+                🛠️ Builder idle
+              </div>
+            </div>
+            <div class="project-url">
+              <span class="url-text">theblog.tism.app</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Team Updates -->
+      <section class="inbox-section">
+        <div class="inbox-section-header">
+          <div class="inbox-section-title">
+            📥 Needs Your Attention
+            <span id="inboxCount">5</span>
+          </div>
+          <a class="view-all" href="app.html">View all →</a>
+        </div>
+        <div class="inbox-cards">
+          <div class="inbox-card urgent" onclick="location.href='app.html'">
+            <div class="inbox-card-header">
+              <div class="inbox-card-avatar">🤖</div>
+              <div class="inbox-card-meta">
+                <div class="inbox-card-project">SaaS Dashboard Team</div>
+                <div class="inbox-card-time">2 min ago</div>
+              </div>
+              <span class="inbox-card-type urgent">Blocker</span>
+            </div>
+            <div class="inbox-card-body">
+              Your team needs direction: Should users see pricing before or after signup?
+            </div>
+          </div>
+
+          <div class="inbox-card decision" onclick="location.href='app.html'">
+            <div class="inbox-card-header">
+              <div class="inbox-card-avatar">🛠️</div>
+              <div class="inbox-card-meta">
+                <div class="inbox-card-project">E-commerce Team</div>
+                <div class="inbox-card-time">1 hour ago</div>
+              </div>
+              <span class="inbox-card-type decision">Decision</span>
+            </div>
+            <div class="inbox-card-body">
+              Builder is asking: Which payment gateway should we integrate — Stripe, PayPal, or Square?
+            </div>
+          </div>
+
+          <div class="inbox-card decision" onclick="location.href='app.html'">
+            <div class="inbox-card-header">
+              <div class="inbox-card-avatar">🎨</div>
+              <div class="inbox-card-meta">
+                <div class="inbox-card-project">SaaS Dashboard Team</div>
+                <div class="inbox-card-time">15 min ago</div>
+              </div>
+              <span class="inbox-card-type decision">Decision</span>
+            </div>
+            <div class="inbox-card-body">
+              Designer is waiting: Which chart library should we use — Recharts, Chart.js, or D3?
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <span class="toast-icon">✅</span>
+    <span class="toast-text" id="toastText">Action completed</span>
+  </div>
+
+  <script>
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastText').textContent = text;
+      toast.classList.add('active');
+      setTimeout(() => toast.classList.remove('active'), 3000);
+    }
+
+    // ========== SEARCH FUNCTIONALITY ==========
+    function filterProjects() {
+      const searchTerm = document.getElementById('projectSearch').value.toLowerCase().trim();
+      const projectCards = document.querySelectorAll('.project-card:not(.new)');
+      const projectsGrid = document.querySelector('.projects-grid');
+      let visibleCount = 0;
+
+      // Remove existing no-results message
+      const existingNoResults = projectsGrid.querySelector('.no-results');
+      if (existingNoResults) {
+        existingNoResults.remove();
+      }
+
+      projectCards.forEach(card => {
+        const name = card.dataset.name?.toLowerCase() || '';
+        const type = card.dataset.type?.toLowerCase() || '';
+        const desc = card.querySelector('.project-desc')?.textContent.toLowerCase() || '';
+        
+        const matches = name.includes(searchTerm) || 
+                       type.includes(searchTerm) || 
+                       desc.includes(searchTerm);
+        
+        if (matches || searchTerm === '') {
+          card.style.display = '';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      // Show no results message if needed
+      if (visibleCount === 0 && searchTerm !== '') {
+        const noResults = document.createElement('div');
+        noResults.className = 'no-results';
+        noResults.innerHTML = `
+          <div class="no-results-icon">🔍</div>
+          <div class="no-results-text">No teams found</div>
+          <div class="no-results-hint">Try a different search term</div>
+        `;
+        projectsGrid.appendChild(noResults);
+      }
+    }
+
+    // ========== SORT FUNCTIONALITY ==========
+    let currentSort = 'modified';
+
+    function toggleSortMenu() {
+      const menu = document.getElementById('sortMenu');
+      menu.classList.toggle('open');
+    }
+
+    function selectSort(element, sortType) {
+      currentSort = sortType;
+      
+      // Update active state
+      document.querySelectorAll('.sort-option').forEach(opt => opt.classList.remove('active'));
+      element.classList.add('active');
+      
+      // Update label
+      document.getElementById('sortLabel').textContent = element.textContent.trim().replace('✓', '').trim();
+      
+      // Close menu
+      document.getElementById('sortMenu').classList.remove('open');
+      
+      // Sort projects
+      sortProjects(sortType);
+    }
+
+    function sortProjects(sortType) {
+      const grid = document.querySelector('.projects-grid');
+      const newCard = grid.querySelector('.project-card.new');
+      const projectCards = Array.from(grid.querySelectorAll('.project-card:not(.new)'));
+
+      projectCards.sort((a, b) => {
+        switch (sortType) {
+          case 'modified':
+            return new Date(b.dataset.modified) - new Date(a.dataset.modified);
+          case 'created':
+            return new Date(b.dataset.created) - new Date(a.dataset.created);
+          case 'name':
+            return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+          default:
+            return 0;
+        }
+      });
+
+      // Reorder DOM
+      projectCards.forEach(card => grid.appendChild(card));
+    }
+
+    // Close sort menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const sortDropdown = document.querySelector('.sort-dropdown');
+      const sortMenu = document.getElementById('sortMenu');
+      if (!sortDropdown.contains(e.target)) {
+        sortMenu.classList.remove('open');
+      }
+    });
+
+    // Initial sort on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      sortProjects('modified');
+    });
+  </script>
+</body>
+</html>

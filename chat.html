@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tism - Build Your Spec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-surface: #12121a;
+      --bg-elevated: #1a1a26;
+      --bg-hover: #222233;
+      --border: #2a2a3e;
+      --border-bright: #3d3d5c;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --text-muted: #555566;
+      --accent-cyan: #00d4ff;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-pink: #ec4899;
+      --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #a855f7 100%);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      overflow: hidden;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .back-btn:hover {
+      border-color: var(--border-bright);
+      color: var(--text-primary);
+    }
+
+    .project-type {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+
+    .type-icon {
+      font-size: 18px;
+    }
+
+    .type-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .type-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .progress-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .progress-bar {
+      width: 120px;
+      height: 4px;
+      background: var(--bg-deep);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--gradient-primary);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 24px;
+      overflow: hidden;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 0;
+    }
+
+    .message {
+      margin-bottom: 24px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .message-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .message-avatar.agent {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    }
+
+    .message-avatar.user {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .message-sender {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .message-time {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .message-content {
+      margin-left: 48px;
+    }
+
+    .message-bubble {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .message.user .message-bubble {
+      background: rgba(0, 212, 255, 0.08);
+      border-color: rgba(0, 212, 255, 0.2);
+    }
+
+    .message-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .option-btn {
+      padding: 12px 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .option-btn.selected {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--accent-cyan);
+    }
+
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 16px 20px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-left: 48px;
+      width: fit-content;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      animation: typing 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    .chat-input-area {
+      padding: 20px 0 32px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .chat-input-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 16px 20px;
+      background: var(--bg-surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+      resize: none;
+      min-height: 56px;
+      max-height: 150px;
+    }
+
+    .chat-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .chat-input:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .chat-send {
+      width: 56px;
+      height: 56px;
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-lg);
+      color: var(--bg-deep);
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chat-send:hover {
+      transform: scale(1.05);
+    }
+
+    .chat-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .finish-btn {
+      padding: 14px 28px;
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      color: var(--bg-deep);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: none;
+    }
+
+    .finish-btn.visible {
+      display: block;
+    }
+
+    .finish-btn:hover {
+      transform: scale(1.02);
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 15, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .loading-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent-cyan);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 24px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 18px;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .loading-subtext {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-left">
+        <a class="back-btn" href="new-project.html">← Back</a>
+        <div class="project-type">
+          <span class="type-icon" id="typeIcon">🛠️</span>
+          <div>
+            <div class="type-label">Project Type</div>
+            <div class="type-name" id="typeName">Tool</div>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="progress-indicator">
+          <span id="progressText">Question 1 of 5</span>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 20%"></div>
+          </div>
+        </div>
+        <div class="avatar">RO</div>
+      </div>
+    </header>
+
+    <div class="chat-container">
+      <div class="chat-messages" id="chatMessages">
+        <!-- Messages will be populated by JS -->
+      </div>
+
+      <div class="chat-input-area">
+        <div class="chat-input-wrapper">
+          <textarea 
+            class="chat-input" 
+            id="chatInput" 
+            placeholder="Type your answer..."
+            rows="1"
+          ></textarea>
+          <button class="chat-send" id="sendBtn" onclick="sendMessage()">→</button>
+          <button class="finish-btn" id="finishBtn" onclick="finishSpec()">Create Project →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Building your project...</div>
+    <div class="loading-subtext">PM Agent is creating your spec</div>
+  </div>
+
+  <script>
+    // Project type configurations
+    const projectTypes = {
+      tool: {
+        icon: '🛠️',
+        name: 'Tool',
+        questions: [
+          { text: "What does this tool do? Describe the main purpose in a sentence or two.", placeholder: "e.g., A PDF merger that combines multiple files into one" },
+          { text: "Who will use this tool? Is it for developers, designers, marketers, or a general audience?", placeholder: "e.g., Small business owners who need to merge invoices" },
+          { text: "What are the core features you need?", placeholder: "e.g., Drag and drop upload, preview before merge, download result" },
+          { text: "Should this be a web app, desktop app, or command-line tool?", options: ["Web App", "Desktop App", "CLI Tool", "All of the above"] },
+          { text: "Any specific technologies or integrations you want to use?", placeholder: "e.g., React, Node.js, or just 'no preference'" }
+        ]
+      },
+      automation: {
+        icon: '⚡',
+        name: 'Automation',
+        questions: [
+          { text: "What process do you want to automate? Describe the workflow.", placeholder: "e.g., When a new lead comes in, add them to my CRM and send a welcome email" },
+          { text: "What triggers should start this automation?", placeholder: "e.g., Form submission, new email, scheduled time, webhook" },
+          { text: "What actions should happen when triggered?", placeholder: "e.g., Create record, send email, update spreadsheet, call API" },
+          { text: "What services or tools does this need to connect to?", placeholder: "e.g., Slack, Google Sheets, Stripe, custom API" },
+          { text: "How often will this run, and what's the expected volume?", placeholder: "e.g., ~100 times per day, or on-demand" }
+        ]
+      },
+      clone: {
+        icon: '🔗',
+        name: 'Clone Existing Software',
+        questions: [
+          { text: "Paste the URL of the software you want to clone.", placeholder: "e.g., https://notion.so or https://linear.app" },
+          { text: "What specific features from this software do you need?", placeholder: "e.g., The kanban board view and the document editor" },
+          { text: "What would you change or improve from the original?", placeholder: "e.g., Simpler UI, different pricing model, specific integrations" },
+          { text: "Who is your target audience? How is it different from the original?", placeholder: "e.g., Freelancers instead of enterprise teams" },
+          { text: "What's your monetization strategy?", options: ["Free", "Freemium", "Paid Subscription", "One-time Purchase", "Not sure yet"] }
+        ]
+      },
+      webapp: {
+        icon: '🚀',
+        name: 'Webapp / SaaS',
+        questions: [
+          { text: "Describe your SaaS in one sentence. What problem does it solve?", placeholder: "e.g., A project management tool for remote design teams" },
+          { text: "Who is your target customer?", placeholder: "e.g., Small marketing agencies with 5-20 employees" },
+          { text: "What are the 3-5 core features you need for launch?", placeholder: "e.g., User dashboard, team workspaces, file sharing, real-time collaboration" },
+          { text: "How will users sign up and authenticate?", options: ["Email/Password", "Google OAuth", "Magic Link", "All of the above"] },
+          { text: "What's your pricing model?", options: ["Free tier + Paid", "Paid only", "Free forever", "Usage-based", "Not sure yet"] }
+        ]
+      },
+      website: {
+        icon: '🌐',
+        name: 'Website / Funnel',
+        questions: [
+          { text: "What's the main goal of this website?", options: ["Generate Leads", "Sell Products", "Showcase Portfolio", "Provide Information", "Build Community"] },
+          { text: "Describe your brand and target audience.", placeholder: "e.g., Modern fintech startup targeting millennials" },
+          { text: "What pages do you need?", placeholder: "e.g., Home, About, Pricing, Contact, Blog" },
+          { text: "Do you need any special functionality?", placeholder: "e.g., Contact form, newsletter signup, booking calendar, payment processing" },
+          { text: "Any websites you'd like to use as design inspiration?", placeholder: "e.g., stripe.com, linear.app, or 'clean and minimal'" }
+        ]
+      },
+      upload: {
+        icon: '📤',
+        name: 'Upload Existing Project',
+        questions: [
+          { text: "What type of project are you uploading?", options: ["Web App", "Mobile App", "API/Backend", "Static Website", "Other"] },
+          { text: "What's the current state of the project?", options: ["Just Started", "Partially Built", "Mostly Complete", "Needs Refactoring"] },
+          { text: "What technologies is it built with?", placeholder: "e.g., React, Next.js, Node.js, PostgreSQL" },
+          { text: "What do you want help with?", placeholder: "e.g., Add new features, fix bugs, improve performance, redesign UI" },
+          { text: "Describe the main functionality of your project.", placeholder: "e.g., An e-commerce store with cart, checkout, and order management" }
+        ]
+      }
+    };
+
+    // Get project type from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectType = urlParams.get('type') || 'tool';
+    const config = projectTypes[projectType] || projectTypes.tool;
+
+    let currentQuestion = 0;
+    let answers = [];
+
+    // Initialize
+    document.getElementById('typeIcon').textContent = config.icon;
+    document.getElementById('typeName').textContent = config.name;
+
+    // Start with first question
+    setTimeout(() => {
+      addAgentMessage(config.questions[0].text, config.questions[0].options, config.questions[0].placeholder);
+      updateProgress();
+    }, 500);
+
+    function addAgentMessage(text, options = null, placeholder = null) {
+      const messagesEl = document.getElementById('chatMessages');
+      
+      let optionsHtml = '';
+      if (options) {
+        optionsHtml = `
+          <div class="message-options">
+            ${options.map(opt => `<button class="option-btn" onclick="selectOption(this, '${opt}')">${opt}</button>`).join('')}
+          </div>
+        `;
+      }
+      
+      const html = `
+        <div class="message">
+          <div class="message-header">
+            <div class="message-avatar agent">🤖</div>
+            <span class="message-sender">Spec Builder</span>
+            <span class="message-time">Just now</span>
+          </div>
+          <div class="message-content">
+            <div class="message-bubble">
+              ${text}
+              ${optionsHtml}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      messagesEl.insertAdjacentHTML('beforeend', html);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      
+      // Update placeholder if provided
+      if (placeholder) {
+        document.getElementById('chatInput').placeholder = placeholder;
+      } else {
+        document.getElementById('chatInput').placeholder = 'Type your answer...';
+      }
+    }
+
+    function addUserMessage(text) {
+      const messagesEl = document.getElementById('chatMessages');
+      const html = `
+        <div class="message user">
+          <div class="message-header">
+            <div class="message-avatar user">RO</div>
+            <span class="message-sender">You</span>
+            <span class="message-time">Just now</span>
+          </div>
+          <div class="message-content">
+            <div class="message-bubble">${text}</div>
+          </div>
+        </div>
+      `;
+      
+      messagesEl.insertAdjacentHTML('beforeend', html);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function showTyping() {
+      const messagesEl = document.getElementById('chatMessages');
+      const html = `
+        <div class="message" id="typingMessage">
+          <div class="message-header">
+            <div class="message-avatar agent">🤖</div>
+            <span class="message-sender">Spec Builder</span>
+          </div>
+          <div class="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      `;
+      messagesEl.insertAdjacentHTML('beforeend', html);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function hideTyping() {
+      const typingEl = document.getElementById('typingMessage');
+      if (typingEl) typingEl.remove();
+    }
+
+    function selectOption(btn, value) {
+      // Mark as selected
+      btn.closest('.message-options').querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      
+      // Submit the answer
+      submitAnswer(value);
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      input.value = '';
+      submitAnswer(text);
+    }
+
+    function submitAnswer(answer) {
+      addUserMessage(answer);
+      answers.push({ question: config.questions[currentQuestion].text, answer: answer });
+      currentQuestion++;
+      
+      updateProgress();
+      
+      if (currentQuestion < config.questions.length) {
+        // Show next question
+        showTyping();
+        setTimeout(() => {
+          hideTyping();
+          const q = config.questions[currentQuestion];
+          addAgentMessage(q.text, q.options, q.placeholder);
+        }, 1000);
+      } else {
+        // All questions answered
+        showTyping();
+        setTimeout(() => {
+          hideTyping();
+          addAgentMessage("Great! I have all the information I need to build your spec. Click 'Create Project' when you're ready, or add any additional details below.");
+          document.getElementById('finishBtn').classList.add('visible');
+          document.getElementById('sendBtn').style.display = 'none';
+        }, 1000);
+      }
+    }
+
+    function updateProgress() {
+      const total = config.questions.length;
+      const current = Math.min(currentQuestion + 1, total);
+      const percent = (current / total) * 100;
+      
+      document.getElementById('progressText').textContent = `Question ${current} of ${total}`;
+      document.getElementById('progressFill').style.width = percent + '%';
+    }
+
+    function finishSpec() {
+      document.getElementById('loadingOverlay').classList.add('active');
+      document.querySelector('.loading-text').textContent = 'Saving your spec...';
+      document.querySelector('.loading-subtext').textContent = 'Next: Choose your style inspiration';
+      
+      // Store answers and redirect to style selection
+      sessionStorage.setItem('projectType', projectType);
+      sessionStorage.setItem('projectAnswers', JSON.stringify(answers));
+      
+      setTimeout(() => {
+        window.location.href = 'style.html';
+      }, 1500);
+    }
+
+    // Auto-resize textarea
+    const textarea = document.getElementById('chatInput');
+    textarea.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+    });
+
+    // Enter to send (Shift+Enter for new line)
+    textarea.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>

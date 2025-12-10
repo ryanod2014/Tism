@@ -1,0 +1,5326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tism - Inbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-surface: #12121a;
+      --bg-elevated: #1a1a26;
+      --bg-hover: #222233;
+      --border: #2a2a3e;
+      --border-bright: #3d3d5c;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --text-muted: #555566;
+      --accent-cyan: #00d4ff;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-pink: #ec4899;
+      --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #a855f7 100%);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Outfit', -apple-system, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: var(--inbox-width, 420px) 6px 1fr;
+      grid-template-rows: 56px 1fr;
+      height: 100vh;
+    }
+
+    /* ========== HEADER ========== */
+    .header {
+      grid-column: 1 / -1;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+
+    /* ========== PANEL RESIZER ========== */
+    .panel-resizer {
+      grid-row: 2;
+      grid-column: 2;
+      background: var(--border);
+      cursor: col-resize;
+      position: relative;
+      z-index: 10;
+      transition: background 0.15s;
+    }
+
+    .panel-resizer:hover,
+    .panel-resizer.dragging {
+      background: var(--accent-cyan);
+    }
+
+    .panel-resizer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -4px;
+      right: -4px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .back-to-projects {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s;
+    }
+
+    .back-to-projects:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .back-arrow {
+      font-size: 16px;
+    }
+
+    .back-text {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .header-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    .project-title {
+      font-size: 15px;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      cursor: text;
+      outline: none;
+      max-width: 250px;
+    }
+
+    .project-title:hover {
+      background: var(--bg-elevated);
+      border-color: var(--border);
+    }
+
+    .project-title:focus {
+      background: var(--bg-deep);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .logo-text { font-weight: 600; font-size: 18px; }
+
+    .project-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .project-selector:hover { border-color: var(--border-bright); }
+
+    .project-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .project-name { font-size: 13px; font-weight: 500; }
+
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .view-tabs {
+      display: flex;
+      background: var(--bg-deep);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+    }
+
+    .view-tab {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .view-tab.active {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .env-toggle {
+      display: flex;
+      background: var(--bg-deep);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+    }
+
+    .env-btn {
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .env-btn.active {
+      background: var(--accent-cyan);
+      color: var(--bg-deep);
+    }
+
+    .header-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-btn.primary {
+      background: var(--gradient-primary);
+      border: none;
+      color: var(--bg-deep);
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* ========== LEFT PANEL - INBOX ========== */
+    .inbox-panel {
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .inbox-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .inbox-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .inbox-badge {
+      background: var(--accent-red);
+      color: white;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .inbox-tabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    .new-ticket-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--bg-deep);
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .new-ticket-btn:hover {
+      opacity: 0.9;
+    }
+
+    .inbox-tab {
+      padding: 4px 10px;
+      font-size: 11px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .inbox-tab.active {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    /* ========== INBOX LIST VIEW ========== */
+    .inbox-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .inbox-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .item-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+      border: 2px solid var(--border);
+    }
+
+    .item-from {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .inbox-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .inbox-item.unread {
+      background: rgba(0, 212, 255, 0.03);
+    }
+
+    .inbox-item.unread .item-subject {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .inbox-item.active {
+      background: rgba(0, 212, 255, 0.08);
+      border-left: 3px solid var(--accent-cyan);
+    }
+
+    .item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .item-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .item-subject {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      line-height: 1.3;
+    }
+
+    .item-preview {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-badges {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .item-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .item-badge.blocker {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+    }
+
+    .item-badge.decision {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--accent-amber);
+    }
+
+    .item-badge.update {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--accent-green);
+    }
+
+    .item-ticket-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(0, 212, 255, 0.15);
+      color: var(--accent-cyan);
+      font-size: 10px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .item-ticket-link:hover {
+      background: rgba(0, 212, 255, 0.25);
+    }
+
+    .item-ticket-link .arrow {
+      font-size: 8px;
+      transition: transform 0.2s;
+    }
+
+    .item-ticket-link:hover .arrow {
+      transform: translateX(2px);
+    }
+
+    /* ========== CHAT VIEW (slides in) ========== */
+    .chat-view {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-surface);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      z-index: 10;
+    }
+
+    .chat-view.active {
+      transform: translateX(0);
+    }
+
+    .chat-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .back-btn {
+      width: 32px;
+      height: 32px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      border-color: var(--border-bright);
+      color: var(--text-primary);
+    }
+
+    .chat-thread-info {
+      flex: 1;
+    }
+
+    .chat-thread-subject {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .chat-thread-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .message {
+      margin-bottom: 20px;
+    }
+
+    .message-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    .message-avatar.user {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .message-sender {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .message-time {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .message-bubble {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-left: 38px;
+    }
+
+    .message.user .message-bubble {
+      background: rgba(0, 212, 255, 0.1);
+      border-color: rgba(0, 212, 255, 0.2);
+    }
+
+    .message-options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .option-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover {
+      border-color: var(--accent-cyan);
+    }
+
+    .option-btn.selected {
+      border-color: var(--accent-green);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .option-key {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 2px 5px;
+      background: var(--bg-elevated);
+      border-radius: 3px;
+      color: var(--text-muted);
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .msg-btn {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .msg-btn.secondary {
+      background: var(--bg-deep);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .msg-btn.primary {
+      background: var(--gradient-primary);
+      color: var(--bg-deep);
+    }
+
+    .chat-input-area {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .chat-input-wrapper {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 12px 14px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      min-height: 44px;
+      max-height: 120px;
+      overflow-y: auto;
+      line-height: 1.5;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .chat-input:focus { border-color: var(--accent-cyan); }
+
+    .chat-input-tools {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .chat-tool-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 14px;
+    }
+
+    .chat-tool-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-bright);
+      color: var(--text-primary);
+    }
+
+    .chat-tool-btn.active {
+      background: rgba(0, 212, 255, 0.15);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    /* ========== DIAGRAM EDITOR MODAL ========== */
+    .diagram-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+    }
+
+    .diagram-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .diagram-modal {
+      width: 95vw;
+      height: 90vh;
+      max-width: 1600px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      transform: translateY(20px);
+      transition: transform 0.2s;
+    }
+
+    .diagram-modal-overlay.active .diagram-modal {
+      transform: translateY(0);
+    }
+
+    .diagram-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+
+    .diagram-header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .diagram-title {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+
+    .diagram-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .diagram-btn {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .diagram-btn.secondary {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .diagram-btn.secondary:hover {
+      border-color: var(--border-bright);
+      color: var(--text-primary);
+    }
+
+    .diagram-btn.primary {
+      background: var(--gradient-primary);
+      border: none;
+      color: var(--bg-deep);
+    }
+
+    .diagram-btn.primary:hover {
+      opacity: 0.9;
+    }
+
+    .diagram-close {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s;
+      margin-left: 8px;
+    }
+
+    .diagram-close:hover {
+      background: var(--bg-surface);
+      color: var(--text-primary);
+    }
+
+    .diagram-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .diagram-toolbar {
+      width: 56px;
+      background: var(--bg-elevated);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 8px;
+      gap: 4px;
+    }
+
+    .toolbar-divider {
+      width: 32px;
+      height: 1px;
+      background: var(--border);
+      margin: 8px 0;
+    }
+
+    .toolbar-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--text-secondary);
+    }
+
+    .toolbar-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .toolbar-btn.active {
+      background: rgba(0, 212, 255, 0.15);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .toolbar-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    .toolbar-btn[title]::after {
+      content: attr(title);
+      position: absolute;
+      left: 100%;
+      margin-left: 8px;
+      padding: 4px 8px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 11px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+    }
+
+    .diagram-canvas-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: #0d0d12;
+      background-image: 
+        linear-gradient(rgba(42, 42, 62, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42, 42, 62, 0.3) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    .diagram-canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Node text input overlay */
+    .node-text-input {
+      position: absolute;
+      background: transparent;
+      border: none;
+      outline: none;
+      text-align: center;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      color: var(--text-primary);
+      pointer-events: auto;
+      resize: none;
+      overflow: hidden;
+    }
+
+    .node-text-input:focus {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+    }
+
+    /* Resize handles */
+    .resize-handle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-cyan);
+      border: 1px solid white;
+      border-radius: 2px;
+    }
+
+    .resize-handle.nw { cursor: nw-resize; }
+    .resize-handle.ne { cursor: ne-resize; }
+    .resize-handle.sw { cursor: sw-resize; }
+    .resize-handle.se { cursor: se-resize; }
+    .resize-handle.n, .resize-handle.s { cursor: ns-resize; }
+    .resize-handle.e, .resize-handle.w { cursor: ew-resize; }
+
+    .diagram-footer {
+      padding: 8px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-elevated);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .diagram-footer-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .diagram-hint {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .diagram-hint kbd {
+      padding: 2px 6px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+    }
+
+    .zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 2px;
+    }
+
+    .zoom-btn {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+
+    .zoom-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .zoom-level {
+      font-size: 11px;
+      color: var(--text-muted);
+      min-width: 40px;
+      text-align: center;
+    }
+
+    .mermaid-preview {
+      display: none;
+      word-break: break-all;
+      max-height: 300px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    /* Diagram attached preview */
+    .diagram-attachment {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .diagram-attachment-icon {
+      font-size: 20px;
+    }
+
+    .diagram-attachment-info {
+      flex: 1;
+    }
+
+    .diagram-attachment-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .diagram-attachment-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .diagram-attachment-preview {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--accent-cyan);
+      background: var(--bg-deep);
+      padding: 2px 6px;
+      border-radius: 3px;
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .diagram-attachment-remove {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+
+    .diagram-attachment-remove:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+    }
+    
+    .chat-input:empty::before {
+      content: attr(data-placeholder);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .chat-input .inline-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid var(--accent-purple);
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin: 0 2px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent-purple);
+      vertical-align: middle;
+      user-select: all;
+    }
+
+    .chat-input .inline-tag::before {
+      content: '🎯';
+      font-size: 10px;
+    }
+
+    .chat-send {
+      width: 44px;
+      height: 44px;
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      color: var(--bg-deep);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ========== MAIN - PREVIEW AREA ========== */
+    .preview-area {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-deep);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .browser-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .browser-nav {
+      display: flex;
+      gap: 4px;
+    }
+
+    .nav-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .nav-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--border-bright);
+    }
+
+    .nav-btn:active {
+      transform: scale(0.95);
+    }
+
+    .url-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      min-width: 300px;
+    }
+
+    .url-icon { font-size: 12px; }
+    .url-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .preview-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .device-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .device-toggle:hover {
+      border-color: var(--border-bright);
+      background: var(--bg-hover);
+    }
+
+    .device-toggle .device-icon {
+      font-size: 14px;
+    }
+
+    .preview-frame.mobile-view {
+      max-width: 375px;
+      margin: 16px auto;
+      border-radius: var(--radius-lg);
+    }
+
+    /* Preview State Dropdown */
+    .preview-state {
+      position: relative;
+    }
+
+    .state-trigger {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-secondary);
+      transition: all 0.15s;
+    }
+
+    .state-trigger:hover {
+      border-color: var(--text-muted);
+    }
+
+    .state-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+    }
+
+    .state-label {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .state-separator {
+      color: var(--border);
+    }
+
+    .state-value {
+      color: var(--text-muted);
+    }
+
+    .state-chevron {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+
+    .state-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 360px;
+      max-height: 500px;
+      overflow-y: auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+      z-index: 100;
+      display: none;
+    }
+
+    .state-dropdown.open {
+      display: block;
+    }
+
+    .state-section {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .state-section:last-child {
+      border-bottom: none;
+    }
+
+    .state-section-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .state-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .state-option:hover {
+      background: var(--bg-elevated);
+    }
+
+    .state-option.active {
+      background: rgba(0, 212, 255, 0.1);
+    }
+
+    .state-option-icon {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 14px;
+      background: var(--bg-deep);
+    }
+
+    .state-option-content {
+      flex: 1;
+    }
+
+    .state-option-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .state-option-desc {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .state-option-check {
+      color: var(--accent-cyan);
+      font-size: 14px;
+      opacity: 0;
+    }
+
+    .state-option.active .state-option-check {
+      opacity: 1;
+    }
+
+    /* Collapsible Section Headers */
+    .section-header-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--bg-deep);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .section-header-toggle:hover {
+      background: var(--bg-hover);
+    }
+
+    .section-chevron {
+      color: var(--text-muted);
+      font-size: 12px;
+      transition: transform 0.2s;
+    }
+
+    .section-header-toggle.open .section-chevron {
+      transform: rotate(90deg);
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .section-value {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--accent-cyan);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .section-contents {
+      display: none;
+      padding-top: 8px;
+    }
+
+    .section-header-toggle.open + .section-contents {
+      display: block;
+    }
+
+    /* Test Data Form */
+    .test-data-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .test-data-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .test-data-key {
+      flex: 1;
+      padding: 8px 10px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--accent-cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      outline: none;
+    }
+
+    .test-data-value {
+      flex: 1.5;
+      padding: 8px 10px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      outline: none;
+    }
+
+    .test-data-key:focus,
+    .test-data-value:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .test-data-key::placeholder,
+    .test-data-value::placeholder {
+      color: var(--text-muted);
+    }
+
+    .test-data-remove {
+      width: 24px;
+      height: 24px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .test-data-remove:hover {
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+    }
+
+    .test-data-add {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+      background: transparent;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .test-data-add:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .feature-folder {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: background 0.1s;
+    }
+
+    .feature-folder:hover {
+      background: var(--bg-elevated);
+    }
+
+    .folder-icon {
+      font-size: 14px;
+    }
+
+    .folder-name {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .folder-chevron {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+
+    .feature-folder.open .folder-chevron {
+      transform: rotate(90deg);
+    }
+
+    .folder-contents {
+      padding-left: 12px;
+      border-left: 1px solid var(--border);
+      margin-left: 16px;
+      margin-bottom: 4px;
+    }
+
+    .folder-contents.collapsed {
+      display: none;
+    }
+
+    .folder-contents .state-option {
+      padding: 6px 10px;
+    }
+
+    .folder-contents .state-option-icon {
+      width: 24px;
+      height: 24px;
+      font-size: 12px;
+    }
+
+    .folder-contents .state-option-name {
+      font-size: 11px;
+    }
+
+    .folder-contents .state-option-desc {
+      font-size: 9px;
+    }
+
+    .preview-frame {
+      flex: 1;
+      background: #ffffff;
+      margin: 16px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Mock App Preview */
+    .mock-app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #f8fafc;
+    }
+
+    .mock-header {
+      background: white;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .mock-logo { font-size: 18px; font-weight: 700; color: #1e293b; }
+
+    .mock-nav { display: flex; gap: 24px; }
+    .mock-nav-item { font-size: 14px; color: #64748b; text-decoration: none; }
+    .mock-nav-item.active { color: #0ea5e9; font-weight: 500; }
+
+    .mock-user {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #8b5cf6, #d946ef);
+      border-radius: 50%;
+    }
+
+    .mock-body {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .mock-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 24px;
+    }
+
+    .mock-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .mock-stat {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .mock-stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    .mock-stat-value { font-size: 28px; font-weight: 700; color: #1e293b; }
+    .mock-stat-change { font-size: 12px; color: #22c55e; margin-top: 4px; }
+
+    .mock-chart {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+    }
+
+    .mock-chart-title { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 16px; }
+
+    .mock-chart-area {
+      height: 180px;
+      background: linear-gradient(180deg, rgba(14, 165, 233, 0.1) 0%, rgba(14, 165, 233, 0) 100%);
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .mock-chart-line {
+      position: absolute;
+      bottom: 20%;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #0ea5e9 0%, #8b5cf6 100%);
+      border-radius: 2px;
+      transform: rotate(-3deg);
+    }
+
+    .mock-table {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .mock-table-header {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      padding: 12px 20px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .mock-table-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13px;
+      color: #475569;
+    }
+
+    .mock-user-cell { display: flex; align-items: center; gap: 10px; }
+    .mock-user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f472b6, #fb923c);
+    }
+
+    .mock-badge {
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .mock-badge.active { background: #dcfce7; color: #16a34a; }
+    .mock-badge.pending { background: #fef9c3; color: #ca8a04; }
+
+    /* Edit Mode Toggle */
+    .edit-toggle {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .edit-toggle:hover {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 10px 40px rgba(0, 212, 255, 0.2);
+    }
+
+    .edit-toggle.active {
+      background: rgba(0, 212, 255, 0.1);
+      border-color: var(--accent-cyan);
+    }
+
+    .edit-toggle-icon {
+      font-size: 16px;
+    }
+
+    .edit-toggle-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .edit-toggle.active .edit-toggle-text {
+      color: var(--accent-cyan);
+    }
+
+    .edit-toggle-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 3px 8px;
+      background: var(--bg-deep);
+      border-radius: 4px;
+    }
+
+    /* Edit Mode Styles */
+    .preview-frame.edit-mode {
+      cursor: crosshair;
+    }
+
+    .preview-frame.edit-mode .mock-app * {
+      transition: outline 0.1s, background-color 0.1s;
+    }
+
+    .preview-frame.edit-mode .selectable-element {
+      outline: 2px dashed transparent;
+      outline-offset: 2px;
+    }
+
+    .preview-frame.edit-mode .selectable-element:hover {
+      outline-color: var(--accent-cyan);
+      background-color: rgba(0, 212, 255, 0.1) !important;
+    }
+
+    .preview-frame.edit-mode .selectable-element.selected {
+      outline-color: var(--accent-purple);
+      outline-style: solid;
+      background-color: rgba(168, 85, 247, 0.15) !important;
+    }
+
+    /* Chat attachment pill */
+    .chat-attachment {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid var(--accent-purple);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+      margin-bottom: 10px;
+    }
+
+    .attachment-icon {
+      font-size: 14px;
+    }
+
+    .attachment-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-purple);
+    }
+
+    .attachment-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      flex: 1;
+    }
+
+    .attachment-remove {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+    }
+
+    .attachment-remove:hover {
+      color: var(--text-primary);
+    }
+    
+    /* Message attachment display */
+    .message-attachment {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+    
+    .message-attachment-icon {
+      font-size: 12px;
+    }
+    
+    .message-attachment-name {
+      color: var(--accent-purple);
+      font-weight: 500;
+    }
+
+    .message-inline-tag {
+      display: inline;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent-purple);
+    }
+
+    .message-ticket-created {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .message-ticket-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 212, 255, 0.15);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent-cyan);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .message-ticket-badge:hover {
+      background: rgba(0, 212, 255, 0.25);
+      border-color: var(--accent-cyan);
+    }
+
+    .message-ticket-badge .ticket-icon {
+      font-size: 12px;
+    }
+
+    .message-ticket-badge .ticket-arrow {
+      font-size: 10px;
+      transition: transform 0.2s;
+    }
+
+    .message-ticket-badge:hover .ticket-arrow {
+      transform: translateX(2px);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--accent-green);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+
+    .toast.active { transform: translateY(0); opacity: 1; }
+
+    /* Ticket creation banner */
+    .ticket-banner {
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid var(--accent-cyan);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin: 12px 16px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .ticket-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ticket-banner-icon {
+      font-size: 16px;
+    }
+
+    .ticket-banner-text {
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .ticket-banner-text strong {
+      color: var(--accent-cyan);
+    }
+
+    .ticket-banner-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      background: rgba(0, 212, 255, 0.15);
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+    }
+
+    .ticket-banner-link:hover {
+      background: rgba(0, 212, 255, 0.25);
+    }
+
+    .ticket-banner-link .arrow {
+      transition: transform 0.2s;
+    }
+
+    .ticket-banner-link:hover .arrow {
+      transform: translateX(3px);
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ========== LAUNCH MODAL ========== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+      transform: translateY(20px);
+      transition: transform 0.2s;
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s;
+    }
+
+    .modal-close:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .domain-section {
+      margin-bottom: 20px;
+    }
+
+    .domain-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .domain-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .domain-input {
+      flex: 1;
+      padding: 12px 14px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .domain-input:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .domain-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .domain-btn {
+      padding: 12px 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .domain-btn:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .domain-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .domain-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 24px 0;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .domain-divider::before,
+    .domain-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .subdomain-section {
+      margin-bottom: 20px;
+    }
+
+    .subdomain-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+
+    .subdomain-icon {
+      font-size: 16px;
+    }
+
+    .subdomain-url {
+      flex: 1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .subdomain-status {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .subdomain-status.live {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--accent-green);
+    }
+
+    .dns-instructions {
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .dns-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .dns-record {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+    }
+
+    .dns-record-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 12px;
+    }
+
+    .dns-record-row:not(:last-child) {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dns-label {
+      color: var(--text-muted);
+    }
+
+    .dns-value {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-cyan);
+    }
+
+    .dns-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .modal-btn {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .modal-btn.secondary {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .modal-btn.secondary:hover {
+      border-color: var(--border-bright);
+      color: var(--text-primary);
+    }
+
+    .modal-btn.primary {
+      background: var(--gradient-primary);
+      border: none;
+      color: var(--bg-deep);
+    }
+
+    .modal-btn.primary:hover {
+      opacity: 0.9;
+    }
+
+    /* Deploy & Promote Modal Styles */
+    .deploy-modal {
+      max-width: 520px;
+    }
+
+    .deploy-modal .modal-body {
+      padding: 0;
+    }
+
+    .env-section {
+      padding: 20px 24px;
+      border: 2px solid transparent;
+      position: relative;
+    }
+
+    .env-section.staging {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .env-section.production {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, transparent 100%);
+    }
+
+    .env-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .env-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    .env-badge.staging {
+      background: rgba(245, 158, 11, 0.2);
+      color: #F59E0B;
+    }
+
+    .env-badge.production {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10B981;
+    }
+
+    .env-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .url-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
+    }
+
+    .url-box .url-icon {
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    .url-box .url-text {
+      flex: 1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .url-box .url-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .url-action-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.15s;
+    }
+
+    .url-action-btn:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .deploy-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    .deploy-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+
+    .deploy-info .commit-msg {
+      color: var(--text-secondary);
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .deploy-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .status-dot.live {
+      background: #10B981;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    }
+
+    .status-dot.staging {
+      background: #F59E0B;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+    }
+
+    .deploy-status.live {
+      color: #10B981;
+    }
+
+    .deploy-status.staging {
+      color: #F59E0B;
+    }
+
+    /* Promote Section */
+    .promote-section {
+      padding: 16px 24px;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .promote-arrow {
+      font-size: 18px;
+      color: var(--text-muted);
+    }
+
+    .promote-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 280px;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      border: none;
+      border-radius: var(--radius-md);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .promote-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .promote-btn:disabled {
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .promote-btn .promote-icon {
+      font-size: 16px;
+    }
+
+    /* Custom Domain Row */
+    .custom-domain-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg-elevated);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
+    }
+
+    .custom-domain-row .domain-icon {
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    .custom-domain-row .domain-text {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .custom-domain-row .domain-text.connected {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-primary);
+    }
+
+    .configure-btn {
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .configure-btn:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    /* Version History */
+    .version-history {
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .version-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .version-header:hover {
+      background: var(--bg-deep);
+    }
+
+    .version-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .version-toggle {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+
+    .version-toggle.open {
+      transform: rotate(180deg);
+    }
+
+    .version-list {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .version-list.open {
+      max-height: 300px;
+    }
+
+    .version-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .version-item:last-child {
+      border-bottom: none;
+    }
+
+    .version-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: transparent;
+      flex-shrink: 0;
+    }
+
+    .version-dot.current {
+      background: #10B981;
+      border-color: #10B981;
+    }
+
+    .version-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .version-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+
+    .version-number {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .version-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      background: rgba(16, 185, 129, 0.2);
+      color: #10B981;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    .version-commit {
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .version-time {
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .rollback-btn {
+      padding: 5px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .rollback-btn:hover {
+      border-color: #EF4444;
+      color: #EF4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Confirmation Modal */
+    .confirm-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+    }
+
+    .confirm-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .confirm-dialog {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      max-width: 380px;
+      width: 90%;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    .confirm-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .confirm-message {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .confirm-message strong {
+      color: var(--text-primary);
+    }
+
+    .confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .confirm-btn {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .confirm-btn.cancel {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .confirm-btn.cancel:hover {
+      border-color: var(--border-bright);
+      color: var(--text-primary);
+    }
+
+    .confirm-btn.promote {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      border: none;
+      color: white;
+    }
+
+    .confirm-btn.promote:hover {
+      opacity: 0.9;
+    }
+
+    .confirm-btn.rollback {
+      background: #EF4444;
+      border: none;
+      color: white;
+    }
+
+    .confirm-btn.rollback:hover {
+      background: #DC2626;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <a class="back-to-projects" href="home.html">←</a>
+        <div class="header-divider"></div>
+        <div class="project-title" id="projectTitle" contenteditable="true" spellcheck="false">SaaS Dashboard</div>
+      </div>
+
+      <div class="header-right">
+        <div class="view-tabs">
+          <button class="view-tab active">Preview</button>
+          <a class="view-tab" href="tickets.html">Pipeline</a>
+          <a class="view-tab" href="live.html">Live</a>
+        </div>
+        <button class="header-btn primary" onclick="openLaunchModal()">🚀 Launch</button>
+        <div class="avatar">RO</div>
+      </div>
+    </header>
+
+    <!-- Left Panel - Inbox -->
+    <aside class="inbox-panel">
+      <div class="inbox-header">
+        <div class="inbox-title">
+          📥 PM Inbox
+          <span class="inbox-badge">5</span>
+        </div>
+        <button class="new-ticket-btn" onclick="createNewRequest()">+ New Request</button>
+      </div>
+
+      <!-- Inbox List View -->
+      <div class="inbox-list" id="inboxList">
+        <div class="inbox-item unread" onclick="openThread(0)">
+          <img class="item-avatar" src="https://i.pravatar.cc/80?img=12" alt="Marcus">
+          <div class="item-content">
+            <div class="item-from">Marcus · Backend Dev</div>
+            <div class="item-header">
+              <span class="item-subject">🚨 Billing flow decision needed</span>
+              <span class="item-time">2 min ago</span>
+            </div>
+            <div class="item-preview">Should users see pricing before or after signup?</div>
+            <div class="item-badges">
+              <span class="item-badge blocker">Blocker</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="inbox-item unread" onclick="openThread(1)">
+          <img class="item-avatar" src="https://i.pravatar.cc/80?img=5" alt="Sophia">
+          <div class="item-content">
+            <div class="item-from">Sophia · Frontend Dev</div>
+            <div class="item-header">
+              <span class="item-subject">Chart library selection</span>
+              <span class="item-time">15 min ago</span>
+            </div>
+            <div class="item-preview">Which chart library should we use for analytics?</div>
+            <div class="item-badges">
+              <span class="item-badge decision">Decision</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="inbox-item" onclick="openThread(2)">
+          <img class="item-avatar" src="https://i.pravatar.cc/80?img=33" alt="Alex">
+          <div class="item-content">
+            <div class="item-from">Alex · Full Stack</div>
+            <div class="item-header">
+              <span class="item-subject">✅ Auth flow complete</span>
+              <span class="item-time">1 hour ago</span>
+            </div>
+            <div class="item-preview">User authentication is ready and tested.</div>
+            <div class="item-badges">
+              <span class="item-badge update">Update</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="inbox-item" onclick="openThread(3)">
+          <img class="item-avatar" src="https://i.pravatar.cc/80?img=59" alt="Jordan">
+          <div class="item-content">
+            <div class="item-from">Jordan · Database Eng</div>
+            <div class="item-header">
+              <span class="item-subject">Database schema review</span>
+              <span class="item-time">2 hours ago</span>
+            </div>
+            <div class="item-preview">I've set up the initial tables for users and billing...</div>
+            <div class="item-badges">
+              <span class="item-badge update">Update</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="inbox-item" onclick="openThread(4)">
+          <img class="item-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+          <div class="item-content">
+            <div class="item-from">Luna · Project Manager</div>
+            <div class="item-header">
+              <span class="item-subject">Project kickoff 🚀</span>
+              <span class="item-time">Yesterday</span>
+            </div>
+            <div class="item-preview">Welcome to your new project! I'll be your PM agent...</div>
+            <div class="item-badges">
+              <span class="item-badge update">Update</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat View (slides in when clicking an item) -->
+      <div class="chat-view" id="chatView">
+        <div class="chat-header">
+          <button class="back-btn" onclick="closeThread()">←</button>
+          <div class="chat-thread-info">
+            <div class="chat-thread-subject" id="threadSubject">Billing flow decision</div>
+            <div class="chat-thread-meta" id="threadMeta">Marcus · Backend Dev</div>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <!-- Messages will be populated by JS -->
+        </div>
+
+        <div class="chat-input-area">
+          <div id="diagramAttachment" style="display: none;"></div>
+          <div class="chat-input-wrapper">
+            <div class="chat-input" contenteditable="true" id="chatInput" data-placeholder="Type your reply..."></div>
+            <button class="chat-send" onclick="sendReply()">→</button>
+          </div>
+          <div class="chat-input-tools">
+            <button class="chat-tool-btn" onclick="openDiagramEditor()" title="Create Diagram">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="8" y="14" width="8" height="7" rx="1"/>
+                <path d="M6.5 10v2.5a1 1 0 001 1h9a1 1 0 001-1V10"/>
+                <path d="M12 13.5V14"/>
+              </svg>
+            </button>
+            <button class="chat-tool-btn" title="Attach File">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </button>
+            <button class="chat-tool-btn" title="Code Snippet">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16,18 22,12 16,6"/>
+                <polyline points="8,6 2,12 8,18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Panel Resizer -->
+    <div class="panel-resizer" id="panelResizer"></div>
+
+    <!-- Main - Preview Area -->
+    <main class="preview-area">
+      <div class="preview-toolbar">
+        <div class="browser-controls">
+          <div class="browser-nav">
+            <button class="nav-btn" title="Back">←</button>
+            <button class="nav-btn" title="Forward">→</button>
+            <button class="nav-btn" title="Reload">↻</button>
+          </div>
+          <div class="url-bar">
+            <span class="url-icon">🔒</span>
+            <span class="url-text">preview.tism.app/saas-dashboard</span>
+          </div>
+        </div>
+
+        <!-- Preview State -->
+        <div class="preview-state">
+          <div class="state-trigger" onclick="toggleStateDropdown()">
+            <span class="state-dot"></span>
+            <span class="state-label">Admin</span>
+            <span class="state-separator">•</span>
+            <span class="state-page">Dashboard</span>
+            <span class="state-chevron">▼</span>
+          </div>
+          <div class="state-dropdown" id="stateDropdown">
+            <div class="state-section">
+              <div class="section-header-toggle" onclick="toggleSection(this)">
+                <span class="section-chevron">›</span>
+                <span class="section-label">👑 User Role</span>
+                <span class="section-value">Admin</span>
+              </div>
+              <div class="section-contents">
+                <div class="state-option active" onclick="selectState(this, 'role')">
+                  <div class="state-option-icon">👑</div>
+                  <div class="state-option-content">
+                    <div class="state-option-name">Admin</div>
+                    <div class="state-option-desc">Full dashboard access</div>
+                  </div>
+                  <span class="state-option-check">✓</span>
+                </div>
+                <div class="state-option" onclick="selectState(this, 'role')">
+                  <div class="state-option-icon">👤</div>
+                  <div class="state-option-content">
+                    <div class="state-option-name">Member</div>
+                    <div class="state-option-desc">Limited access</div>
+                  </div>
+                  <span class="state-option-check">✓</span>
+                </div>
+                <div class="state-option" onclick="selectState(this, 'role')">
+                  <div class="state-option-icon">👁️</div>
+                  <div class="state-option-content">
+                    <div class="state-option-name">Viewer</div>
+                    <div class="state-option-desc">Read-only</div>
+                  </div>
+                  <span class="state-option-check">✓</span>
+                </div>
+              </div>
+            </div>
+            <div class="state-section">
+              <div class="section-header-toggle" onclick="toggleSection(this)">
+                <span class="section-chevron">›</span>
+                <span class="section-label">🗃️ Test Data</span>
+                <span class="section-value">3 fields</span>
+              </div>
+              <div class="section-contents">
+                <div class="test-data-fields" id="testDataFields">
+                  <div class="test-data-row">
+                    <input type="text" class="test-data-key" value="billing_plan" placeholder="key">
+                    <input type="text" class="test-data-value" value="pro_6mo" placeholder="value">
+                    <button class="test-data-remove" onclick="removeTestDataRow(this)">×</button>
+                  </div>
+                  <div class="test-data-row">
+                    <input type="text" class="test-data-key" value="subscription_status" placeholder="key">
+                    <input type="text" class="test-data-value" value="active" placeholder="value">
+                    <button class="test-data-remove" onclick="removeTestDataRow(this)">×</button>
+                  </div>
+                  <div class="test-data-row">
+                    <input type="text" class="test-data-key" value="trial_days_left" placeholder="key">
+                    <input type="text" class="test-data-value" value="0" placeholder="value">
+                    <button class="test-data-remove" onclick="removeTestDataRow(this)">×</button>
+                  </div>
+                </div>
+                <button class="test-data-add" onclick="addTestDataRow()">+ Add Field</button>
+              </div>
+            </div>
+            <div class="state-section">
+              <div class="state-section-title">Pages</div>
+              <div class="feature-folder" onclick="toggleFolder(this)">
+                <span class="folder-icon">📁</span>
+                <span class="folder-name">Dashboard</span>
+                <span class="folder-chevron">›</span>
+              </div>
+              <div class="folder-contents">
+                <div class="state-option active" onclick="selectPage(this, 'Dashboard')">
+                  <div class="state-option-icon">📊</div>
+                  <div class="state-option-content">
+                    <div class="state-option-name">Dashboard</div>
+                    <div class="state-option-desc">Main overview page</div>
+                  </div>
+                  <span class="state-option-check">✓</span>
+                </div>
+                <div class="state-option" onclick="selectPage(this, 'Analytics')">
+                  <div class="state-option-icon">📈</div>
+                  <div class="state-option-content">
+                    <div class="state-option-name">Analytics</div>
+                    <div class="state-option-desc">Charts and metrics</div>
+                  </div>
+                  <span class="state-option-check">✓</span>
+                </div>
+              </div>
+              <div class="feature-folder" onclick="toggleFolder(this)">
+                <span class="folder-icon">📁</span>
+                <span class="folder-name">Users</span>
+                <span class="folder-chevron">›</span>
+              </div>
+              <div class="folder-contents collapsed">
+                <div class="state-option" onclick="selectPage(this, 'User List')">
+                  <div class="state-option-icon">👥</div>
+                  <div class="state-option-content">
+                    <div class="state-option-name">User List</div>
+                    <div class="state-option-desc">All users table</div>
+                  </div>
+                  <span class="state-option-check">✓</span>
+                </div>
+                <div class="state-option" onclick="selectPage(this, 'User Profile')">
+                  <div class="state-option-icon">👤</div>
+                  <div class="state-option-content">
+                    <div class="state-option-name">User Profile</div>
+                    <div class="state-option-desc">Individual user view</div>
+                  </div>
+                  <span class="state-option-check">✓</span>
+                </div>
+              </div>
+              <div class="feature-folder" onclick="toggleFolder(this)">
+                <span class="folder-icon">📁</span>
+                <span class="folder-name">Billing</span>
+                <span class="folder-chevron">›</span>
+              </div>
+              <div class="folder-contents collapsed">
+                <div class="state-option" onclick="selectPage(this, 'Plans')">
+                  <div class="state-option-icon">💳</div>
+                  <div class="state-option-content">
+                    <div class="state-option-name">Plans</div>
+                    <div class="state-option-desc">Subscription tiers</div>
+                  </div>
+                  <span class="state-option-check">✓</span>
+                </div>
+                <div class="state-option" onclick="selectPage(this, 'Invoices')">
+                  <div class="state-option-icon">🧾</div>
+                  <div class="state-option-content">
+                    <div class="state-option-name">Invoices</div>
+                    <div class="state-option-desc">Payment history</div>
+                  </div>
+                  <span class="state-option-check">✓</span>
+                </div>
+              </div>
+              <div class="feature-folder" onclick="toggleFolder(this)">
+                <span class="folder-icon">📁</span>
+                <span class="folder-name">Settings</span>
+                <span class="folder-chevron">›</span>
+              </div>
+              <div class="folder-contents collapsed">
+                <div class="state-option" onclick="selectPage(this, 'General')">
+                  <div class="state-option-icon">⚙️</div>
+                  <div class="state-option-content">
+                    <div class="state-option-name">General</div>
+                    <div class="state-option-desc">App settings</div>
+                  </div>
+                  <span class="state-option-check">✓</span>
+                </div>
+                <div class="state-option" onclick="selectPage(this, 'Team')">
+                  <div class="state-option-icon">🏢</div>
+                  <div class="state-option-content">
+                    <div class="state-option-name">Team</div>
+                    <div class="state-option-desc">Team management</div>
+                  </div>
+                  <span class="state-option-check">✓</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-actions">
+          <button class="device-toggle" id="deviceToggle" onclick="toggleDevice()">
+            <span class="device-icon" id="deviceIcon">💻</span>
+            <span class="device-label" id="deviceLabel">Desktop</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="preview-frame">
+        <div class="mock-app">
+          <div class="mock-header">
+            <div class="mock-logo">Acme Dashboard</div>
+            <nav class="mock-nav">
+              <a class="mock-nav-item active">Dashboard</a>
+              <a class="mock-nav-item">Users</a>
+              <a class="mock-nav-item">Analytics</a>
+              <a class="mock-nav-item">Billing</a>
+              <a class="mock-nav-item">Settings</a>
+            </nav>
+            <div class="mock-user"></div>
+          </div>
+          <div class="mock-body" id="mockBody">
+            <!-- Content will be populated by JS based on selected page -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Mode Toggle -->
+      <div class="edit-toggle" id="editToggle" onclick="toggleEditMode()">
+        <span class="edit-toggle-icon">✏️</span>
+        <span class="edit-toggle-text">Click to Edit</span>
+        <span class="edit-toggle-hint">ESC to exit</span>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">
+    <span>✅</span>
+    <span id="toastText">Action completed</span>
+  </div>
+
+  <!-- Deploy & Promote Modal -->
+  <div class="modal-overlay" id="launchModal" onclick="closeLaunchModal(event)">
+    <div class="modal deploy-modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">🚀 Deploy & Promote</h2>
+        <button class="modal-close" onclick="closeLaunchModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Staging Section -->
+        <div class="env-section staging">
+          <div class="env-header">
+            <span class="env-badge staging">🟡 Staging</span>
+          </div>
+          <p class="env-desc">Your changes deploy here first for testing.</p>
+          
+          <div class="url-box">
+            <span class="url-icon">🔗</span>
+            <span class="url-text" id="stagingUrl">saas-dashboard-staging.tism.app</span>
+            <div class="url-actions">
+              <button class="url-action-btn" onclick="copyUrl('staging')" title="Copy URL">📋</button>
+              <button class="url-action-btn" onclick="openUrl('staging')" title="Open in new tab">↗</button>
+            </div>
+          </div>
+          
+          <div class="deploy-meta">
+            <div class="deploy-info">
+              <span class="commit-msg" id="stagingCommit">"Added dark mode toggle"</span>
+              <span>•</span>
+              <span id="stagingTime">2 mins ago</span>
+            </div>
+            <div class="deploy-status staging">
+              <span class="status-dot staging"></span>
+              <span>Deployed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Promote Section -->
+        <div class="promote-section">
+          <span class="promote-arrow">↓</span>
+          <button class="promote-btn" id="promoteBtn" onclick="showPromoteConfirm()">
+            <span class="promote-icon">⬆️</span>
+            <span>Promote to Production</span>
+          </button>
+        </div>
+
+        <!-- Production Section -->
+        <div class="env-section production">
+          <div class="env-header">
+            <span class="env-badge production">🟢 Production</span>
+          </div>
+          
+          <div class="url-box">
+            <span class="url-icon">🔗</span>
+            <span class="url-text" id="prodUrl">saas-dashboard.tism.app</span>
+            <div class="url-actions">
+              <button class="url-action-btn" onclick="copyUrl('prod')" title="Copy URL">📋</button>
+              <button class="url-action-btn" onclick="openUrl('prod')" title="Open in new tab">↗</button>
+            </div>
+          </div>
+
+          <div class="custom-domain-row" id="customDomainRow">
+            <span class="domain-icon">🌐</span>
+            <span class="domain-text" id="customDomainText">Add a custom domain</span>
+            <button class="configure-btn" onclick="showDomainConfig()">Configure</button>
+          </div>
+          
+          <div class="deploy-meta">
+            <div class="deploy-info">
+              <span class="commit-msg" id="prodCommit">"Fixed checkout bug"</span>
+              <span>•</span>
+              <span id="prodTime">3 days ago</span>
+            </div>
+            <div class="deploy-status live">
+              <span class="status-dot live"></span>
+              <span>Live</span>
+            </div>
+          </div>
+
+          <!-- Version History -->
+          <div class="version-history">
+            <div class="version-header" onclick="toggleVersionHistory()">
+              <div class="version-header-left">
+                <span>📜</span>
+                <span>Version History</span>
+              </div>
+              <span class="version-toggle" id="versionToggle">▼</span>
+            </div>
+            <div class="version-list" id="versionList">
+              <div class="version-item">
+                <span class="version-dot current"></span>
+                <div class="version-details">
+                  <div class="version-label">
+                    <span class="version-number">v12</span>
+                    <span class="version-tag">Current</span>
+                  </div>
+                  <span class="version-commit">"Fixed checkout bug"</span>
+                </div>
+                <span class="version-time">3 days ago</span>
+              </div>
+              <div class="version-item">
+                <span class="version-dot"></span>
+                <div class="version-details">
+                  <div class="version-label">
+                    <span class="version-number">v11</span>
+                  </div>
+                  <span class="version-commit">"Added dark mode"</span>
+                </div>
+                <span class="version-time">5 days ago</span>
+                <button class="rollback-btn" onclick="showRollbackConfirm('v11', 'Added dark mode')">Rollback</button>
+              </div>
+              <div class="version-item">
+                <span class="version-dot"></span>
+                <div class="version-details">
+                  <div class="version-label">
+                    <span class="version-number">v10</span>
+                  </div>
+                  <span class="version-commit">"Updated pricing page"</span>
+                </div>
+                <span class="version-time">1 week ago</span>
+                <button class="rollback-btn" onclick="showRollbackConfirm('v10', 'Updated pricing page')">Rollback</button>
+              </div>
+              <div class="version-item">
+                <span class="version-dot"></span>
+                <div class="version-details">
+                  <div class="version-label">
+                    <span class="version-number">v9</span>
+                  </div>
+                  <span class="version-commit">"New onboarding flow"</span>
+                </div>
+                <span class="version-time">2 weeks ago</span>
+                <button class="rollback-btn" onclick="showRollbackConfirm('v9', 'New onboarding flow')">Rollback</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn secondary" onclick="closeLaunchModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Promote Confirmation Dialog -->
+  <div class="confirm-overlay" id="promoteConfirm" onclick="closeConfirmDialog('promoteConfirm', event)">
+    <div class="confirm-dialog" onclick="event.stopPropagation()">
+      <div class="confirm-title">⬆️ Promote to Production?</div>
+      <p class="confirm-message">
+        This will make <strong id="promoteCommitMsg">"Added dark mode toggle"</strong> live for all users.
+      </p>
+      <div class="confirm-actions">
+        <button class="confirm-btn cancel" onclick="closeConfirmDialog('promoteConfirm')">Cancel</button>
+        <button class="confirm-btn promote" onclick="confirmPromote()">Yes, Promote</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rollback Confirmation Dialog -->
+  <div class="confirm-overlay" id="rollbackConfirm" onclick="closeConfirmDialog('rollbackConfirm', event)">
+    <div class="confirm-dialog" onclick="event.stopPropagation()">
+      <div class="confirm-title">⚠️ Rollback to <span id="rollbackVersion">v11</span>?</div>
+      <p class="confirm-message">
+        This will replace the current production with <strong id="rollbackCommitMsg">"Added dark mode"</strong>
+      </p>
+      <div class="confirm-actions">
+        <button class="confirm-btn cancel" onclick="closeConfirmDialog('rollbackConfirm')">Cancel</button>
+        <button class="confirm-btn rollback" onclick="confirmRollback()">Yes, Rollback</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Domain Configuration Dialog -->
+  <div class="confirm-overlay" id="domainConfigDialog" onclick="closeConfirmDialog('domainConfigDialog', event)">
+    <div class="confirm-dialog" onclick="event.stopPropagation()" style="max-width: 420px;">
+      <div class="confirm-title">🌐 Configure Custom Domain</div>
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">Domain</label>
+        <input type="text" id="customDomainInput" placeholder="yourdomain.com" style="width: 100%; padding: 12px 14px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); font-size: 14px; font-family: 'JetBrains Mono', monospace; outline: none; box-sizing: border-box;">
+      </div>
+      <div id="dnsInstructionsInline" style="display: none; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 16px;">
+        <div style="font-size: 12px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">DNS Configuration</div>
+        <div style="background: var(--bg-elevated); border-radius: var(--radius-sm); padding: 10px; font-size: 12px;">
+          <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
+            <span style="color: var(--text-muted);">Type</span>
+            <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);">CNAME</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
+            <span style="color: var(--text-muted);">Name</span>
+            <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);">@</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+            <span style="color: var(--text-muted);">Value</span>
+            <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);">proxy.tism.app</span>
+          </div>
+        </div>
+        <p style="font-size: 11px; color: var(--text-muted); margin-top: 10px; margin-bottom: 0;">DNS changes can take up to 48 hours to propagate.</p>
+      </div>
+      <div class="confirm-actions">
+        <button class="confirm-btn cancel" onclick="closeConfirmDialog('domainConfigDialog')">Cancel</button>
+        <button class="confirm-btn promote" onclick="saveDomainConfig()">Save Domain</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diagram Editor Modal -->
+  <div class="diagram-modal-overlay" id="diagramModal" onclick="closeDiagramEditor(event)">
+    <div class="diagram-modal" onclick="event.stopPropagation()">
+      <div class="diagram-header">
+        <div class="diagram-header-left">
+          <span class="diagram-title">Create Diagram</span>
+          <div style="display: flex; gap: 4px; margin-left: 16px;">
+            <button class="diagram-btn secondary" onclick="clearDiagram()">Clear</button>
+          </div>
+        </div>
+        <div class="diagram-header-actions">
+          <button class="diagram-btn secondary" onclick="closeDiagramEditor()">Cancel</button>
+          <button class="diagram-btn primary" onclick="insertDiagramToChat()">
+            Insert to Chat
+          </button>
+          <button class="diagram-close" onclick="closeDiagramEditor()">&times;</button>
+        </div>
+      </div>
+      <div class="diagram-body">
+        <div class="diagram-toolbar">
+          <!-- Selection tool -->
+          <button class="toolbar-btn active" data-shape="select" title="Select (V)" onclick="selectShape('select')">
+            <svg viewBox="0 0 24 24"><path d="M4 4l7 17 2.5-6.5L20 12z"/></svg>
+          </button>
+          
+          <div class="toolbar-divider"></div>
+          
+          <!-- Shapes -->
+          <button class="toolbar-btn" data-shape="rectangle" title="Rectangle (R)" onclick="selectShape('rectangle')">
+            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/></svg>
+          </button>
+          <button class="toolbar-btn" data-shape="rounded" title="Rounded (U)" onclick="selectShape('rounded')">
+            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="7"/></svg>
+          </button>
+          <button class="toolbar-btn" data-shape="diamond" title="Decision (D)" onclick="selectShape('diamond')">
+            <svg viewBox="0 0 24 24"><path d="M12 3L21 12L12 21L3 12Z"/></svg>
+          </button>
+          <button class="toolbar-btn" data-shape="circle" title="Circle (C)" onclick="selectShape('circle')">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+          </button>
+          <button class="toolbar-btn" data-shape="cylinder" title="Database" onclick="selectShape('cylinder')">
+            <svg viewBox="0 0 24 24"><path d="M12 5c3.866 0 7 1.12 7 2.5v9c0 1.38-3.134 2.5-7 2.5s-7-1.12-7-2.5v-9C5 6.12 8.134 5 12 5z"/><ellipse cx="12" cy="7.5" rx="7" ry="2.5"/></svg>
+          </button>
+          
+          <div class="toolbar-divider"></div>
+          
+          <!-- Connections -->
+          <button class="toolbar-btn" data-shape="arrow" title="Arrow (A)" onclick="selectShape('arrow')">
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M14 6l6 6-6 6"/></svg>
+          </button>
+          <button class="toolbar-btn" data-shape="line" title="Line (L)" onclick="selectShape('line')">
+            <svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>
+          </button>
+          
+          <div class="toolbar-divider"></div>
+          
+          <!-- Delete -->
+          <button class="toolbar-btn" data-shape="delete" title="Delete (Del)" onclick="selectShape('delete')">
+            <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>
+        </div>
+        
+        <div class="diagram-canvas-container" id="diagramContainer">
+          <canvas id="diagramCanvas" class="diagram-canvas"></canvas>
+          <div id="nodeTextOverlay"></div>
+        </div>
+      </div>
+      <div class="diagram-footer">
+        <div class="diagram-footer-left">
+          <span id="diagramNodeCount">0 nodes</span>
+          <span style="opacity: 0.5;">•</span>
+          <span id="diagramConnectionCount">0 connections</span>
+          <span style="opacity: 0.5; margin-left: 12px;">|</span>
+          <span class="diagram-hint">Drag <kbd>●</kbd> to connect</span>
+          <span class="diagram-hint">Click line to add bend</span>
+          <span class="diagram-hint">Double-click to edit text</span>
+        </div>
+        <div class="diagram-footer-right">
+          <div class="zoom-controls">
+            <button class="zoom-btn" onclick="zoomDiagram(-0.1)">−</button>
+            <span class="zoom-level" id="zoomLevel">100%</span>
+            <button class="zoom-btn" onclick="zoomDiagram(0.1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Hidden mermaid output -->
+  <div class="mermaid-preview" id="mermaidOutput" style="display:none;"></div>
+
+  <script>
+    // Thread data
+    // Agent definitions
+    const agents = {
+      marcus: { name: "Marcus", role: "Backend Dev", photo: "https://i.pravatar.cc/80?img=12" },
+      sophia: { name: "Sophia", role: "Frontend Dev", photo: "https://i.pravatar.cc/80?img=5" },
+      alex: { name: "Alex", role: "Full Stack", photo: "https://i.pravatar.cc/80?img=33" },
+      jordan: { name: "Jordan", role: "Database Eng", photo: "https://i.pravatar.cc/80?img=59" },
+      luna: { name: "Luna", role: "Project Manager", photo: "https://i.pravatar.cc/80?img=23" }
+    };
+
+    const threads = [
+      {
+        subject: "🚨 Billing flow decision needed",
+        page: "Plans",
+        role: "Admin",
+        db: "Staging DB",
+        agent: "marcus",
+        messages: [
+          {
+            from: "agent",
+            time: "2 min ago",
+            content: `<p>I need a decision on the billing flow. Should users see the pricing page <strong>before</strong> or <strong>after</strong> signup?</p>
+              <p style="margin-top: 8px; font-size: 11px; color: var(--text-muted);">Related: TSM-009 (Stripe integration)</p>`,
+            hasOptions: true,
+            options: ["Before signup (paywall first)", "After signup (freemium model)"]
+          }
+        ]
+      },
+      {
+        subject: "Chart library selection",
+        page: "Analytics",
+        role: "Admin",
+        db: "Staging DB",
+        agent: "sophia",
+        messages: [
+          {
+            from: "agent",
+            time: "15 min ago",
+            content: "<p>The analytics widgets are ready for review. Which chart library should we use for better performance?</p>",
+            hasOptions: true,
+            options: ["Recharts (React native)", "Chart.js (lightweight)", "D3.js (most flexible)"]
+          }
+        ]
+      },
+      {
+        subject: "✅ Auth flow complete",
+        page: "General",
+        role: "Admin",
+        db: "Staging DB",
+        agent: "alex",
+        messages: [
+          {
+            from: "agent",
+            time: "1 hour ago",
+            content: "<p>Great news! The user authentication flow is complete and tested. Here's what's included:</p><ul style='margin: 10px 0 0 20px; color: var(--text-secondary);'><li>Login with email/password</li><li>Social login (Google, GitHub)</li><li>Password reset flow</li><li>Email verification</li></ul><p style='margin-top: 10px;'>Moving TSM-002 to Done.</p>"
+          }
+        ]
+      },
+      {
+        subject: "Database schema review",
+        page: "User List",
+        role: "Admin",
+        db: "Test DB",
+        agent: "jordan",
+        messages: [
+          {
+            from: "agent",
+            time: "2 hours ago",
+            content: "<p>I've set up the initial database tables for the application:</p><ul style='margin: 10px 0 0 20px; color: var(--text-secondary);'><li><code>users</code> - User accounts and profiles</li><li><code>subscriptions</code> - Billing and plan info</li><li><code>analytics_events</code> - User activity tracking</li></ul><p style='margin-top: 10px;'>Let me know if you'd like any changes to the schema.</p>"
+          },
+          {
+            from: "user",
+            time: "1.5 hours ago",
+            content: "<p>Looks good! Can you add a <code>teams</code> table for multi-user organizations?</p>"
+          },
+          {
+            from: "agent",
+            time: "1 hour ago",
+            content: "<p>Done! I've added the <code>teams</code> table with proper relationships. Users can now belong to multiple teams.</p>"
+          }
+        ]
+      },
+      {
+        subject: "Project kickoff 🚀",
+        page: "Dashboard",
+        role: "Admin",
+        db: "Staging DB",
+        agent: "luna",
+        messages: [
+          {
+            from: "agent",
+            time: "Yesterday",
+            content: "<p>Welcome to your new SaaS Dashboard project! I'll be your project manager, helping you make decisions and coordinating with the dev team.</p><p style='margin-top: 10px;'>Here's the plan:</p><ol style='margin: 10px 0 0 20px; color: var(--text-secondary);'><li>Set up authentication</li><li>Build dashboard layout</li><li>Add analytics widgets</li><li>Integrate Stripe billing</li><li>User management features</li></ol><p style='margin-top: 10px;'>Let's build something great! 🎉</p>"
+          }
+        ]
+      }
+    ];
+
+    // Page templates for the mock preview
+    const pageTemplates = {
+      'Dashboard': `
+        <h1 class="mock-title">Dashboard Overview</h1>
+        <div class="mock-stats">
+          <div class="mock-stat">
+            <div class="mock-stat-label">Total Users</div>
+            <div class="mock-stat-value">12,847</div>
+            <div class="mock-stat-change">↑ 12% from last month</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-label">Active Now</div>
+            <div class="mock-stat-value">1,294</div>
+            <div class="mock-stat-change">↑ 8% from yesterday</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-label">Revenue</div>
+            <div class="mock-stat-value">$48.2K</div>
+            <div class="mock-stat-change">↑ 23% from last month</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-label">Churn Rate</div>
+            <div class="mock-stat-value">2.4%</div>
+            <div class="mock-stat-change" style="color: #22c55e;">↓ 0.3% improvement</div>
+          </div>
+        </div>
+        <div class="mock-chart">
+          <div class="mock-chart-title">Revenue Over Time</div>
+          <div class="mock-chart-area">
+            <div class="mock-chart-line"></div>
+          </div>
+        </div>
+      `,
+      'Analytics': `
+        <h1 class="mock-title">Analytics</h1>
+        <div class="mock-stats">
+          <div class="mock-stat">
+            <div class="mock-stat-label">Page Views</div>
+            <div class="mock-stat-value">284,392</div>
+            <div class="mock-stat-change">↑ 18% from last week</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-label">Bounce Rate</div>
+            <div class="mock-stat-value">32.4%</div>
+            <div class="mock-stat-change" style="color: #22c55e;">↓ 2.1% improvement</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-label">Avg. Session</div>
+            <div class="mock-stat-value">4m 32s</div>
+            <div class="mock-stat-change">↑ 12% from last week</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-label">Conversions</div>
+            <div class="mock-stat-value">1,847</div>
+            <div class="mock-stat-change">↑ 8% from last week</div>
+          </div>
+        </div>
+        <div class="mock-chart">
+          <div class="mock-chart-title">Traffic Sources</div>
+          <div class="mock-chart-area" style="display: flex; align-items: center; justify-content: center;">
+            <div style="font-size: 14px; color: #64748b;">📊 Select a chart library to display analytics</div>
+          </div>
+        </div>
+      `,
+      'Plans': `
+        <h1 class="mock-title">Billing & Plans</h1>
+        <div class="mock-stats" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="mock-stat" style="border: 2px solid #e2e8f0;">
+            <div class="mock-stat-label">Starter</div>
+            <div class="mock-stat-value">$9<span style="font-size: 14px; color: #64748b;">/mo</span></div>
+            <div style="margin-top: 12px; font-size: 12px; color: #64748b;">
+              <div>✓ 1,000 users</div>
+              <div>✓ Basic analytics</div>
+              <div>✓ Email support</div>
+            </div>
+          </div>
+          <div class="mock-stat" style="border: 2px solid #0ea5e9; position: relative;">
+            <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #0ea5e9; color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px;">Popular</div>
+            <div class="mock-stat-label">Pro</div>
+            <div class="mock-stat-value">$29<span style="font-size: 14px; color: #64748b;">/mo</span></div>
+            <div style="margin-top: 12px; font-size: 12px; color: #64748b;">
+              <div>✓ 10,000 users</div>
+              <div>✓ Advanced analytics</div>
+              <div>✓ Priority support</div>
+            </div>
+          </div>
+          <div class="mock-stat" style="border: 2px solid #e2e8f0;">
+            <div class="mock-stat-label">Enterprise</div>
+            <div class="mock-stat-value">$99<span style="font-size: 14px; color: #64748b;">/mo</span></div>
+            <div style="margin-top: 12px; font-size: 12px; color: #64748b;">
+              <div>✓ Unlimited users</div>
+              <div>✓ Custom analytics</div>
+              <div>✓ Dedicated support</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 24px; padding: 16px; background: #fef3c7; border-radius: 8px; font-size: 13px; color: #92400e;">
+          ⚠️ Decision needed: Should users see pricing before or after signup?
+        </div>
+      `,
+      'User List': `
+        <h1 class="mock-title">Users</h1>
+        <div class="mock-table">
+          <div class="mock-table-header">
+            <div>User</div>
+            <div>Status</div>
+            <div>Plan</div>
+            <div>Joined</div>
+          </div>
+          <div class="mock-table-row">
+            <div class="mock-user-cell">
+              <div class="mock-user-avatar"></div>
+              <span>Sarah Johnson</span>
+            </div>
+            <div><span class="mock-badge active">Active</span></div>
+            <div>Pro</div>
+            <div>Dec 1, 2024</div>
+          </div>
+          <div class="mock-table-row">
+            <div class="mock-user-cell">
+              <div class="mock-user-avatar" style="background: linear-gradient(135deg, #60a5fa, #34d399);"></div>
+              <span>Mike Chen</span>
+            </div>
+            <div><span class="mock-badge active">Active</span></div>
+            <div>Enterprise</div>
+            <div>Nov 28, 2024</div>
+          </div>
+          <div class="mock-table-row">
+            <div class="mock-user-cell">
+              <div class="mock-user-avatar" style="background: linear-gradient(135deg, #a78bfa, #f472b6);"></div>
+              <span>Emma Wilson</span>
+            </div>
+            <div><span class="mock-badge pending">Pending</span></div>
+            <div>Starter</div>
+            <div>Dec 5, 2024</div>
+          </div>
+        </div>
+      `,
+      'General': `
+        <h1 class="mock-title">Settings</h1>
+        <div class="mock-chart" style="margin-bottom: 16px;">
+          <div class="mock-chart-title">Authentication</div>
+          <div style="padding: 12px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+              <div>
+                <div style="font-size: 13px; font-weight: 500; color: #1e293b;">Email/Password Login</div>
+                <div style="font-size: 11px; color: #64748b;">Allow users to sign in with email</div>
+              </div>
+              <div style="width: 40px; height: 22px; background: #22c55e; border-radius: 11px; position: relative;">
+                <div style="width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; right: 2px; top: 2px;"></div>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+              <div>
+                <div style="font-size: 13px; font-weight: 500; color: #1e293b;">Google OAuth</div>
+                <div style="font-size: 11px; color: #64748b;">Sign in with Google account</div>
+              </div>
+              <div style="width: 40px; height: 22px; background: #22c55e; border-radius: 11px; position: relative;">
+                <div style="width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; right: 2px; top: 2px;"></div>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+              <div>
+                <div style="font-size: 13px; font-weight: 500; color: #1e293b;">GitHub OAuth</div>
+                <div style="font-size: 11px; color: #64748b;">Sign in with GitHub account</div>
+              </div>
+              <div style="width: 40px; height: 22px; background: #22c55e; border-radius: 11px; position: relative;">
+                <div style="width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; right: 2px; top: 2px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="padding: 16px; background: #dcfce7; border-radius: 8px; font-size: 13px; color: #166534;">
+          ✅ Auth flow complete and tested!
+        </div>
+      `
+    };
+
+    let currentThread = null;
+
+    // Initialize with Dashboard view immediately (script runs at end of body)
+    (function initDashboard() {
+      const mockBody = document.getElementById('mockBody');
+      if (mockBody && pageTemplates['Dashboard']) {
+        mockBody.innerHTML = pageTemplates['Dashboard'];
+      }
+    })();
+
+    function openThread(index) {
+      currentThread = index;
+      const thread = threads[index];
+      
+      // Mark as read
+      document.querySelectorAll('.inbox-item')[index].classList.remove('unread');
+      document.querySelectorAll('.inbox-item').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.inbox-item')[index].classList.add('active');
+      
+      // Update header
+      document.getElementById('threadSubject').textContent = thread.subject.replace(/[🚨✅🚀📊]/g, '').trim();
+      
+      // Update meta with agent info
+      const agentKey = thread.agent || 'luna';
+      const agentInfo = agents[agentKey] || agents.luna;
+      document.getElementById('threadMeta').textContent = `${agentInfo.name} · ${agentInfo.role}`;
+      
+      // Update preview page and state trigger based on thread context
+      if (thread.page) {
+        updatePreviewState(thread.page, thread.role, thread.db);
+      }
+      
+      // Get agent info for this thread (reuse agentKey from above)
+      const agent = agentInfo;
+      
+      // Build messages
+      const messagesHtml = thread.messages.map((msg, i) => {
+        const isUser = msg.from === 'user';
+        let optionsHtml = '';
+        
+        if (msg.hasOptions) {
+          optionsHtml = `
+            <div class="message-options">
+              ${msg.options.map((opt, j) => `
+                <button class="option-btn" onclick="selectOption(this)">
+                  ${opt}
+                  <span class="option-key">${String.fromCharCode(65 + j)}</span>
+                </button>
+              `).join('')}
+            </div>
+            <div class="message-actions">
+              <button class="msg-btn secondary" onclick="skipDecision()">Skip for now</button>
+              <button class="msg-btn primary" onclick="submitDecision()">Submit Decision</button>
+            </div>
+          `;
+        }
+        
+        const avatarHtml = isUser 
+          ? '<div class="message-avatar user">RO</div>'
+          : `<img class="message-avatar" src="${agent.photo}" alt="${agent.name}">`;
+        
+        const senderName = isUser ? 'You' : `${agent.name} · ${agent.role}`;
+        
+        return `
+          <div class="message ${isUser ? 'user' : ''}">
+            <div class="message-header">
+              ${avatarHtml}
+              <span class="message-sender">${senderName}</span>
+              <span class="message-time">${msg.time}</span>
+            </div>
+            <div class="message-bubble">
+              ${msg.content}
+              ${optionsHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('chatMessages').innerHTML = messagesHtml;
+      
+      // Show chat view
+      document.getElementById('chatView').classList.add('active');
+    }
+
+    function closeThread() {
+      // Check if this is a new thread with no messages - discard it
+      if (currentThread !== null && threads[currentThread]) {
+        const thread = threads[currentThread];
+        if (thread.isNew && thread.messages.length === 0) {
+          // Remove from threads array
+          threads.splice(currentThread, 1);
+          
+          // Remove from inbox list
+          const inboxItems = document.querySelectorAll('.inbox-item');
+          if (inboxItems[currentThread]) {
+            inboxItems[currentThread].remove();
+          }
+          
+          // Update remaining inbox item indices
+          updateInboxIndices();
+        }
+      }
+      
+      // Clear input
+      document.getElementById('chatInput').innerHTML = '';
+      
+      document.getElementById('chatView').classList.remove('active');
+      document.querySelectorAll('.inbox-item').forEach(item => item.classList.remove('active'));
+      currentThread = null;
+    }
+    
+    function updateInboxIndices() {
+      // Update all inbox items to point to correct thread indices
+      const items = document.querySelectorAll('.inbox-item');
+      items.forEach((item, i) => {
+        item.onclick = () => openThread(i);
+      });
+    }
+
+    function selectOption(btn) {
+      const parent = btn.closest('.message-options');
+      parent.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    function submitDecision() {
+      const selected = document.querySelector('.option-btn.selected');
+      if (!selected) {
+        showToast('Please select an option first');
+        return;
+      }
+      
+      // Add user response
+      const choice = selected.textContent.trim().split('\n')[0];
+      addMessage('user', `Let's go with "${choice}"`);
+      
+      // Add agent confirmation
+      setTimeout(() => {
+        addMessage('pm', `<p>Got it! I'll implement that now. The Builder agent will update the code shortly.</p>`);
+        showToast('Decision submitted! Agent is implementing...');
+      }, 500);
+      
+      // Remove options
+      document.querySelector('.message-options').remove();
+      document.querySelector('.message-actions').remove();
+    }
+
+    function skipDecision() {
+      showToast('Skipped for now');
+      closeThread();
+    }
+
+    function addMessage(from, content, ticketId = null) {
+      const isUser = from === 'user';
+      
+      // Get current thread's agent
+      const thread = currentThread !== null ? threads[currentThread] : null;
+      const agentKey = thread?.agent || 'luna';
+      const agent = agents[agentKey] || agents.luna;
+      
+      const ticketBadge = ticketId ? `
+        <div class="message-ticket-created">
+          <a href="tickets.html?highlight=${ticketId}" class="message-ticket-badge">
+            <span class="ticket-icon">🎫</span>
+            Created ${ticketId}
+            <span class="ticket-arrow">→</span>
+          </a>
+        </div>
+      ` : '';
+      
+      const avatarHtml = isUser 
+        ? '<div class="message-avatar user">RO</div>'
+        : `<img class="message-avatar" src="${agent.photo}" alt="${agent.name}">`;
+      
+      const senderName = isUser ? 'You' : `${agent.name} · ${agent.role}`;
+      
+      const html = `
+        <div class="message ${isUser ? 'user' : ''}">
+          <div class="message-header">
+            ${avatarHtml}
+            <span class="message-sender">${senderName}</span>
+            <span class="message-time">Just now</span>
+            ${ticketBadge}
+          </div>
+          <div class="message-bubble">${content}</div>
+        </div>
+      `;
+      document.getElementById('chatMessages').insertAdjacentHTML('beforeend', html);
+      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+    }
+
+    // Track ticket counter
+    let ticketCounter = 15; // Start after existing tickets
+
+    function sendReply() {
+      const input = document.getElementById('chatInput');
+      const textContent = input.textContent.trim();
+      if (!textContent) return;
+      
+      // Get the HTML content with inline tags converted to display format
+      let messageHtml = '';
+      input.childNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          messageHtml += node.textContent;
+        } else if (node.classList && node.classList.contains('inline-tag')) {
+          const name = node.getAttribute('data-element-name');
+          messageHtml += '<span class="message-inline-tag">🎯 ' + name + '</span>';
+        }
+      });
+      
+      addMessage('user', '<p>' + messageHtml + '</p>');
+      const userMsg = textContent;
+      input.innerHTML = '';
+      
+      // Mark the thread as having messages (so it won't be discarded)
+      if (currentThread !== null && threads[currentThread]) {
+        threads[currentThread].messages.push({ from: 'user', content: userMsg });
+      }
+      
+      // Generate new ticket ID
+      const ticketId = 'TSM-' + String(ticketCounter).padStart(3, '0');
+      ticketCounter++;
+      
+      setTimeout(() => {
+        addMessage('pm', '<p>Got it! I\'m creating a ticket for this request...</p>');
+        if (currentThread !== null && threads[currentThread]) {
+          threads[currentThread].messages.push({ from: 'pm', content: 'Got it!' });
+          threads[currentThread].ticketId = ticketId; // Store ticket ID on thread
+        }
+        
+        // Show ticket creation message with link
+        setTimeout(() => {
+          showTicketBanner(ticketId, textContent);
+          addMessage('pm', '<p>✅ Ticket created! The dev agents will start working on this shortly.</p>', ticketId);
+          
+          // Update inbox item to show ticket link
+          updateInboxItemWithTicket(currentThread, ticketId);
+        }, 1000);
+      }, 800);
+    }
+
+    function updateInboxItemWithTicket(threadIndex, ticketId) {
+      const inboxItems = document.querySelectorAll('.inbox-item');
+      if (inboxItems[threadIndex]) {
+        const badgesContainer = inboxItems[threadIndex].querySelector('.item-badges');
+        if (badgesContainer) {
+          // Check if ticket link already exists
+          if (!badgesContainer.querySelector('.item-ticket-link')) {
+            const ticketLink = document.createElement('a');
+            ticketLink.className = 'item-ticket-link';
+            ticketLink.href = 'tickets.html?highlight=' + ticketId;
+            ticketLink.innerHTML = '🎫 ' + ticketId + ' <span class="arrow">→</span>';
+            ticketLink.onclick = (e) => e.stopPropagation(); // Prevent opening thread when clicking link
+            badgesContainer.appendChild(ticketLink);
+          }
+        } else {
+          // Create badges container if it doesn't exist
+          const itemContent = inboxItems[threadIndex].querySelector('.item-content');
+          if (itemContent) {
+            const newBadges = document.createElement('div');
+            newBadges.className = 'item-badges';
+            const ticketLink = document.createElement('a');
+            ticketLink.className = 'item-ticket-link';
+            ticketLink.href = 'tickets.html?highlight=' + ticketId;
+            ticketLink.innerHTML = '🎫 ' + ticketId + ' <span class="arrow">→</span>';
+            ticketLink.onclick = (e) => e.stopPropagation();
+            newBadges.appendChild(ticketLink);
+            itemContent.appendChild(newBadges);
+          }
+        }
+      }
+    }
+
+    function showTicketBanner(ticketId, description) {
+      // Remove any existing banner
+      const existingBanner = document.querySelector('.ticket-banner');
+      if (existingBanner) existingBanner.remove();
+      
+      // Create banner
+      const banner = document.createElement('div');
+      banner.className = 'ticket-banner';
+      banner.innerHTML = `
+        <div class="ticket-banner-left">
+          <span class="ticket-banner-icon">🎫</span>
+          <span class="ticket-banner-text">Ticket being created: <strong>${ticketId}</strong></span>
+        </div>
+        <a href="tickets.html?highlight=${ticketId}" class="ticket-banner-link">
+          See progress <span class="arrow">→</span>
+        </a>
+      `;
+      
+      // Insert after chat header
+      const chatHeader = document.querySelector('.chat-header');
+      chatHeader.insertAdjacentElement('afterend', banner);
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastText').textContent = text;
+      toast.classList.add('active');
+      setTimeout(() => toast.classList.remove('active'), 3000);
+    }
+
+    function createNewRequest() {
+      // Open a new conversation for creating a request
+      const newThread = { 
+        subject: 'New Request', 
+        messages: [],
+        isNew: true,
+        agent: 'luna'
+      };
+      threads.unshift(newThread);
+      
+      // Update all existing onclick handlers to point to correct indices
+      updateInboxIndices();
+      
+      // Add to inbox list
+      const inboxList = document.getElementById('inboxList');
+      const newItem = document.createElement('div');
+      newItem.className = 'inbox-item active';
+      newItem.onclick = () => openThread(0);
+      newItem.innerHTML = `<img class="item-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna"><div class="item-content"><div class="item-from">Luna · Project Manager</div><div class="item-header"><span class="item-subject">New Request</span><span class="item-time">Just now</span></div><div class="item-preview">Tell me what you need built...</div></div>`;
+      inboxList.insertBefore(newItem, inboxList.firstChild);
+      
+      // Open the thread
+      currentThread = 0;
+      document.getElementById('threadSubject').textContent = 'New Request';
+      document.getElementById('threadMeta').textContent = 'Luna · Project Manager';
+      document.getElementById('chatMessages').innerHTML = '';
+      document.getElementById('chatInput').setAttribute('data-placeholder', 'Tell Luna what you need built...');
+      document.getElementById('chatView').classList.add('active');
+      document.getElementById('chatInput').focus();
+    }
+
+    // Enter to send
+    document.getElementById('chatInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendReply();
+      }
+    });
+
+    // Tab switching
+    document.querySelectorAll('.inbox-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.inbox-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      });
+    });
+
+    // Edit Mode
+    let editMode = false;
+    let selectedElement = null;
+
+    function toggleEditMode() {
+      editMode = !editMode;
+      const toggle = document.getElementById('editToggle');
+      const frame = document.querySelector('.preview-frame');
+      
+      if (editMode) {
+        toggle.classList.add('active');
+        toggle.querySelector('.edit-toggle-text').textContent = 'Select an element';
+        frame.classList.add('edit-mode');
+        initSelectableElements();
+      } else {
+        toggle.classList.remove('active');
+        toggle.querySelector('.edit-toggle-text').textContent = 'Click to Edit';
+        frame.classList.remove('edit-mode');
+        clearSelection();
+      }
+    }
+
+    function initSelectableElements() {
+      ['.mock-app-header', '.mock-nav', '.mock-stat', '.mock-chart', '.mock-table'].forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => {
+          el.classList.add('selectable-element');
+          el.addEventListener('click', handleElementClick);
+        });
+      });
+    }
+
+    function handleElementClick(e) {
+      if (!editMode) return;
+      e.stopPropagation();
+      
+      // Get element info
+      let name = 'Element', desc = 'UI component';
+      if (this.classList.contains('mock-app-header')) { name = 'App Header'; desc = 'Navigation bar with logo and menu'; }
+      else if (this.classList.contains('mock-nav')) { name = 'Navigation Menu'; desc = 'Main navigation links'; }
+      else if (this.classList.contains('mock-stat')) { const l = this.querySelector('.mock-stat-label')?.textContent || 'Stat'; name = l + ' Card'; desc = 'Metric card showing ' + l.toLowerCase(); }
+      else if (this.classList.contains('mock-chart')) { name = 'Revenue Chart'; desc = 'Line chart showing revenue over time'; }
+      else if (this.classList.contains('mock-table')) { name = 'Users Table'; desc = 'Table listing user accounts'; }
+      
+      // Flash selection effect
+      this.classList.add('selected');
+      setTimeout(() => this.classList.remove('selected'), 300);
+      
+      // Immediately open chat with element attached
+      openChatWithElement(name, desc);
+    }
+
+    function clearSelection() {
+      document.querySelectorAll('.selectable-element').forEach(el => {
+        el.classList.remove('selectable-element', 'selected');
+        el.removeEventListener('click', handleElementClick);
+      });
+      selectedElement = null;
+    }
+
+    function openChatWithElement(name, desc) {
+      // Exit edit mode
+      toggleEditMode();
+      
+      // If already in a chat, just add the attachment to that chat
+      const chatView = document.getElementById('chatView');
+      if (chatView.classList.contains('active') && currentThread !== null) {
+        showAttachmentInInput(name, desc);
+        document.getElementById('chatInput').focus();
+        return;
+      }
+      
+      // Create thread with element attachment
+      const newThread = { 
+        subject: name, 
+        attachment: { name: name, desc: desc },
+        messages: [],
+        isNew: true
+      };
+      threads.unshift(newThread);
+      
+      // Update all existing onclick handlers to point to correct indices
+      updateInboxIndices();
+      
+      // Add to inbox list
+      const inboxList = document.getElementById('inboxList');
+      const newItem = document.createElement('div');
+      newItem.className = 'inbox-item active';
+      newItem.setAttribute('data-thread-index', '0');
+      newItem.onclick = () => openThread(0);
+      newItem.innerHTML = '<div class="item-content"><div class="item-header"><span class="item-subject">' + name + '</span><span class="item-time">Just now</span></div><div class="item-preview">What would you like to change?</div></div>';
+      inboxList.insertBefore(newItem, inboxList.firstChild);
+      
+      // Open thread with attachment visible
+      openThreadWithAttachment(0, name, desc);
+    }
+    
+    function openThreadWithAttachment(index, elementName, elementDesc) {
+      currentThread = index;
+      const thread = threads[index];
+      
+      // Update header
+      document.getElementById('threadSubject').textContent = 'New Chat';
+      
+      // Show empty chat with attachment context
+      document.getElementById('chatMessages').innerHTML = '';
+      
+      // Show attachment pill in input area and focus
+      showAttachmentInInput(elementName, elementDesc);
+      
+      // Show chat view
+      document.getElementById('chatView').classList.add('active');
+      document.getElementById('chatInput').focus();
+    }
+    
+    // Store saved cursor position for inserting tags
+    let savedInputRange = null;
+    
+    // Save cursor position when input loses focus
+    document.getElementById('chatInput').addEventListener('blur', function() {
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0 && this.contains(selection.anchorNode)) {
+        savedInputRange = selection.getRangeAt(0).cloneRange();
+      }
+    });
+    
+    function showAttachmentInInput(name, desc) {
+      const input = document.getElementById('chatInput');
+      
+      // Create inline tag element
+      const tag = document.createElement('span');
+      tag.className = 'inline-tag';
+      tag.contentEditable = 'false';
+      tag.setAttribute('data-element-name', name);
+      tag.setAttribute('data-element-desc', desc);
+      tag.textContent = name;
+      
+      input.focus();
+      const selection = window.getSelection();
+      
+      // Try to use saved range if we have one and it's still valid
+      let range = null;
+      if (savedInputRange && input.contains(savedInputRange.startContainer)) {
+        range = savedInputRange;
+      } else if (selection.rangeCount > 0 && input.contains(selection.anchorNode)) {
+        range = selection.getRangeAt(0);
+      }
+      
+      if (range) {
+        // Insert at cursor position
+        selection.removeAllRanges();
+        selection.addRange(range);
+        range.deleteContents();
+        range.insertNode(tag);
+        
+        // Add a space after the tag and move cursor there
+        const space = document.createTextNode(' ');
+        range.setStartAfter(tag);
+        range.insertNode(space);
+        range.setStartAfter(space);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      } else {
+        // Insert at end
+        input.appendChild(tag);
+        const space = document.createTextNode(' ');
+        input.appendChild(space);
+        // Move cursor to end
+        const newRange = document.createRange();
+        newRange.selectNodeContents(input);
+        newRange.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+      }
+      
+      // Clear saved range
+      savedInputRange = null;
+    }
+    
+    function removeAttachment() {
+      // No longer needed - tags are inline and can be deleted naturally
+    }
+
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && editMode) toggleEditMode(); });
+
+    // State Dropdown
+    function toggleStateDropdown() {
+      const dropdown = document.getElementById('stateDropdown');
+      dropdown.classList.toggle('open');
+    }
+
+    // Section Toggle
+    function toggleSection(header) {
+      header.classList.toggle('open');
+    }
+
+    // Test Data Functions
+    function updateTestDataCount() {
+      const count = document.querySelectorAll('#testDataFields .test-data-row').length;
+      const section = document.getElementById('testDataFields').closest('.state-section');
+      const sectionValue = section.querySelector('.section-value');
+      if (sectionValue) sectionValue.textContent = count + ' field' + (count !== 1 ? 's' : '');
+    }
+
+    function addTestDataRow() {
+      const container = document.getElementById('testDataFields');
+      const row = document.createElement('div');
+      row.className = 'test-data-row';
+      row.innerHTML = `
+        <input type="text" class="test-data-key" placeholder="key">
+        <input type="text" class="test-data-value" placeholder="value">
+        <button class="test-data-remove" onclick="removeTestDataRow(this)">×</button>
+      `;
+      container.appendChild(row);
+      row.querySelector('.test-data-key').focus();
+      updateTestDataCount();
+    }
+
+    function removeTestDataRow(btn) {
+      const row = btn.closest('.test-data-row');
+      row.remove();
+      updateTestDataCount();
+    }
+
+    function selectState(el, type) {
+      // Update selection in dropdown
+      const section = el.closest('.state-section');
+      section.querySelectorAll('.state-option').forEach(opt => opt.classList.remove('active'));
+      el.classList.add('active');
+      
+      // Update trigger display
+      const name = el.querySelector('.state-option-name').textContent;
+      const trigger = document.querySelector('.state-trigger');
+      
+      if (type === 'role') {
+        trigger.querySelector('.state-label').textContent = name;
+        // Update section header value
+        const sectionValue = section.querySelector('.section-value');
+        if (sectionValue) sectionValue.textContent = name;
+      }
+      
+      showToast('Preview updated: ' + name);
+    }
+
+    function toggleFlag(el) {
+      el.classList.toggle('active');
+      const name = el.querySelector('.state-option-name').textContent;
+      const enabled = el.classList.contains('active');
+      showToast(name + (enabled ? ' enabled' : ' disabled'));
+    }
+
+    function toggleFolder(el) {
+      el.classList.toggle('open');
+      const contents = el.nextElementSibling;
+      if (contents && contents.classList.contains('folder-contents')) {
+        contents.classList.toggle('collapsed');
+      }
+    }
+
+    function selectPage(el, pageName) {
+      // Update selection in all folders
+      document.querySelectorAll('.folder-contents .state-option').forEach(opt => opt.classList.remove('active'));
+      el.classList.add('active');
+      
+      // Update displays
+      document.querySelector('.state-page').textContent = pageName;
+      
+      // Update mock app nav highlight
+      updateMockNavHighlight(pageName);
+      
+      // Update mock body content
+      if (pageTemplates[pageName]) {
+        document.getElementById('mockBody').innerHTML = pageTemplates[pageName];
+      }
+      
+      showToast('Navigated to ' + pageName);
+    }
+
+    function updateMockNavHighlight(pageName) {
+      document.querySelectorAll('.mock-nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.textContent === pageName || 
+            (pageName === 'Dashboard' && item.textContent === 'Dashboard') ||
+            (pageName === 'Analytics' && item.textContent === 'Analytics') ||
+            (pageName === 'User List' && item.textContent === 'Users') ||
+            (pageName === 'User Profile' && item.textContent === 'Users') ||
+            (pageName === 'Plans' && item.textContent === 'Billing') ||
+            (pageName === 'Invoices' && item.textContent === 'Billing') ||
+            (pageName === 'General' && item.textContent === 'Settings') ||
+            (pageName === 'Team' && item.textContent === 'Settings')) {
+          item.classList.add('active');
+        }
+      });
+    }
+
+    function updatePreviewState(pageName, roleName, dbName) {
+      // Update page display in state trigger
+      document.querySelector('.state-page').textContent = pageName;
+      
+      // Update page selection in dropdown
+      document.querySelectorAll('.folder-contents .state-option').forEach(opt => {
+        opt.classList.remove('active');
+        const optName = opt.querySelector('.state-option-name')?.textContent;
+        if (optName === pageName) {
+          opt.classList.add('active');
+          // Expand parent folder
+          const folderContents = opt.closest('.folder-contents');
+          if (folderContents) {
+            folderContents.classList.remove('collapsed');
+            const folder = folderContents.previousElementSibling;
+            if (folder && folder.classList.contains('feature-folder')) {
+              folder.classList.add('open');
+            }
+          }
+        }
+      });
+      
+      // Update role if provided
+      if (roleName) {
+        document.querySelector('.state-label').textContent = roleName;
+        // Update role selection in dropdown
+        document.querySelectorAll('.state-section').forEach(section => {
+          const title = section.querySelector('.state-section-title');
+          if (title && title.textContent === 'User Role') {
+            section.querySelectorAll('.state-option').forEach(opt => {
+              opt.classList.remove('active');
+              const optName = opt.querySelector('.state-option-name')?.textContent;
+              if (optName === roleName) {
+                opt.classList.add('active');
+              }
+            });
+          }
+        });
+      }
+      
+      // Update database if provided
+      if (dbName) {
+        // Update db selection in dropdown
+        document.querySelectorAll('.state-section').forEach(section => {
+          const title = section.querySelector('.state-section-title');
+          if (title && title.textContent === 'Database') {
+            section.querySelectorAll('.state-option').forEach(opt => {
+              opt.classList.remove('active');
+              const optName = opt.querySelector('.state-option-name')?.textContent;
+              if (optName === dbName) {
+                opt.classList.add('active');
+              }
+            });
+          }
+        });
+      }
+      
+      // Update mock app nav highlight
+      updateMockNavHighlight(pageName);
+      
+      // Update mock body content
+      if (pageTemplates[pageName]) {
+        document.getElementById('mockBody').innerHTML = pageTemplates[pageName];
+      }
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('stateDropdown');
+      const trigger = document.querySelector('.state-trigger');
+      if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
+        dropdown.classList.remove('open');
+      }
+    });
+
+    // ========== PROJECT TITLE EDITING ==========
+    const projectTitle = document.getElementById('projectTitle');
+    let originalTitle = projectTitle.textContent;
+
+    projectTitle.addEventListener('focus', () => {
+      originalTitle = projectTitle.textContent;
+    });
+
+    projectTitle.addEventListener('blur', () => {
+      const newTitle = projectTitle.textContent.trim();
+      if (newTitle && newTitle !== originalTitle) {
+        showToast(`Project renamed to "${newTitle}"`);
+      } else if (!newTitle) {
+        projectTitle.textContent = originalTitle;
+      }
+    });
+
+    projectTitle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        projectTitle.blur();
+      }
+      if (e.key === 'Escape') {
+        projectTitle.textContent = originalTitle;
+        projectTitle.blur();
+      }
+    });
+
+    projectTitle.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = e.clipboardData.getData('text/plain').replace(/\n/g, ' ');
+      document.execCommand('insertText', false, text);
+    });
+
+    // ========== PANEL RESIZER ==========
+    const resizer = document.getElementById('panelResizer');
+    const app = document.querySelector('.app');
+    let isResizing = false;
+    let startX, startWidth;
+
+    // Restore saved width from localStorage
+    const savedWidth = localStorage.getItem('inboxPanelWidth');
+    if (savedWidth) {
+      app.style.setProperty('--inbox-width', savedWidth + 'px');
+    }
+
+    resizer.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      startX = e.clientX;
+      startWidth = parseInt(getComputedStyle(app).getPropertyValue('--inbox-width') || '420');
+      resizer.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      const delta = e.clientX - startX;
+      const newWidth = Math.min(Math.max(280, startWidth + delta), 600);
+      app.style.setProperty('--inbox-width', newWidth + 'px');
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isResizing) {
+        isResizing = false;
+        resizer.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        // Save width to localStorage
+        const currentWidth = parseInt(getComputedStyle(app).getPropertyValue('--inbox-width') || '420');
+        localStorage.setItem('inboxPanelWidth', currentWidth);
+      }
+    });
+
+    // ========== DEVICE TOGGLE ==========
+    let isMobileView = false;
+
+    function toggleDevice() {
+      isMobileView = !isMobileView;
+      const frame = document.querySelector('.preview-frame');
+      const icon = document.getElementById('deviceIcon');
+      const label = document.getElementById('deviceLabel');
+
+      if (isMobileView) {
+        frame.classList.add('mobile-view');
+        icon.textContent = '📱';
+        label.textContent = 'Mobile';
+      } else {
+        frame.classList.remove('mobile-view');
+        icon.textContent = '💻';
+        label.textContent = 'Desktop';
+      }
+    }
+
+    // ========== DEPLOY & PROMOTE MODAL ==========
+    let pendingRollbackVersion = null;
+    let pendingRollbackCommit = null;
+
+    function openLaunchModal() {
+      document.getElementById('launchModal').classList.add('active');
+    }
+
+    function closeLaunchModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('launchModal').classList.remove('active');
+    }
+
+    function copyUrl(env) {
+      const urlElement = env === 'staging' 
+        ? document.getElementById('stagingUrl') 
+        : document.getElementById('prodUrl');
+      const url = 'https://' + urlElement.textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('📋 URL copied to clipboard');
+      });
+    }
+
+    function openUrl(env) {
+      const urlElement = env === 'staging' 
+        ? document.getElementById('stagingUrl') 
+        : document.getElementById('prodUrl');
+      const url = 'https://' + urlElement.textContent;
+      window.open(url, '_blank');
+    }
+
+    function toggleVersionHistory() {
+      const list = document.getElementById('versionList');
+      const toggle = document.getElementById('versionToggle');
+      list.classList.toggle('open');
+      toggle.classList.toggle('open');
+    }
+
+    function showPromoteConfirm() {
+      const commitMsg = document.getElementById('stagingCommit').textContent;
+      document.getElementById('promoteCommitMsg').textContent = commitMsg;
+      document.getElementById('promoteConfirm').classList.add('active');
+    }
+
+    function confirmPromote() {
+      const stagingCommit = document.getElementById('stagingCommit').textContent;
+      const stagingTime = document.getElementById('stagingTime').textContent;
+      
+      // Update production to match staging
+      document.getElementById('prodCommit').textContent = stagingCommit;
+      document.getElementById('prodTime').textContent = 'Just now';
+      
+      closeConfirmDialog('promoteConfirm');
+      showToast('🚀 Promoted to production successfully!');
+      
+      // Update version history (add new current, shift others)
+      updateVersionHistory(stagingCommit);
+    }
+
+    function updateVersionHistory(commitMsg) {
+      const versionList = document.getElementById('versionList');
+      const items = versionList.querySelectorAll('.version-item');
+      
+      // Remove "Current" tag from previous current
+      const currentTag = versionList.querySelector('.version-tag');
+      if (currentTag) {
+        currentTag.remove();
+      }
+      
+      // Update dots
+      const currentDot = versionList.querySelector('.version-dot.current');
+      if (currentDot) {
+        currentDot.classList.remove('current');
+      }
+      
+      // Get next version number
+      const firstVersionNum = items[0]?.querySelector('.version-number')?.textContent || 'v12';
+      const nextVersion = 'v' + (parseInt(firstVersionNum.replace('v', '')) + 1);
+      
+      // Create new version item
+      const newItem = document.createElement('div');
+      newItem.className = 'version-item';
+      newItem.innerHTML = `
+        <span class="version-dot current"></span>
+        <div class="version-details">
+          <div class="version-label">
+            <span class="version-number">${nextVersion}</span>
+            <span class="version-tag">Current</span>
+          </div>
+          <span class="version-commit">${commitMsg}</span>
+        </div>
+        <span class="version-time">Just now</span>
+      `;
+      
+      // Add rollback button to old first item
+      if (items[0] && !items[0].querySelector('.rollback-btn')) {
+        const oldCommit = items[0].querySelector('.version-commit').textContent;
+        const oldVersion = items[0].querySelector('.version-number').textContent;
+        const rollbackBtn = document.createElement('button');
+        rollbackBtn.className = 'rollback-btn';
+        rollbackBtn.textContent = 'Rollback';
+        rollbackBtn.onclick = () => showRollbackConfirm(oldVersion, oldCommit.replace(/"/g, ''));
+        items[0].appendChild(rollbackBtn);
+      }
+      
+      // Insert new item at the top
+      versionList.insertBefore(newItem, items[0]);
+      
+      // Remove last item if more than 4
+      if (versionList.children.length > 4) {
+        versionList.removeChild(versionList.lastElementChild);
+      }
+    }
+
+    function showRollbackConfirm(version, commit) {
+      pendingRollbackVersion = version;
+      pendingRollbackCommit = commit;
+      document.getElementById('rollbackVersion').textContent = version;
+      document.getElementById('rollbackCommitMsg').textContent = '"' + commit + '"';
+      document.getElementById('rollbackConfirm').classList.add('active');
+    }
+
+    function confirmRollback() {
+      if (!pendingRollbackVersion) return;
+      
+      // Update production info
+      document.getElementById('prodCommit').textContent = '"' + pendingRollbackCommit + '"';
+      document.getElementById('prodTime').textContent = 'Just now (rollback)';
+      
+      closeConfirmDialog('rollbackConfirm');
+      showToast('⏪ Rolled back to ' + pendingRollbackVersion);
+      
+      pendingRollbackVersion = null;
+      pendingRollbackCommit = null;
+    }
+
+    function showDomainConfig() {
+      document.getElementById('domainConfigDialog').classList.add('active');
+      document.getElementById('customDomainInput').focus();
+    }
+
+    function saveDomainConfig() {
+      const domain = document.getElementById('customDomainInput').value.trim();
+      if (!domain) {
+        // Show DNS instructions when no domain entered
+        document.getElementById('dnsInstructionsInline').style.display = 'block';
+        showToast('Please enter a domain');
+        return;
+      }
+      
+      // Show DNS instructions
+      document.getElementById('dnsInstructionsInline').style.display = 'block';
+      
+      // Update the custom domain row
+      const domainText = document.getElementById('customDomainText');
+      domainText.textContent = domain;
+      domainText.classList.add('connected');
+      
+      showToast('🌐 Domain configured — update your DNS');
+    }
+
+    function closeConfirmDialog(dialogId, event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById(dialogId).classList.remove('active');
+    }
+
+    // Close modal on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        // Close confirmation dialogs first
+        const confirmDialogs = ['promoteConfirm', 'rollbackConfirm', 'domainConfigDialog'];
+        for (const dialogId of confirmDialogs) {
+          const dialog = document.getElementById(dialogId);
+          if (dialog && dialog.classList.contains('active')) {
+            closeConfirmDialog(dialogId);
+            return;
+          }
+        }
+        
+        // Then close main modal
+        const modal = document.getElementById('launchModal');
+        if (modal.classList.contains('active')) {
+          closeLaunchModal();
+        }
+
+        // Close diagram modal
+        const diagramModal = document.getElementById('diagramModal');
+        if (diagramModal.classList.contains('active')) {
+          closeDiagramEditor();
+        }
+      }
+    });
+
+    // ========== DIAGRAM EDITOR (Lucidchart-style) ==========
+    let diagramCanvas, diagramCtx, diagramContainer;
+    let nodes = [];
+    let lines = [];
+    let currentTool = 'select';
+    let selected = null; // {type: 'node'|'line', item: ...}
+    let hovered = null;  // node being hovered
+    let dragging = null; // {type: 'node'|'resize'|'line-point', ...}
+    let connecting = null; // {node, side}
+    let mousePos = {x: 0, y: 0};
+    let zoom = 1;
+    let nodeCounter = 0;
+    let pendingDiagramMermaid = null;
+    let editingNode = null;
+
+    // Initialize canvas
+    function initDiagramCanvas() {
+      diagramCanvas = document.getElementById('diagramCanvas');
+      diagramContainer = document.getElementById('diagramContainer');
+      if (!diagramCanvas) return;
+      
+      diagramCtx = diagramCanvas.getContext('2d');
+      resizeCanvas();
+      
+      diagramCanvas.addEventListener('mousedown', onMouseDown);
+      diagramCanvas.addEventListener('mousemove', onMouseMove);
+      diagramCanvas.addEventListener('mouseup', onMouseUp);
+      diagramCanvas.addEventListener('dblclick', onDoubleClick);
+      document.addEventListener('keydown', onKeyDown);
+      window.addEventListener('resize', resizeCanvas);
+    }
+
+    function resizeCanvas() {
+      if (!diagramCanvas || !diagramContainer) return;
+      diagramCanvas.width = diagramContainer.clientWidth;
+      diagramCanvas.height = diagramContainer.clientHeight;
+      draw();
+    }
+
+    function openDiagramEditor() {
+      document.getElementById('diagramModal').classList.add('active');
+      setTimeout(() => {
+        initDiagramCanvas();
+        if (nodes.length === 0) createDefaultDiagram();
+        draw();
+        generateMermaid();
+      }, 100);
+    }
+
+    function closeDiagramEditor(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('diagramModal').classList.remove('active');
+      finishEditing();
+    }
+
+    function createDefaultDiagram() {
+      const cx = diagramCanvas.width / 2, cy = diagramCanvas.height / 2;
+      nodes = [
+        { id: 'A', type: 'rounded', x: cx, y: cy - 120, w: 120, h: 45, text: 'Start' },
+        { id: 'B', type: 'diamond', x: cx, y: cy, w: 120, h: 70, text: 'Choice?' },
+        { id: 'C', type: 'rectangle', x: cx - 140, y: cy + 120, w: 100, h: 45, text: 'Yes' },
+        { id: 'D', type: 'rectangle', x: cx + 140, y: cy + 120, w: 100, h: 45, text: 'No' },
+        { id: 'E', type: 'rounded', x: cx, y: cy + 220, w: 120, h: 45, text: 'End' }
+      ];
+      lines = [
+        { from: 'A', to: 'B', pts: [] },
+        { from: 'B', to: 'C', pts: [], label: 'yes' },
+        { from: 'B', to: 'D', pts: [], label: 'no' },
+        { from: 'C', to: 'E', pts: [] },
+        { from: 'D', to: 'E', pts: [] }
+      ];
+      nodeCounter = 5;
+      updateCounts();
+    }
+
+    function selectShape(shape) {
+      currentTool = shape;
+      document.querySelectorAll('.toolbar-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.toolbar-btn[data-shape="${shape}"]`)?.classList.add('active');
+      diagramCanvas.style.cursor = shape === 'select' ? 'default' : 'crosshair';
+    }
+
+    // Get connection port positions (4 sides)
+    function getPorts(n) {
+      return [
+        { x: n.x, y: n.y - n.h/2, side: 'top' },
+        { x: n.x + n.w/2, y: n.y, side: 'right' },
+        { x: n.x, y: n.y + n.h/2, side: 'bottom' },
+        { x: n.x - n.w/2, y: n.y, side: 'left' }
+      ];
+    }
+
+    function nearPort(n, x, y) {
+      for (const p of getPorts(n)) {
+        if (Math.hypot(x - p.x, y - p.y) < 10) return p;
+      }
+      return null;
+    }
+
+    function hitNode(x, y) {
+      for (let i = nodes.length - 1; i >= 0; i--) {
+        const n = nodes[i];
+        if (x >= n.x - n.w/2 && x <= n.x + n.w/2 && y >= n.y - n.h/2 && y <= n.y + n.h/2) return n;
+      }
+      return null;
+    }
+
+    function hitCorner(n, x, y) {
+      if (!n) return null;
+      const corners = [
+        { cx: n.x - n.w/2, cy: n.y - n.h/2, dir: 'nw' },
+        { cx: n.x + n.w/2, cy: n.y - n.h/2, dir: 'ne' },
+        { cx: n.x - n.w/2, cy: n.y + n.h/2, dir: 'sw' },
+        { cx: n.x + n.w/2, cy: n.y + n.h/2, dir: 'se' }
+      ];
+      for (const c of corners) {
+        if (Math.hypot(x - c.cx, y - c.cy) < 8) return c.dir;
+      }
+      return null;
+    }
+
+    function hitLinePoint(x, y) {
+      for (const ln of lines) {
+        if (ln.pts) {
+          for (let i = 0; i < ln.pts.length; i++) {
+            if (Math.hypot(x - ln.pts[i].x, y - ln.pts[i].y) < 8) return { line: ln, idx: i };
+          }
+        }
+      }
+      return null;
+    }
+
+    function hitLine(x, y) {
+      for (const ln of lines) {
+        const pts = getLinePts(ln);
+        for (let i = 0; i < pts.length - 1; i++) {
+          if (distToSeg(x, y, pts[i], pts[i+1]) < 6) return { line: ln, seg: i };
+        }
+      }
+      return null;
+    }
+
+    function distToSeg(px, py, a, b) {
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const len2 = dx*dx + dy*dy;
+      if (len2 === 0) return Math.hypot(px - a.x, py - a.y);
+      let t = ((px - a.x)*dx + (py - a.y)*dy) / len2;
+      t = Math.max(0, Math.min(1, t));
+      return Math.hypot(px - (a.x + t*dx), py - (a.y + t*dy));
+    }
+
+    function getLinePts(ln) {
+      const from = nodes.find(n => n.id === ln.from);
+      const to = nodes.find(n => n.id === ln.to);
+      if (!from || !to) return [];
+      const p1 = bestPort(from, to.x, to.y);
+      const p2 = bestPort(to, from.x, from.y);
+      return [p1, ...(ln.pts || []), p2];
+    }
+
+    function bestPort(n, tx, ty) {
+      let best = null, dist = Infinity;
+      for (const p of getPorts(n)) {
+        const d = Math.hypot(p.x - tx, p.y - ty);
+        if (d < dist) { dist = d; best = p; }
+      }
+      return best || { x: n.x, y: n.y };
+    }
+
+    function onMouseDown(e) {
+      const rect = diagramCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+      mousePos = { x, y };
+      finishEditing();
+
+      if (currentTool === 'select') {
+        // Check line bend points first
+        const lp = hitLinePoint(x, y);
+        if (lp) {
+          dragging = { type: 'line-point', line: lp.line, idx: lp.idx };
+          selected = { type: 'line', item: lp.line };
+          draw();
+          return;
+        }
+
+        // Check ports
+        for (const n of nodes) {
+          const port = nearPort(n, x, y);
+          if (port) {
+            connecting = { node: n, port };
+            return;
+          }
+        }
+
+        // Check resize handles
+        if (selected?.type === 'node') {
+          const corner = hitCorner(selected.item, x, y);
+          if (corner) {
+            dragging = { type: 'resize', dir: corner, ox: selected.item.x, oy: selected.item.y, ow: selected.item.w, oh: selected.item.h, sx: x, sy: y };
+            return;
+          }
+        }
+
+        // Check lines (to add bend point)
+        const lineHit = hitLine(x, y);
+        if (lineHit && !hitNode(x, y)) {
+          if (!lineHit.line.pts) lineHit.line.pts = [];
+          lineHit.line.pts.splice(lineHit.seg, 0, { x, y });
+          dragging = { type: 'line-point', line: lineHit.line, idx: lineHit.seg };
+          selected = { type: 'line', item: lineHit.line };
+          draw();
+          return;
+        }
+
+        // Check nodes
+        const n = hitNode(x, y);
+        if (n) {
+          selected = { type: 'node', item: n };
+          dragging = { type: 'node', ox: n.x - x, oy: n.y - y };
+          draw();
+          return;
+        }
+
+        selected = null;
+        draw();
+
+      } else if (currentTool === 'delete') {
+        const lp = hitLinePoint(x, y);
+        if (lp) { lp.line.pts.splice(lp.idx, 1); draw(); generateMermaid(); return; }
+        const lineHit = hitLine(x, y);
+        if (lineHit && !hitNode(x, y)) { lines = lines.filter(l => l !== lineHit.line); draw(); generateMermaid(); updateCounts(); return; }
+        const n = hitNode(x, y);
+        if (n) { deleteNode(n); return; }
+
+      } else if (currentTool === 'arrow' || currentTool === 'line') {
+        const n = hitNode(x, y);
+        if (n) {
+          const port = nearPort(n, x, y) || bestPort(n, x, y);
+          connecting = { node: n, port };
+        }
+
+      } else {
+        // Create shape
+        addNode(x, y, currentTool);
+        selectShape('select');
+      }
+    }
+
+    function onMouseMove(e) {
+      const rect = diagramCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+      mousePos = { x, y };
+
+      // Update hover
+      hovered = hitNode(x, y);
+      
+      // Cursor
+      if (currentTool === 'select' && !dragging && !connecting) {
+        let cursor = 'default';
+        for (const n of nodes) { if (nearPort(n, x, y)) cursor = 'crosshair'; }
+        if (cursor === 'default' && hitLinePoint(x, y)) cursor = 'move';
+        if (cursor === 'default' && selected?.type === 'node' && hitCorner(selected.item, x, y)) cursor = 'nwse-resize';
+        if (cursor === 'default' && hitLine(x, y) && !hitNode(x, y)) cursor = 'pointer';
+        if (cursor === 'default' && hitNode(x, y)) cursor = 'move';
+        diagramCanvas.style.cursor = cursor;
+      }
+
+      if (dragging?.type === 'node' && selected?.item) {
+        selected.item.x = x + dragging.ox;
+        selected.item.y = y + dragging.oy;
+        draw(); generateMermaid();
+      } else if (dragging?.type === 'resize') {
+        const dx = x - dragging.sx, dy = y - dragging.sy;
+        const dir = dragging.dir;
+        if (dir.includes('e')) selected.item.w = Math.max(60, dragging.ow + dx * 2);
+        if (dir.includes('w')) selected.item.w = Math.max(60, dragging.ow - dx * 2);
+        if (dir.includes('s')) selected.item.h = Math.max(35, dragging.oh + dy * 2);
+        if (dir.includes('n')) selected.item.h = Math.max(35, dragging.oh - dy * 2);
+        draw(); generateMermaid();
+      } else if (dragging?.type === 'line-point') {
+        dragging.line.pts[dragging.idx] = { x, y };
+        draw(); generateMermaid();
+      } else if (connecting) {
+        draw();
+        // Draw preview line
+        diagramCtx.save();
+        diagramCtx.beginPath();
+        diagramCtx.strokeStyle = '#22c55e';
+        diagramCtx.lineWidth = 2;
+        diagramCtx.setLineDash([4, 4]);
+        diagramCtx.moveTo(connecting.port.x, connecting.port.y);
+        diagramCtx.lineTo(x, y);
+        diagramCtx.stroke();
+        diagramCtx.setLineDash([]);
+        drawArrow(connecting.port.x, connecting.port.y, x, y, '#22c55e');
+        diagramCtx.restore();
+      } else {
+        draw();
+      }
+    }
+
+    function onMouseUp(e) {
+      const rect = diagramCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+
+      if (connecting) {
+        const targetNode = hitNode(x, y);
+        if (targetNode && targetNode !== connecting.node) {
+          const exists = lines.some(l => (l.from === connecting.node.id && l.to === targetNode.id) || (l.to === connecting.node.id && l.from === targetNode.id));
+          if (!exists) {
+            lines.push({ from: connecting.node.id, to: targetNode.id, pts: [] });
+            generateMermaid(); updateCounts();
+          }
+        }
+        connecting = null;
+        if (currentTool !== 'select') selectShape('select');
+      }
+
+      dragging = null;
+      draw();
+    }
+
+    function onDoubleClick(e) {
+      const rect = diagramCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+      const n = hitNode(x, y);
+      if (n) startEditing(n);
+    }
+
+    function onKeyDown(e) {
+      if (!document.getElementById('diagramModal')?.classList.contains('active')) return;
+      if (editingNode) return;
+      
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selected) {
+        if (selected.type === 'node') deleteNode(selected.item);
+        else if (selected.type === 'line') { lines = lines.filter(l => l !== selected.item); selected = null; draw(); generateMermaid(); updateCounts(); }
+        e.preventDefault();
+      }
+      if (e.key === 'Escape') { selected = null; draw(); }
+    }
+
+    function startEditing(n) {
+      editingNode = n;
+      const overlay = document.getElementById('nodeTextOverlay');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'node-text-input';
+      input.value = n.text;
+      input.style.cssText = `left:${n.x - n.w/2 + 8}px; top:${n.y - 10}px; width:${n.w - 16}px;`;
+      input.onblur = () => { n.text = input.value || n.text; finishEditing(); draw(); generateMermaid(); };
+      input.onkeydown = (e) => { if (e.key === 'Enter') input.blur(); if (e.key === 'Escape') finishEditing(); e.stopPropagation(); };
+      overlay.appendChild(input);
+      input.focus();
+      input.select();
+    }
+
+    function finishEditing() {
+      editingNode = null;
+      const overlay = document.getElementById('nodeTextOverlay');
+      if (overlay) overlay.innerHTML = '';
+    }
+
+    function addNode(x, y, type) {
+      const id = String.fromCharCode(65 + nodeCounter % 26) + (nodeCounter >= 26 ? Math.floor(nodeCounter/26) : '');
+      nodeCounter++;
+      const labels = { rectangle: 'Process', rounded: 'Step', diamond: 'Decision?', circle: 'State', cylinder: 'Database' };
+      const n = { id, type, x, y, w: type === 'diamond' ? 110 : 100, h: type === 'diamond' ? 70 : 45, text: labels[type] || 'Node' };
+      nodes.push(n);
+      selected = { type: 'node', item: n };
+      draw(); generateMermaid(); updateCounts();
+      setTimeout(() => startEditing(n), 50);
+    }
+
+    function deleteNode(n) {
+      nodes = nodes.filter(nd => nd !== n);
+      lines = lines.filter(l => l.from !== n.id && l.to !== n.id);
+      if (selected?.item === n) selected = null;
+      draw(); generateMermaid(); updateCounts();
+    }
+
+    function draw() {
+      if (!diagramCtx) return;
+      const ctx = diagramCtx;
+      ctx.clearRect(0, 0, diagramCanvas.width, diagramCanvas.height);
+
+      // Draw lines
+      lines.forEach(ln => {
+        const pts = getLinePts(ln);
+        if (pts.length < 2) return;
+        const isSel = selected?.item === ln;
+        ctx.beginPath();
+        ctx.strokeStyle = isSel ? '#00d4ff' : '#555';
+        ctx.lineWidth = isSel ? 2.5 : 1.5;
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+        ctx.stroke();
+        drawArrow(pts[pts.length-2].x, pts[pts.length-2].y, pts[pts.length-1].x, pts[pts.length-1].y, isSel ? '#00d4ff' : '#555');
+        
+        // Bend points
+        if (ln.pts) ln.pts.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+          ctx.fillStyle = isSel ? '#00d4ff' : '#444';
+          ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        });
+
+        // Label
+        if (ln.label) {
+          const mid = pts[Math.floor(pts.length / 2)];
+          ctx.font = '11px Outfit';
+          ctx.fillStyle = '#999';
+          ctx.textAlign = 'center';
+          ctx.fillText(ln.label, mid.x, mid.y - 8);
+        }
+      });
+
+      // Draw nodes
+      nodes.forEach(n => {
+        const isSel = selected?.item === n;
+        const isHov = hovered === n;
+        ctx.fillStyle = isSel ? 'rgba(0,212,255,0.12)' : 'rgba(80,80,100,0.2)';
+        ctx.strokeStyle = isSel ? '#00d4ff' : '#555';
+        ctx.lineWidth = isSel ? 2 : 1.5;
+
+        ctx.beginPath();
+        if (n.type === 'rounded') roundRect(ctx, n.x - n.w/2, n.y - n.h/2, n.w, n.h, 8);
+        else if (n.type === 'diamond') { ctx.moveTo(n.x, n.y - n.h/2); ctx.lineTo(n.x + n.w/2, n.y); ctx.lineTo(n.x, n.y + n.h/2); ctx.lineTo(n.x - n.w/2, n.y); ctx.closePath(); }
+        else if (n.type === 'circle') ctx.arc(n.x, n.y, Math.min(n.w, n.h)/2, 0, Math.PI * 2);
+        else ctx.rect(n.x - n.w/2, n.y - n.h/2, n.w, n.h);
+        ctx.fill();
+        ctx.stroke();
+
+        // Text
+        ctx.fillStyle = '#ddd';
+        ctx.font = '13px Outfit';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(n.text, n.x, n.y);
+
+        // Resize handles
+        if (isSel) {
+          [[n.x - n.w/2, n.y - n.h/2], [n.x + n.w/2, n.y - n.h/2], [n.x - n.w/2, n.y + n.h/2], [n.x + n.w/2, n.y + n.h/2]].forEach(([cx, cy]) => {
+            ctx.fillStyle = '#00d4ff';
+            ctx.fillRect(cx - 4, cy - 4, 8, 8);
+          });
+        }
+
+        // Connection ports
+        if (isSel || isHov) {
+          getPorts(n).forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#111';
+            ctx.fill();
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          });
+        }
+      });
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+    }
+
+    function drawArrow(x1, y1, x2, y2, color) {
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      const len = 8;
+      diagramCtx.beginPath();
+      diagramCtx.moveTo(x2, y2);
+      diagramCtx.lineTo(x2 - len * Math.cos(angle - 0.5), y2 - len * Math.sin(angle - 0.5));
+      diagramCtx.lineTo(x2 - len * Math.cos(angle + 0.5), y2 - len * Math.sin(angle + 0.5));
+      diagramCtx.closePath();
+      diagramCtx.fillStyle = color;
+      diagramCtx.fill();
+    }
+
+    function generateMermaid() {
+      const shapes = { rectangle: ['[', ']'], rounded: ['(', ')'], diamond: ['{', '}'], circle: ['((', '))'], cylinder: ['[(', ')]'] };
+      let m = 'flowchart TD\n';
+      nodes.forEach(n => { const s = shapes[n.type] || ['[', ']']; m += `    ${n.id}${s[0]}${n.text}${s[1]}\n`; });
+      lines.forEach(l => { m += l.label ? `    ${l.from} -->|${l.label}| ${l.to}\n` : `    ${l.from} --> ${l.to}\n`; });
+      document.getElementById('mermaidOutput').textContent = m;
+      pendingDiagramMermaid = m;
+    }
+
+    function updateCounts() {
+      document.getElementById('diagramNodeCount').textContent = nodes.length + ' node' + (nodes.length !== 1 ? 's' : '');
+      document.getElementById('diagramConnectionCount').textContent = lines.length + ' connection' + (lines.length !== 1 ? 's' : '');
+    }
+
+    function clearDiagram() {
+      nodes = []; lines = []; nodeCounter = 0; selected = null;
+      draw(); generateMermaid(); updateCounts();
+    }
+
+    function insertDiagramToChat() {
+      if (!nodes.length) { showToast('Add nodes first'); return; }
+      generateMermaid();
+      document.getElementById('diagramAttachment').style.display = 'block';
+      document.getElementById('diagramAttachment').innerHTML = `<div class="diagram-attachment"><span class="diagram-attachment-icon">📊</span><div class="diagram-attachment-info"><div class="diagram-attachment-title">Diagram</div><div class="diagram-attachment-meta">${nodes.length} nodes, ${lines.length} lines</div></div><button class="diagram-attachment-remove" onclick="removeDiagramAttachment()">×</button></div>`;
+      closeDiagramEditor();
+      showToast('Diagram attached');
+      document.getElementById('chatInput').focus();
+    }
+
+    function removeDiagramAttachment() {
+      document.getElementById('diagramAttachment').style.display = 'none';
+      document.getElementById('diagramAttachment').innerHTML = '';
+      pendingDiagramMermaid = null;
+    }
+
+    function zoomDiagram(d) {
+      zoom = Math.max(0.5, Math.min(2, zoom + d));
+      document.getElementById('zoomLevel').textContent = Math.round(zoom * 100) + '%';
+    }
+
+    // Override sendReply
+    const _origSendReply = sendReply;
+    sendReply = function() {
+      if (pendingDiagramMermaid) {
+        removeDiagramAttachment();
+        const input = document.getElementById('chatInput');
+        const text = input.innerText.trim();
+        const chatMessages = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.className = 'message user';
+        div.innerHTML = `<div class="message-header"><div class="message-avatar user">RO</div><span class="message-sender">You</span><span class="message-time">Just now</span></div><div class="message-bubble">${text ? '<p>' + text + '</p>' : ''}<div style="background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;padding:12px;margin-top:8px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span>📊</span><span style="font-weight:600;font-size:12px">Diagram</span></div><pre style="font:10px/1.4 monospace;color:#888;margin:0;white-space:pre-wrap">${pendingDiagramMermaid.replace(/</g,'&lt;')}</pre></div></div>`;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        input.innerHTML = '';
+        pendingDiagramMermaid = null;
+        showToast('Sent');
+        return;
+      }
+      if (_origSendReply) _origSendReply();
+    };
+  </script>
+</body>
+</html>

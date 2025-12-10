@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tism - Mockup Navigation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-surface: #12121a;
+      --bg-elevated: #1a1a26;
+      --border: #2a2a3e;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --accent-cyan: #00d4ff;
+      --accent-purple: #a855f7;
+      --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #a855f7 100%);
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse at 30% 20%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .logo-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--gradient-primary);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .logo-text {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+
+    .tagline {
+      font-size: 20px;
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+    }
+
+    .screens-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .screens {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .screen-link {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 32px 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.25s;
+    }
+
+    .screen-link:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .screen-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .screen-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .screen-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <div class="logo-icon">T</div>
+      <span class="logo-text">Tism</span>
+    </div>
+    <p class="tagline">AI Project Manager Mockup</p>
+
+    <p class="screens-label">Available Screens</p>
+
+    <div class="screens">
+      <a href="home.html" class="screen-link">
+        <div class="screen-icon">🏠</div>
+        <div class="screen-name">Home</div>
+        <div class="screen-desc">Projects dashboard with PM inbox preview</div>
+      </a>
+
+      <a href="new-project.html" class="screen-link">
+        <div class="screen-icon">✨</div>
+        <div class="screen-name">New Project</div>
+        <div class="screen-desc">Create project flow with options</div>
+      </a>
+
+      <a href="app.html" class="screen-link">
+        <div class="screen-icon">📋</div>
+        <div class="screen-name">Project View</div>
+        <div class="screen-desc">Ticket board + PM inbox + agent activity</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

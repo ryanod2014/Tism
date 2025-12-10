@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tism - Pipeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-surface: #12121a;
+      --bg-elevated: #1a1a26;
+      --bg-hover: #222233;
+      --border: #2a2a3e;
+      --border-bright: #3d3d5c;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --text-muted: #555566;
+      --accent-cyan: #00d4ff;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-pink: #ec4899;
+      --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #a855f7 100%);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Outfit', -apple-system, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: var(--inbox-width, 420px) 6px 1fr;
+      grid-template-rows: 56px 1fr;
+      height: 100vh;
+    }
+
+    /* ========== PANEL RESIZER ========== */
+    .panel-resizer {
+      grid-row: 2;
+      grid-column: 2;
+      background: var(--border);
+      cursor: col-resize;
+      position: relative;
+      z-index: 10;
+      transition: background 0.15s;
+    }
+
+    .panel-resizer:hover,
+    .panel-resizer.dragging {
+      background: var(--accent-cyan);
+    }
+
+    .panel-resizer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -4px;
+      right: -4px;
+    }
+
+    /* ========== LEFT PANEL - INBOX ========== */
+    .inbox-panel {
+      grid-row: 2;
+      grid-column: 1;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .inbox-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .inbox-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .inbox-badge {
+      background: var(--accent-red);
+      color: white;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .new-ticket-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--bg-deep);
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .new-ticket-btn:hover {
+      opacity: 0.9;
+    }
+
+    .inbox-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .inbox-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .inbox-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .inbox-item.unread {
+      background: rgba(0, 212, 255, 0.03);
+    }
+
+    .inbox-item.unread .item-subject {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .item-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+      border: 2px solid var(--border);
+    }
+
+    .item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-from {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .item-subject {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      line-height: 1.3;
+    }
+
+    .item-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .item-preview {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-badges {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .item-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .item-badge.blocker {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+    }
+
+    .item-badge.decision {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--accent-amber);
+    }
+
+    .item-badge.update {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--accent-green);
+    }
+
+    .header {
+      grid-column: 1 / -1;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      height: 56px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .back-to-projects {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s;
+    }
+
+    .back-to-projects:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .back-arrow {
+      font-size: 16px;
+    }
+
+    .back-text {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .header-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    .project-title {
+      font-size: 15px;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      cursor: text;
+      outline: none;
+      max-width: 250px;
+    }
+
+    .project-title:hover {
+      background: var(--bg-elevated);
+      border-color: var(--border);
+    }
+
+    .project-title:focus {
+      background: var(--bg-deep);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .logo-text { font-weight: 600; font-size: 18px; }
+
+    .project-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+
+    .project-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .project-name { font-size: 13px; font-weight: 500; }
+
+    .view-tabs {
+      display: flex;
+      background: var(--bg-deep);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+    }
+
+    .view-tab {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .view-tab.active {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .view-tab:hover:not(.active) { color: var(--text-secondary); }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+
+    .header-btn.primary {
+      background: var(--gradient-primary);
+      border: none;
+      color: var(--bg-deep);
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .main {
+      grid-row: 2;
+      grid-column: 3;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .board-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-deep);
+      padding: 4px;
+      border-radius: var(--radius-md);
+    }
+
+    .board-tab {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+
+    .board-tab.active {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+
+    .action-btn.primary {
+      background: var(--gradient-primary);
+      border: none;
+      color: var(--bg-deep);
+    }
+
+    .ticket-board {
+      flex: 1;
+      display: flex;
+      gap: 16px;
+      padding: 20px;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .ticket-column {
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      min-width: 260px;
+      max-width: 280px;
+      flex-shrink: 0;
+      max-height: 100%;
+    }
+
+    .ticket-column.pending-tickets { border-top: 3px solid var(--text-muted); }
+    .ticket-column.tickets { border-top: 3px solid var(--accent-purple); }
+    .ticket-column.dev-in-progress { border-top: 3px solid var(--accent-cyan); }
+    .ticket-column.pending-qa { border-top: 3px solid var(--accent-amber); }
+    .ticket-column.qa-in-progress { border-top: 3px solid #f97316; }
+    .ticket-column.pending-docs { border-top: 3px solid var(--accent-pink); }
+    .ticket-column.docs-in-progress { border-top: 3px solid #ec4899; }
+    .ticket-column.pending-tests { border-top: 3px solid #8b5cf6; }
+    .ticket-column.done { border-top: 3px solid var(--accent-green); }
+
+    .column-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .column-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .column-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .column-dot.pending-tickets { background: var(--text-muted); }
+    .column-dot.tickets { background: var(--accent-purple); }
+    .column-dot.dev-in-progress { background: var(--accent-cyan); }
+    .column-dot.pending-qa { background: var(--accent-amber); }
+    .column-dot.qa-in-progress { background: #f97316; }
+    .column-dot.pending-docs { background: var(--accent-pink); }
+    .column-dot.docs-in-progress { background: #ec4899; }
+    .column-dot.pending-tests { background: #8b5cf6; }
+    .column-dot.done { background: var(--accent-green); }
+
+    /* Highlighted ticket */
+    .ticket.highlighted {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.3), 0 4px 20px rgba(0, 212, 255, 0.2);
+      animation: highlightPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes highlightPulse {
+      0%, 100% { box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.3), 0 4px 20px rgba(0, 212, 255, 0.2); }
+      50% { box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.4), 0 4px 30px rgba(0, 212, 255, 0.3); }
+    }
+
+    .new-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      background: var(--accent-cyan);
+      color: var(--bg-deep);
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 8px;
+    }
+
+    .column-name {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .column-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg-deep);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .column-body {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+    }
+
+    .ticket {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ticket:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-2px);
+    }
+
+    .ticket-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .ticket-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .ticket-priority {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .ticket-priority.high { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+    .ticket-priority.medium { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); }
+    .ticket-priority.low { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+
+    .ticket-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .ticket-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .ticket-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ticket-tag {
+      font-size: 10px;
+      padding: 3px 8px;
+      background: var(--bg-deep);
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .agent-working {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.1);
+      padding: 3px 8px;
+      border-radius: 10px;
+    }
+
+    .working-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-left">
+        <a class="back-to-projects" href="home.html">←</a>
+        <div class="header-divider"></div>
+        <div class="project-title" id="projectTitle" contenteditable="true" spellcheck="false">SaaS Dashboard</div>
+      </div>
+
+      <div class="header-right">
+        <div class="view-tabs">
+          <a class="view-tab" href="app.html">Preview</a>
+          <a class="view-tab active">Pipeline</a>
+          <a class="view-tab" href="live.html">Live</a>
+        </div>
+        <button class="header-btn primary" onclick="openLaunchModal()">🚀 Launch</button>
+        <div class="avatar">RO</div>
+      </div>
+    </header>
+
+    <!-- Left Panel - Inbox -->
+    <aside class="inbox-panel">
+      <div class="inbox-header">
+        <div class="inbox-title">
+          📥 PM Inbox
+          <span class="inbox-badge">5</span>
+        </div>
+        <button class="new-ticket-btn" onclick="createNewRequest()">+ New Request</button>
+      </div>
+
+      <div class="inbox-list">
+        <div class="inbox-item unread">
+          <img class="item-avatar" src="https://i.pravatar.cc/80?img=12" alt="Marcus">
+          <div class="item-content">
+            <div class="item-from">Marcus · Backend Dev</div>
+            <div class="item-header">
+              <span class="item-subject">🚨 Billing flow decision needed</span>
+              <span class="item-time">2 min ago</span>
+            </div>
+            <div class="item-preview">Should users see pricing before or after signup?</div>
+            <div class="item-badges">
+              <span class="item-badge blocker">Blocker</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="inbox-item unread">
+          <img class="item-avatar" src="https://i.pravatar.cc/80?img=5" alt="Sophia">
+          <div class="item-content">
+            <div class="item-from">Sophia · Frontend Dev</div>
+            <div class="item-header">
+              <span class="item-subject">Chart library selection</span>
+              <span class="item-time">15 min ago</span>
+            </div>
+            <div class="item-preview">Which chart library should we use for analytics?</div>
+            <div class="item-badges">
+              <span class="item-badge decision">Decision</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="inbox-item">
+          <img class="item-avatar" src="https://i.pravatar.cc/80?img=33" alt="Alex">
+          <div class="item-content">
+            <div class="item-from">Alex · Full Stack</div>
+            <div class="item-header">
+              <span class="item-subject">✅ Auth flow complete</span>
+              <span class="item-time">1 hour ago</span>
+            </div>
+            <div class="item-preview">User authentication is ready and tested.</div>
+            <div class="item-badges">
+              <span class="item-badge update">Update</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="inbox-item">
+          <img class="item-avatar" src="https://i.pravatar.cc/80?img=59" alt="Jordan">
+          <div class="item-content">
+            <div class="item-from">Jordan · Database Eng</div>
+            <div class="item-header">
+              <span class="item-subject">Database schema review</span>
+              <span class="item-time">2 hours ago</span>
+            </div>
+            <div class="item-preview">I've set up the initial tables for users and billing...</div>
+            <div class="item-badges">
+              <span class="item-badge update">Update</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="inbox-item">
+          <img class="item-avatar" src="https://i.pravatar.cc/80?img=23" alt="Luna">
+          <div class="item-content">
+            <div class="item-from">Luna · Project Manager</div>
+            <div class="item-header">
+              <span class="item-subject">Project kickoff 🚀</span>
+              <span class="item-time">Yesterday</span>
+            </div>
+            <div class="item-preview">Welcome to your new project! I'll be your PM agent...</div>
+            <div class="item-badges">
+              <span class="item-badge update">Update</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Panel Resizer -->
+    <div class="panel-resizer" id="panelResizer"></div>
+
+    <main class="main">
+      <div class="ticket-board" id="ticketBoard">
+        <!-- Column 1: Pending Tickets -->
+        <div class="ticket-column pending-tickets">
+          <div class="column-header">
+            <div class="column-title">
+              <div class="column-dot pending-tickets"></div>
+              <span class="column-name">Pending Tickets</span>
+            </div>
+            <span class="column-count">2</span>
+          </div>
+          <div class="column-body" id="pending-tickets-body">
+            <div class="ticket" data-ticket-id="TSM-014">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-014</span>
+                <span class="ticket-priority low">Low</span>
+              </div>
+              <div class="ticket-title">Keyboard shortcuts</div>
+              <div class="ticket-footer">
+                <span class="ticket-tag">UX</span>
+              </div>
+            </div>
+            <div class="ticket" data-ticket-id="TSM-013">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-013</span>
+                <span class="ticket-priority medium">Medium</span>
+              </div>
+              <div class="ticket-title">Export to CSV</div>
+              <div class="ticket-footer">
+                <span class="ticket-tag">Feature</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Tickets (Ready for Dev) -->
+        <div class="ticket-column tickets">
+          <div class="column-header">
+            <div class="column-title">
+              <div class="column-dot tickets"></div>
+              <span class="column-name">Tickets</span>
+            </div>
+            <span class="column-count">2</span>
+          </div>
+          <div class="column-body">
+            <div class="ticket" data-ticket-id="TSM-012">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-012</span>
+                <span class="ticket-priority low">Low</span>
+              </div>
+              <div class="ticket-title">Add dark mode toggle</div>
+              <div class="ticket-desc">Allow users to switch between light and dark themes</div>
+              <div class="ticket-footer">
+                <span class="ticket-tag">UI</span>
+              </div>
+            </div>
+            <div class="ticket" data-ticket-id="TSM-011">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-011</span>
+                <span class="ticket-priority medium">Medium</span>
+              </div>
+              <div class="ticket-title">User avatar upload</div>
+              <div class="ticket-footer">
+                <span class="ticket-tag">Feature</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: Dev Agents In Progress -->
+        <div class="ticket-column dev-in-progress">
+          <div class="column-header">
+            <div class="column-title">
+              <div class="column-dot dev-in-progress"></div>
+              <span class="column-name">Dev Agents</span>
+            </div>
+            <span class="column-count">2</span>
+          </div>
+          <div class="column-body">
+            <div class="ticket" data-ticket-id="TSM-008">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-008</span>
+                <span class="ticket-priority high">High</span>
+              </div>
+              <div class="ticket-title">User management table with CRUD</div>
+              <div class="ticket-desc">Build the full user table with pagination and search</div>
+              <div class="ticket-footer">
+                <span class="agent-working">
+                  <span class="working-dot"></span>
+                  Dev Agent
+                </span>
+              </div>
+            </div>
+            <div class="ticket" data-ticket-id="TSM-009">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-009</span>
+                <span class="ticket-priority high">High</span>
+              </div>
+              <div class="ticket-title">Stripe billing integration</div>
+              <div class="ticket-desc">Connect Stripe API for subscription management</div>
+              <div class="ticket-footer">
+                <span class="agent-working">
+                  <span class="working-dot"></span>
+                  Dev Agent
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 4: Pending QA -->
+        <div class="ticket-column pending-qa">
+          <div class="column-header">
+            <div class="column-title">
+              <div class="column-dot pending-qa"></div>
+              <span class="column-name">Pending QA</span>
+            </div>
+            <span class="column-count">1</span>
+          </div>
+          <div class="column-body">
+            <div class="ticket" data-ticket-id="TSM-007">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-007</span>
+                <span class="ticket-priority medium">Medium</span>
+              </div>
+              <div class="ticket-title">Dashboard layout</div>
+              <div class="ticket-desc">Main dashboard grid layout</div>
+              <div class="ticket-footer">
+                <span class="ticket-tag">Awaiting QA</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 5: QA Agents In Progress -->
+        <div class="ticket-column qa-in-progress">
+          <div class="column-header">
+            <div class="column-title">
+              <div class="column-dot qa-in-progress"></div>
+              <span class="column-name">QA Agents</span>
+            </div>
+            <span class="column-count">1</span>
+          </div>
+          <div class="column-body">
+            <div class="ticket" data-ticket-id="TSM-006">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-006</span>
+                <span class="ticket-priority medium">Medium</span>
+              </div>
+              <div class="ticket-title">Email templates</div>
+              <div class="ticket-footer">
+                <span class="agent-working" style="background: rgba(249, 115, 22, 0.1); color: #f97316;">
+                  <span class="working-dot" style="background: #f97316;"></span>
+                  QA Agent
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 6: Pending Documentation -->
+        <div class="ticket-column pending-docs">
+          <div class="column-header">
+            <div class="column-title">
+              <div class="column-dot pending-docs"></div>
+              <span class="column-name">Pending Docs</span>
+            </div>
+            <span class="column-count">1</span>
+          </div>
+          <div class="column-body">
+            <div class="ticket" data-ticket-id="TSM-005">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-005</span>
+                <span class="ticket-priority medium">Medium</span>
+              </div>
+              <div class="ticket-title">Analytics widgets</div>
+              <div class="ticket-desc">Charts for MAU, revenue, churn</div>
+              <div class="ticket-footer">
+                <span class="ticket-tag">Awaiting Docs</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 7: Documentation Agents -->
+        <div class="ticket-column docs-in-progress">
+          <div class="column-header">
+            <div class="column-title">
+              <div class="column-dot docs-in-progress"></div>
+              <span class="column-name">Docs Agents</span>
+            </div>
+            <span class="column-count">1</span>
+          </div>
+          <div class="column-body">
+            <div class="ticket" data-ticket-id="TSM-004">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-004</span>
+                <span class="ticket-priority low">Low</span>
+              </div>
+              <div class="ticket-title">API documentation</div>
+              <div class="ticket-footer">
+                <span class="agent-working" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;">
+                  <span class="working-dot" style="background: #ec4899;"></span>
+                  Docs Agent
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 8: Pending Unit Tests -->
+        <div class="ticket-column pending-tests">
+          <div class="column-header">
+            <div class="column-title">
+              <div class="column-dot pending-tests"></div>
+              <span class="column-name">Pending Tests</span>
+            </div>
+            <span class="column-count">1</span>
+          </div>
+          <div class="column-body">
+            <div class="ticket" data-ticket-id="TSM-003">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-003</span>
+              </div>
+              <div class="ticket-title">Main layout</div>
+              <div class="ticket-footer">
+                <span class="ticket-tag">Awaiting Tests</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 9: Done -->
+        <div class="ticket-column done">
+          <div class="column-header">
+            <div class="column-title">
+              <div class="column-dot done"></div>
+              <span class="column-name">Done</span>
+            </div>
+            <span class="column-count">2</span>
+          </div>
+          <div class="column-body">
+            <div class="ticket" style="opacity: 0.6;" data-ticket-id="TSM-001">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-001</span>
+              </div>
+              <div class="ticket-title">Project setup</div>
+              <div class="ticket-footer">
+                <span class="ticket-tag">Setup</span>
+              </div>
+            </div>
+            <div class="ticket" style="opacity: 0.6;" data-ticket-id="TSM-002">
+              <div class="ticket-header">
+                <span class="ticket-id">TSM-002</span>
+              </div>
+              <div class="ticket-title">Auth flow</div>
+              <div class="ticket-footer">
+                <span class="ticket-tag">Auth</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ========== PROJECT TITLE EDITING ==========
+    const projectTitle = document.getElementById('projectTitle');
+    let originalTitle = projectTitle.textContent;
+
+    projectTitle.addEventListener('focus', () => {
+      originalTitle = projectTitle.textContent;
+    });
+
+    projectTitle.addEventListener('blur', () => {
+      const newTitle = projectTitle.textContent.trim();
+      if (!newTitle) {
+        projectTitle.textContent = originalTitle;
+      }
+    });
+
+    projectTitle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        projectTitle.blur();
+      }
+      if (e.key === 'Escape') {
+        projectTitle.textContent = originalTitle;
+        projectTitle.blur();
+      }
+    });
+
+    projectTitle.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = e.clipboardData.getData('text/plain').replace(/\n/g, ' ');
+      document.execCommand('insertText', false, text);
+    });
+
+    // Check for highlighted ticket from URL
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const highlightId = urlParams.get('highlight');
+      
+      if (highlightId) {
+        // Check if ticket already exists
+        let existingTicket = document.querySelector(`[data-ticket-id="${highlightId}"]`);
+        
+        if (!existingTicket) {
+          // Create new ticket in Pending Tickets column
+          const pendingBody = document.getElementById('pending-tickets-body');
+          const newTicket = document.createElement('div');
+          newTicket.className = 'ticket highlighted';
+          newTicket.setAttribute('data-ticket-id', highlightId);
+          newTicket.innerHTML = `
+            <div class="ticket-header">
+              <span class="ticket-id">${highlightId}<span class="new-badge">New</span></span>
+              <span class="ticket-priority medium">Medium</span>
+            </div>
+            <div class="ticket-title">New ticket from chat</div>
+            <div class="ticket-desc">Created from PM Inbox conversation</div>
+            <div class="ticket-footer">
+              <span class="ticket-tag">Pending</span>
+            </div>
+          `;
+          pendingBody.insertBefore(newTicket, pendingBody.firstChild);
+          
+          // Update count
+          const countEl = pendingBody.closest('.ticket-column').querySelector('.column-count');
+          countEl.textContent = parseInt(countEl.textContent) + 1;
+          
+          existingTicket = newTicket;
+        } else {
+          existingTicket.classList.add('highlighted');
+        }
+        
+        // Scroll the ticket into view
+        setTimeout(() => {
+          existingTicket.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        }, 100);
+      }
+    });
+
+    // ========== PANEL RESIZER ==========
+    const resizer = document.getElementById('panelResizer');
+    const app = document.querySelector('.app');
+    let isResizing = false;
+    let startX, startWidth;
+
+    // Restore saved width from localStorage
+    const savedWidth = localStorage.getItem('inboxPanelWidth');
+    if (savedWidth) {
+      app.style.setProperty('--inbox-width', savedWidth + 'px');
+    }
+
+    resizer.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      startX = e.clientX;
+      startWidth = parseInt(getComputedStyle(app).getPropertyValue('--inbox-width') || '420');
+      resizer.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      const delta = e.clientX - startX;
+      const newWidth = Math.min(Math.max(280, startWidth + delta), 600);
+      app.style.setProperty('--inbox-width', newWidth + 'px');
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isResizing) {
+        isResizing = false;
+        resizer.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        // Save width to localStorage
+        const currentWidth = parseInt(getComputedStyle(app).getPropertyValue('--inbox-width') || '420');
+        localStorage.setItem('inboxPanelWidth', currentWidth);
+      }
+    });
+  </script>
+</body>
+</html>
+
