@@ -1,0 +1,39 @@
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  transition: all 0.25s;
+}
+
+.elevated {
+  background: var(--bg-elevated);
+}
+
+.outlined {
+  background: transparent;
+  border: 2px dashed var(--border);
+}
+
+.hover:hover {
+  border-color: var(--border-bright);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+}
+
+.hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.hover:hover::before {
+  opacity: 1;
+}

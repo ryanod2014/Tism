@@ -1,0 +1,73 @@
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.card:hover {
+  border-color: var(--border-bright);
+  transform: translateY(-2px);
+}
+
+.card.blocker {
+  border-left: 4px solid var(--accent-red);
+}
+
+.card.decision {
+  border-left: 4px solid var(--accent-amber);
+}
+
+.card.update {
+  border-left: 4px solid var(--accent-green);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.meta {
+  flex: 1;
+}
+
+.project {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.typeBadge {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.body {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
