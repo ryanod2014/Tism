@@ -1167,77 +1167,398 @@ function PipelineView() {
 }
 
 // Live View Component
-const liveAgents = [
-  { id: 'agent1', name: 'Marcus', task: 'TSM-008' },
-  { id: 'agent2', name: 'Sophia', task: 'TSM-012' },
-  { id: 'agent3', name: 'Jordan', task: 'TSM-006' },
-  { id: 'agent4', name: 'Alex', task: 'TSM-015' },
-  { id: 'agent5', name: 'Riley', task: 'TSM-009' },
-  { id: 'agent6', name: 'Sam', task: 'TSM-011' },
-  { id: 'agent7', name: 'Morgan', task: 'TSM-014' },
-  { id: 'agent8', name: 'Casey', task: 'TSM-016' },
+interface LiveAgent {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+  task: string;
+  taskDesc: string;
+  status: 'coding' | 'thinking' | 'reviewing' | 'testing';
+  code: string[];
+  thinkingText?: string;
+}
+
+const liveAgentsData: LiveAgent[] = [
+  { id: 'agent1', name: 'Marcus', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=11', task: 'TSM-008', taskDesc: 'API Auth', status: 'coding', code: ['async function validateToken(token) {', '  const decoded = jwt.verify(token, SECRET);', '  const user = await db.users.findOne({', '    where: { id: decoded.userId }', '  });', '  return { user, session: decoded };', '}'] },
+  { id: 'agent2', name: 'Sophia', role: 'Frontend', avatar: 'https://i.pravatar.cc/80?img=5', task: 'TSM-012', taskDesc: 'Charts', status: 'coding', code: ['const Chart = ({ data }) => {', '  const config = useMemo(() => ({', '    responsive: true,', '    plugins: { legend: { position: "top" } }', '  }), []);', '  return <Line data={data} />;', '}'] },
+  { id: 'agent3', name: 'Jordan', role: 'Full Stack', avatar: 'https://i.pravatar.cc/80?img=12', task: 'TSM-006', taskDesc: 'Settings', status: 'coding', code: ['export function SettingsPage() {', '  const [settings, setSettings] = useState({', '    theme: "dark", lang: "en"', '  });', '  const save = () => api.update(settings);', '  return <Form onSubmit={save} />;', '}'] },
+  { id: 'agent4', name: 'Alex', role: 'DevOps', avatar: 'https://i.pravatar.cc/80?img=33', task: 'TSM-015', taskDesc: 'CI/CD', status: 'coding', code: ['jobs:', '  build:', '    runs-on: ubuntu-latest', '    steps:', '      - uses: actions/checkout@v4', '      - run: npm ci && npm test', '  deploy:'] },
+  { id: 'agent5', name: 'Riley', role: 'UI/UX', avatar: 'https://i.pravatar.cc/80?img=23', task: 'TSM-009', taskDesc: 'Buttons', status: 'coding', code: ['.button {', '  display: inline-flex;', '  padding: 8px 16px;', '  border-radius: var(--radius);', '  font-weight: 500;', '  transition: all 0.15s;', '}'] },
+  { id: 'agent6', name: 'Sam', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=52', task: 'TSM-011', taskDesc: 'Database', status: 'coding', code: ['CREATE TABLE sessions (', '  id UUID PRIMARY KEY,', '  user_id UUID REFERENCES users(id),', '  token VARCHAR(255) UNIQUE,', '  expires_at TIMESTAMPTZ', ');'] },
+  { id: 'agent7', name: 'Morgan', role: 'QA', avatar: 'https://i.pravatar.cc/80?img=47', task: 'TSM-014', taskDesc: 'Tests', status: 'coding', code: ['describe("Auth", () => {', '  it("logs in", async () => {', '    const res = await request(app)', '      .post("/api/login")', '      .send({ email, password });', '    expect(res.status).toBe(200);', '  });'] },
+  { id: 'agent8', name: 'Casey', role: 'Frontend', avatar: 'https://i.pravatar.cc/80?img=60', task: 'TSM-016', taskDesc: 'Modals', status: 'coding', code: ['export function Modal({ isOpen, onClose }) {', '  useEffect(() => {', '    const esc = (e) => e.key === "Escape" && onClose();', '    document.addEventListener("keydown", esc);', '    return () => removeEventListener("keydown", esc);', '  }, []);'] },
+  { id: 'agent9', name: 'Taylor', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=13', task: 'TSM-030', taskDesc: 'Webhooks', status: 'coding', code: ['app.post("/webhook", async (req, res) => {', '  const sig = req.headers["x-signature"];', '  if (!verifySignature(req.body, sig)) {', '    return res.status(401).send("Invalid");', '  }', '  await processEvent(req.body);', '  res.status(200).send("OK");'] },
+  { id: 'agent10', name: 'Avery', role: 'Frontend', avatar: 'https://i.pravatar.cc/80?img=16', task: 'TSM-031', taskDesc: 'Tables', status: 'coding', code: ['function DataTable({ rows, columns }) {', '  const [sorted, setSorted] = useState(null);', '  const data = useMemo(() => {', '    if (!sorted) return rows;', '    return [...rows].sort((a,b) =>', '      a[sorted] > b[sorted] ? 1 : -1);', '  }, [rows, sorted]);'] },
+  { id: 'agent11', name: 'Quinn', role: 'DevOps', avatar: 'https://i.pravatar.cc/80?img=18', task: 'TSM-032', taskDesc: 'Docker', status: 'coding', code: ['FROM node:20-alpine', 'WORKDIR /app', 'COPY package*.json ./', 'RUN npm ci --only=production', 'COPY . .', 'EXPOSE 3000', 'CMD ["node", "server.js"]'] },
+  { id: 'agent12', name: 'Blake', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=53', task: 'TSM-033', taskDesc: 'Cache', status: 'coding', code: ['const cache = new Redis(REDIS_URL);', '', 'async function cached(key, fn, ttl = 300) {', '  const hit = await cache.get(key);', '  if (hit) return JSON.parse(hit);', '  const data = await fn();', '  await cache.setex(key, ttl, JSON.stringify(data));'] },
+  { id: 'agent13', name: 'Skyler', role: 'Frontend', avatar: 'https://i.pravatar.cc/80?img=20', task: 'TSM-034', taskDesc: 'Forms', status: 'coding', code: ['const { register, handleSubmit } = useForm();', '', 'return (', '  <form onSubmit={handleSubmit(onSubmit)}>', '    <input {...register("email")} />', '    <input {...register("password")} />', '    <button type="submit">Login</button>'] },
+  { id: 'agent14', name: 'Drew', role: 'QA', avatar: 'https://i.pravatar.cc/80?img=57', task: 'TSM-035', taskDesc: 'E2E Tests', status: 'coding', code: ['test("user signup flow", async ({ page }) => {', '  await page.goto("/signup");', '  await page.fill("[name=email]", email);', '  await page.fill("[name=password]", pass);', '  await page.click("button[type=submit]");', '  await expect(page).toHaveURL("/dashboard");', '});'] },
+  { id: 'agent15', name: 'Peyton', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=22', task: 'TSM-036', taskDesc: 'GraphQL', status: 'coding', code: ['const resolvers = {', '  Query: {', '    user: (_, { id }) => db.user.findUnique({', '      where: { id }', '    }),', '    users: () => db.user.findMany()', '  }', '};'] },
+  { id: 'agent16', name: 'Reese', role: 'UI/UX', avatar: 'https://i.pravatar.cc/80?img=25', task: 'TSM-037', taskDesc: 'Icons', status: 'coding', code: ['export const Icons = {', '  home: (props) => (', '    <svg viewBox="0 0 24 24" {...props}>', '      <path d="M3 9l9-7 9 7v11a2 2 0" />', '    </svg>', '  ),', '};'] },
+  { id: 'agent17', name: 'Jamie', role: 'Frontend', avatar: 'https://i.pravatar.cc/80?img=26', task: 'TSM-038', taskDesc: 'Animations', status: 'coding', code: ['const variants = {', '  hidden: { opacity: 0, y: 20 },', '  visible: { opacity: 1, y: 0 }', '};', '', '<motion.div', '  initial="hidden"', '  animate="visible"'] },
+  { id: 'agent18', name: 'Kendall', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=28', task: 'TSM-039', taskDesc: 'Jobs Queue', status: 'coding', code: ['const queue = new Queue("emails", redis);', '', 'queue.process(async (job) => {', '  const { to, subject, body } = job.data;', '  await sendEmail({ to, subject, body });', '  return { sent: true };', '});'] },
+  { id: 'agent19', name: 'Parker', role: 'DevOps', avatar: 'https://i.pravatar.cc/80?img=32', task: 'TSM-040', taskDesc: 'Terraform', status: 'coding', code: ['resource "aws_lambda_function" "api" {', '  filename      = "lambda.zip"', '  function_name = "api-handler"', '  role          = aws_iam_role.lambda.arn', '  handler       = "index.handler"', '  runtime       = "nodejs18.x"', '}'] },
+  { id: 'agent20', name: 'Hayden', role: 'Frontend', avatar: 'https://i.pravatar.cc/80?img=35', task: 'TSM-041', taskDesc: 'Search', status: 'coding', code: ['const [query, setQuery] = useState("");', 'const results = useMemo(() => {', '  if (!query) return items;', '  return items.filter(item =>', '    item.name.toLowerCase().includes(', '      query.toLowerCase())', '  );', '}, [query, items]);'] },
+  { id: 'agent21', name: 'Cameron', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=51', task: 'TSM-042', taskDesc: 'OAuth', status: 'coding', code: ['app.get("/auth/google", passport.authenticate(', '  "google", { scope: ["profile", "email"] }', '));', '', 'app.get("/auth/google/callback",', '  passport.authenticate("google"),', '  (req, res) => res.redirect("/dashboard")'] },
+  { id: 'agent22', name: 'Dakota', role: 'QA', avatar: 'https://i.pravatar.cc/80?img=36', task: 'TSM-043', taskDesc: 'Load Tests', status: 'coding', code: ['export default function() {', '  const res = http.get(BASE_URL + "/api/users");', '  check(res, {', '    "status is 200": (r) => r.status === 200,', '    "response time < 200ms": (r) =>', '      r.timings.duration < 200', '  });', '}'] },
+  { id: 'agent23', name: 'River', role: 'Frontend', avatar: 'https://i.pravatar.cc/80?img=38', task: 'TSM-044', taskDesc: 'Drag & Drop', status: 'coding', code: ['const onDragEnd = (result) => {', '  if (!result.destination) return;', '  const items = Array.from(list);', '  const [moved] = items.splice(result.source.index, 1);', '  items.splice(result.destination.index, 0, moved);', '  setList(items);', '};'] },
+  { id: 'agent24', name: 'Sage', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=41', task: 'TSM-045', taskDesc: 'File Upload', status: 'coding', code: ['const upload = multer({', '  storage: multer.memoryStorage(),', '  limits: { fileSize: 5 * 1024 * 1024 }', '});', '', 'app.post("/upload", upload.single("file"),', '  async (req, res) => {', '    const url = await s3.upload(req.file);'] },
+  { id: 'agent25', name: 'Finley', role: 'UI/UX', avatar: 'https://i.pravatar.cc/80?img=43', task: 'TSM-046', taskDesc: 'Tooltips', status: 'coding', code: ['function Tooltip({ content, children }) {', '  const [show, setShow] = useState(false);', '  return (', '    <div onMouseEnter={() => setShow(true)}', '         onMouseLeave={() => setShow(false)}>', '      {children}', '      {show && <div className={styles.tip}>'] },
+  { id: 'agent26', name: 'Ellis', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=45', task: 'TSM-047', taskDesc: 'Rate Limit', status: 'coding', code: ['const limiter = rateLimit({', '  windowMs: 15 * 60 * 1000,', '  max: 100,', '  message: "Too many requests"', '});', '', 'app.use("/api/", limiter);'] },
+  { id: 'agent27', name: 'Rowan', role: 'Frontend', avatar: 'https://i.pravatar.cc/80?img=48', task: 'TSM-048', taskDesc: 'Infinite Scroll', status: 'coding', code: ['const { ref, inView } = useInView();', '', 'useEffect(() => {', '  if (inView && hasMore) {', '    fetchNextPage();', '  }', '}, [inView, hasMore]);', '', '<div ref={ref} />'] },
+  { id: 'agent28', name: 'Emery', role: 'DevOps', avatar: 'https://i.pravatar.cc/80?img=50', task: 'TSM-049', taskDesc: 'Monitoring', status: 'coding', code: ['const metrics = new prometheus.Registry();', '', 'const httpRequests = new prometheus.Counter({', '  name: "http_requests_total",', '  help: "Total HTTP requests",', '  labelNames: ["method", "path", "status"]', '});'] },
+  { id: 'agent29', name: 'Lennox', role: 'QA', avatar: 'https://i.pravatar.cc/80?img=54', task: 'TSM-050', taskDesc: 'Accessibility', status: 'coding', code: ['test("button is accessible", async () => {', '  render(<Button>Click me</Button>);', '  const btn = screen.getByRole("button");', '  expect(btn).toHaveAccessibleName("Click me");', '  expect(btn).not.toHaveAttribute(', '    "aria-disabled", "true");', '});'] },
+  { id: 'agent30', name: 'Phoenix', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=55', task: 'TSM-051', taskDesc: 'Encryption', status: 'coding', code: ['const encrypt = (text: string) => {', '  const iv = crypto.randomBytes(16);', '  const cipher = crypto.createCipheriv(', '    "aes-256-gcm", key, iv);', '  let encrypted = cipher.update(text, "utf8");', '  encrypted = Buffer.concat([encrypted,', '    cipher.final()]);'] },
+  { id: 'agent31', name: 'Arden', role: 'Frontend', avatar: 'https://i.pravatar.cc/80?img=58', task: 'TSM-052', taskDesc: 'Virtualization', status: 'coding', code: ['<FixedSizeList', '  height={400}', '  width={600}', '  itemCount={items.length}', '  itemSize={50}', '>', '  {({ index, style }) => (', '    <div style={style}>{items[index]}</div>'] },
+  { id: 'agent32', name: 'Marlowe', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=59', task: 'TSM-053', taskDesc: 'WebSockets', status: 'coding', code: ['io.on("connection", (socket) => {', '  socket.on("join", (room) => {', '    socket.join(room);', '  });', '  socket.on("message", (data) => {', '    io.to(data.room).emit("message", data);', '  });', '});'] },
+  { id: 'agent33', name: 'Remy', role: 'UI/UX', avatar: 'https://i.pravatar.cc/80?img=61', task: 'TSM-054', taskDesc: 'Dark Mode', status: 'coding', code: [':root {', '  --bg: #ffffff;', '  --text: #1a1a1a;', '}', '', '[data-theme="dark"] {', '  --bg: #0a0a0a;', '  --text: #fafafa;', '}'] },
+  { id: 'agent34', name: 'Scout', role: 'DevOps', avatar: 'https://i.pravatar.cc/80?img=62', task: 'TSM-055', taskDesc: 'K8s', status: 'coding', code: ['apiVersion: apps/v1', 'kind: Deployment', 'metadata:', '  name: api-server', 'spec:', '  replicas: 3', '  selector:', '    matchLabels:'] },
+  { id: 'agent35', name: 'Harley', role: 'Frontend', avatar: 'https://i.pravatar.cc/80?img=63', task: 'TSM-056', taskDesc: 'PWA', status: 'coding', code: ['self.addEventListener("fetch", (event) => {', '  event.respondWith(', '    caches.match(event.request)', '      .then((response) => {', '        return response || fetch(event.request);', '      })', '  );', '});'] },
+  { id: 'agent36', name: 'Milan', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=64', task: 'TSM-057', taskDesc: 'Audit Log', status: 'coding', code: ['async function logAction(action, userId, meta) {', '  await db.auditLog.create({', '    data: {', '      action, userId,', '      metadata: JSON.stringify(meta),', '      timestamp: new Date()', '    }', '  });'] },
+  { id: 'agent37', name: 'Zion', role: 'QA', avatar: 'https://i.pravatar.cc/80?img=65', task: 'TSM-058', taskDesc: 'Snapshots', status: 'coding', code: ['it("renders correctly", () => {', '  const tree = renderer', '    .create(<Button variant="primary" />)', '    .toJSON();', '  expect(tree).toMatchSnapshot();', '});'] },
+  { id: 'agent38', name: 'Lyric', role: 'Frontend', avatar: 'https://i.pravatar.cc/80?img=66', task: 'TSM-059', taskDesc: 'i18n', status: 'coding', code: ['const { t } = useTranslation();', '', 'return (', '  <div>', '    <h1>{t("welcome.title")}</h1>', '    <p>{t("welcome.description")}</p>', '  </div>', ');'] },
+  { id: 'agent39', name: 'Shay', role: 'Backend', avatar: 'https://i.pravatar.cc/80?img=67', task: 'TSM-060', taskDesc: 'Pagination', status: 'coding', code: ['const getPaginated = async (page, limit) => {', '  const skip = (page - 1) * limit;', '  const [items, total] = await Promise.all([', '    db.items.findMany({ skip, take: limit }),', '    db.items.count()', '  ]);', '  return { items, total, pages: Math.ceil(total/limit) };'] },
+  { id: 'agent40', name: 'Kai', role: 'DevOps', avatar: 'https://i.pravatar.cc/80?img=68', task: 'TSM-061', taskDesc: 'Secrets', status: 'coding', code: ['const client = new SecretManagerClient();', '', 'async function getSecret(name) {', '  const [version] = await client.accessSecretVersion({', '    name: `projects/my-project/secrets/${name}/latest`', '  });', '  return version.payload.data.toString();', '}'] },
 ];
 
-const liveActivities = [
-  { name: 'Marcus', action: 'started working on TSM-008', time: 'just now' },
-  { name: 'Sophia', action: 'pushed 3 commits', time: '3s ago' },
-  { name: 'Jordan', action: 'completed test suite', time: '6s ago' },
-  { name: 'Alex', action: 'deployed to staging', time: '9s ago' },
-  { name: 'Riley', action: 'fixed UI bug', time: '12s ago' },
+// Pool of possible tasks that agents can work on
+const taskPool = [
+  { task: 'TSM-017', taskDesc: 'Payment Integration' },
+  { task: 'TSM-018', taskDesc: 'Email Templates' },
+  { task: 'TSM-019', taskDesc: 'Search Filters' },
+  { task: 'TSM-020', taskDesc: 'Dark Mode Toggle' },
+  { task: 'TSM-021', taskDesc: 'Export to CSV' },
+  { task: 'TSM-022', taskDesc: 'Notifications API' },
+  { task: 'TSM-023', taskDesc: 'User Avatars' },
+  { task: 'TSM-024', taskDesc: 'Rate Limiting' },
+  { task: 'TSM-025', taskDesc: 'Webhooks Setup' },
+  { task: 'TSM-026', taskDesc: 'Audit Logging' },
+  { task: 'TSM-027', taskDesc: 'Password Reset' },
+  { task: 'TSM-028', taskDesc: 'API Caching' },
+];
+
+const codeSnippets = [
+  ['const handlePayment = async (data) => {', '  const session = await stripe.checkout.create({', '    mode: "payment",', '    line_items: data.items,', '    success_url: `${BASE_URL}/success`,', '  });', '  return session.url;', '};'],
+  ['function EmailTemplate({ user, content }) {', '  return (', '    <Html>', '      <Head />', '      <Body style={main}>', '        <Container>', '          <Text>Hello {user.name}</Text>', '        </Container>'],
+  ['const searchUsers = async (query) => {', '  return db.users.findMany({', '    where: {', '      OR: [', '        { name: { contains: query } },', '        { email: { contains: query } }', '      ]', '    }'],
+  ['export function ThemeToggle() {', '  const { theme, setTheme } = useTheme();', '  return (', '    <button onClick={() => {', '      setTheme(theme === "dark" ? "light" : "dark")', '    }}>', '      {theme === "dark" ? "🌙" : "☀️"}', '    </button>'],
+  ['async function exportToCSV(data) {', '  const headers = Object.keys(data[0]);', '  const rows = data.map(row =>', '    headers.map(h => row[h]).join(",")', '  );', '  return [headers.join(","), ...rows].join("\\n");', '}', ''],
+  ['app.post("/api/notify", async (req, res) => {', '  const { userId, message, type } = req.body;', '  await db.notifications.create({', '    data: { userId, message, type, read: false }', '  });', '  pusher.trigger(`user-${userId}`, "notify", {', '    message, type', '  });'],
 ];
 
 function LiveView() {
+  const [typingState, setTypingState] = useState<Record<string, number>>({});
+  const [activities, setActivities] = useState([
+    { name: 'Marcus', avatar: 'https://i.pravatar.cc/80?img=11', action: 'started working on TSM-008', time: 'just now' },
+    { name: 'Sophia', avatar: 'https://i.pravatar.cc/80?img=5', action: 'pushed 3 commits', time: '3s ago' },
+    { name: 'Jordan', avatar: 'https://i.pravatar.cc/80?img=12', action: 'analyzing component structure', time: '6s ago' },
+    { name: 'Alex', avatar: 'https://i.pravatar.cc/80?img=33', action: 'reviewing pipeline config', time: '9s ago' },
+    { name: 'Riley', avatar: 'https://i.pravatar.cc/80?img=23', action: 'styling button variants', time: '12s ago' },
+  ]);
+  const [lineCount, setLineCount] = useState(4302);
+  const [commitCount, setCommitCount] = useState(13);
+  
+  // Active windows - each has a unique instance ID, agent info, and position
+  const [activeWindows, setActiveWindows] = useState<Array<{
+    instanceId: string;
+    agent: LiveAgent;
+    position: number;
+  }>>(() => 
+    liveAgentsData.slice(0, 8).map((agent, i) => ({
+      instanceId: `${agent.id}-${Date.now()}-${i}`,
+      agent,
+      position: i,
+    }))
+  );
+  
+  const [focusedAgent, setFocusedAgent] = useState<string | null>(null);
+  const [minimizedAgents, setMinimizedAgents] = useState<Set<string>>(new Set());
+  const [enteringWindows, setEnteringWindows] = useState<Set<string>>(new Set());
+  const [exitingWindows, setExitingWindows] = useState<Set<string>>(new Set());
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [gridCols, setGridCols] = useState(4);
+  const nextInstanceId = useRef(0);
+
+  // Calculate grid columns based on container width
+  useEffect(() => {
+    const updateCols = () => {
+      if (gridRef.current) {
+        const width = gridRef.current.offsetWidth;
+        const cols = Math.max(2, Math.floor(width / 240));
+        setGridCols(Math.min(cols, 4));
+      }
+    };
+    updateCols();
+    window.addEventListener('resize', updateCols);
+    return () => window.removeEventListener('resize', updateCols);
+  }, []);
+
+  // Calculate position for each card based on grid
+  const getCardStyle = (position: number, instanceId: string) => {
+    const col = position % gridCols;
+    const row = Math.floor(position / gridCols);
+    const cardWidth = 100 / gridCols;
+    const cardHeight = 250;
+    
+    const isEntering = enteringWindows.has(instanceId);
+    const isExiting = exitingWindows.has(instanceId);
+    
+    return {
+      position: 'absolute' as const,
+      left: `${col * cardWidth}%`,
+      top: `${row * cardHeight}px`,
+      width: `calc(${cardWidth}% - 12px)`,
+      transition: 'left 0.6s cubic-bezier(0.4, 0, 0.2, 1), top 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s ease, opacity 0.4s ease',
+      transform: isEntering ? 'scale(0.8)' : isExiting ? 'scale(0.8)' : 'scale(1)',
+      opacity: isEntering ? 0 : isExiting ? 0 : 1,
+    };
+  };
+
+  // Simulate typing animation - FAST
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTypingState(prev => {
+        const newState = { ...prev };
+        activeWindows.forEach(window => {
+          const currentPos = prev[window.instanceId] || 0;
+          const maxLen = window.agent.code.join('').length;
+          // Much faster typing - 5-15 chars at a time
+          newState[window.instanceId] = currentPos >= maxLen ? 0 : currentPos + Math.floor(Math.random() * 10) + 5;
+        });
+        return newState;
+      });
+    }, 50);
+    return () => clearInterval(interval);
+  }, [activeWindows]);
+
+  // Simulate activity updates - use all agents
+  useEffect(() => {
+    const actions = [
+      'committed changes', 'pushed to main', 'opened PR', 'merged PR', 'fixed bug',
+      'added feature', 'refactored code', 'updated deps', 'wrote tests', 'deployed',
+      'reviewed code', 'approved PR', 'started task', 'completed task', 'optimized query',
+      'added caching', 'fixed typo', 'updated docs', 'ran tests', 'fixed lint errors',
+      'added logging', 'improved perf', 'fixed edge case', 'added validation', 'updated schema'
+    ];
+
+    const interval = setInterval(() => {
+      const randomAgent = liveAgentsData[Math.floor(Math.random() * liveAgentsData.length)];
+      const randomAction = actions[Math.floor(Math.random() * actions.length)];
+      
+      setActivities(prev => [
+        { name: randomAgent.name, avatar: randomAgent.avatar, action: randomAction, time: 'just now' },
+        ...prev.slice(0, 19).map((a, i) => ({ ...a, time: `${(i + 1) * 2}s ago` }))
+      ]);
+      
+      setLineCount(prev => prev + Math.floor(Math.random() * 20) + 5);
+      if (Math.random() > 0.6) setCommitCount(prev => prev + 1);
+    }, 800);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Add new windows at top and push others down
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveWindows(currentWindows => {
+        // Get agents currently on screen
+        const usedAgentNames = new Set(currentWindows.map(w => w.agent.name));
+        
+        // Get available agents (not currently on screen)
+        const availableAgents = liveAgentsData.filter(a => !usedAgentNames.has(a.name));
+        
+        // If no available agents, skip this cycle
+        if (availableAgents.length === 0) return currentWindows;
+        
+        // Add 1-3 new windows (but not more than available agents)
+        const numToAdd = Math.min(
+          Math.floor(Math.random() * 3) + 1,
+          availableAgents.length
+        );
+        
+        const newWindows: Array<{ instanceId: string; agent: LiveAgent; position: number }> = [];
+        const shuffledAvailable = [...availableAgents].sort(() => Math.random() - 0.5);
+        
+        for (let i = 0; i < numToAdd; i++) {
+          const selectedAgent = shuffledAvailable[i];
+          const randomTask = taskPool[Math.floor(Math.random() * taskPool.length)];
+          const randomCode = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
+          
+          const newAgent: LiveAgent = {
+            ...selectedAgent,
+            id: `${selectedAgent.id}-${nextInstanceId.current}`,
+            task: randomTask.task,
+            taskDesc: randomTask.taskDesc,
+            code: randomCode,
+          };
+          
+          const instanceId = `window-${nextInstanceId.current++}`;
+          newWindows.push({
+            instanceId,
+            agent: newAgent,
+            position: i,
+          });
+          
+          // Mark as entering
+          setEnteringWindows(prev => new Set([...prev, instanceId]));
+        }
+      
+      // After a brief delay, remove entering state
+        setTimeout(() => {
+          setEnteringWindows(prev => {
+            const next = new Set(prev);
+            newWindows.forEach(w => next.delete(w.instanceId));
+            return next;
+          });
+        }, 50);
+        
+        // Shift existing windows down
+        const shifted = currentWindows.map(w => ({
+          ...w,
+          position: w.position + numToAdd,
+        }));
+        
+        // Add new windows at top - keep ALL windows (up to 40)
+        const combined = [...newWindows, ...shifted].slice(0, 40);
+        
+        // Randomly focus a new window
+        if (newWindows.length > 0 && Math.random() > 0.5) {
+          const randomWindow = newWindows[Math.floor(Math.random() * newWindows.length)];
+          setFocusedAgent(randomWindow.instanceId);
+          setTimeout(() => setFocusedAgent(null), 500);
+        }
+        
+        return combined;
+      });
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const getTypedCode = (agent: LiveAgent, instanceId: string) => {
+    const totalTyped = typingState[instanceId] || 0;
+    let remaining = totalTyped;
+    
+    return agent.code.map((line, lineIndex) => {
+      if (remaining <= 0) return { text: '', isTyping: lineIndex === 0 };
+      
+      const visibleChars = Math.min(remaining, line.length);
+      remaining -= line.length;
+      
+      return {
+        text: line.substring(0, visibleChars),
+        isTyping: remaining <= 0 && remaining > -line.length
+      };
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'coding': return '#10b981';
+      case 'thinking': return '#f59e0b';
+      case 'reviewing': return '#8b5cf6';
+      case 'testing': return '#3b82f6';
+      default: return '#6b7280';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'coding': return '● Coding';
+      case 'thinking': return '◐ Thinking';
+      case 'reviewing': return '◉ Reviewing';
+      case 'testing': return '▶ Testing';
+      default: return '○ Idle';
+    }
+  };
+
   return (
     <div className={styles.liveContent}>
       <div className={styles.liveHeader}>
         <div className={styles.liveStatus}>
           <span className={styles.liveStatusDot} />
-          <span className={styles.liveStatusText}>8 Agents Active</span>
+          <span className={styles.liveStatusText}>40 Agents Active</span>
         </div>
         <div className={styles.liveStats}>
-          <span className={styles.liveStat}>📄 4,302 lines</span>
+          <span className={styles.liveStat}>📄 {lineCount.toLocaleString()} lines</span>
           <span className={styles.liveStat}>✅ 249 tests</span>
-          <span className={styles.liveStat}>📦 13 commits</span>
+          <span className={styles.liveStat}>📦 {commitCount} commits</span>
         </div>
       </div>
       
       <div className={styles.liveGrid}>
-        <div className={styles.agentsGrid}>
-          {liveAgents.map((agent) => (
-            <div key={agent.id} className={styles.agentCard}>
-              <div className={styles.agentHeader}>
-                <div className={styles.agentAvatar}>{agent.name[0]}</div>
-                <div className={styles.agentInfo}>
-                  <div className={styles.agentName}>{agent.name}</div>
-                  <div className={styles.agentTask}>{agent.task}</div>
+        <div className={styles.agentsGridWrapper}>
+          <div 
+            className={styles.agentsGrid} 
+            ref={gridRef}
+            style={{ height: `${Math.ceil(activeWindows.length / gridCols) * 250}px` }}
+          >
+          {activeWindows.map((window) => {
+            const { agent, instanceId, position } = window;
+            const typedLines = getTypedCode(agent, instanceId);
+            const isFocused = focusedAgent === instanceId;
+            const isMinimized = minimizedAgents.has(instanceId);
+            const cardStyle = getCardStyle(position, instanceId);
+            return (
+              <div 
+                key={instanceId} 
+                className={`${styles.agentCard} ${styles[agent.status]} ${isFocused ? styles.focused : ''} ${isMinimized ? styles.minimized : ''}`}
+                style={cardStyle}
+              >
+                <div className={styles.agentCodeFull}>
+                  <div className={styles.codeWindowBar}>
+                    <span className={styles.windowDot} style={{ background: '#ff5f57' }} />
+                    <span className={styles.windowDot} style={{ background: '#febc2e' }} />
+                    <span className={styles.windowDot} style={{ background: '#28c840' }} />
+                    <span className={styles.windowTitle}>{agent.taskDesc}</span>
+                    <span className={styles.windowTask}>{agent.task}</span>
+                  </div>
+                  {agent.code.map((line, i) => {
+                    const typed = typedLines[i];
+                    return (
+                      <div key={i} className={styles.codeLine}>
+                        <span className={styles.lineNum}>{i + 1}</span>
+                        <span className={styles.codeText}>
+                          {typed.text}
+                          {typed.isTyping && (
+                            <span className={styles.cursor}>|</span>
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                <div className={styles.floatingAvatar}>
+                  <img src={agent.avatar} alt={agent.name} className={styles.floatingAvatarImg} />
+                  <span className={styles.floatingStatus} style={{ background: getStatusColor(agent.status) }} />
+                  <span className={styles.floatingName}>{agent.name}</span>
                 </div>
               </div>
-              <div className={styles.agentCode}>
-                <div className={styles.codeLine}><span className={styles.lineNum}>1</span>import {'{ us'}</div>
-                <div className={styles.codeLine}><span className={styles.lineNum}>2</span>import {'{ Us'}</div>
-                <div className={styles.codeLine}><span className={styles.lineNum}>3</span></div>
-                <div className={styles.codeLine}><span className={styles.lineNum}>4</span>export func</div>
-                <div className={styles.codeLine}><span className={styles.lineNum}>5</span>{'  const [us'}</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
+          </div>
         </div>
         
         <div className={styles.activityFeed}>
           <div className={styles.activityHeader}>
             <span className={styles.activityDot} />
             Live Activity
+            <span className={styles.activityCount}>{activities.length}</span>
           </div>
-          {liveActivities.map((activity, i) => (
-            <div key={i} className={styles.activityItem}>
-              <div className={styles.activityAvatar}>{activity.name[0]}</div>
-              <div className={styles.activityContent}>
-                <span className={styles.activityName}>{activity.name}</span>
-                <span className={styles.activityAction}>{activity.action}</span>
+          <div className={styles.activityList}>
+            {activities.map((activity, i) => (
+              <div key={i} className={`${styles.activityItem} ${i === 0 ? styles.newest : ''}`}>
+                <img src={activity.avatar} alt={activity.name} className={styles.activityAvatarImg} />
+                <div className={styles.activityContent}>
+                  <span className={styles.activityName}>{activity.name}</span>
+                  <span className={styles.activityAction}>{activity.action}</span>
+                </div>
+                <span className={styles.activityTime}>{activity.time}</span>
               </div>
-              <span className={styles.activityTime}>{activity.time}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

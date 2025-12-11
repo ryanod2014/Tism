@@ -1698,14 +1698,17 @@
   gap: 16px;
   padding: 16px;
   overflow: hidden;
+  min-height: 0;
+}
+
+.agentsGridWrapper {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .agentsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-  overflow-y: auto;
-  align-content: start;
+  position: relative;
+  perspective: 1000px;
 }
 
 .agentCard {
@@ -1713,56 +1716,136 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   overflow: hidden;
-}
-
-.agentHeader {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
+  flex-direction: column;
+  height: 240px;
+  transform-origin: center center;
+  position: relative;
 }
 
-.agentAvatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: white;
+.agentCard.coding {
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
 }
 
-.agentInfo {
-  flex: 1;
+.agentCard.thinking {
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
 }
 
-.agentName {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
+.agentCard.reviewing {
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
 }
 
-.agentTask {
-  font-size: 10px;
-  color: var(--accent-cyan);
-  font-family: 'JetBrains Mono', monospace;
+.agentCard.testing {
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
 }
 
-.agentCode {
+.agentCard.focused {
+  transform: scale(1.03);
+  z-index: 10;
+  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.3), 0 0 0 2px var(--accent-cyan);
+  animation: windowPop 0.3s ease-out;
+}
+
+.agentCard.minimized {
+  transform: scale(0.95);
+  opacity: 0.6;
+  filter: brightness(0.8);
+}
+
+@keyframes windowPop {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1.03); opacity: 1; }
+}
+
+.agentCodeFull {
   background: var(--bg-deep);
   padding: 8px 10px;
   font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.codeWindowBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.windowDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.windowTitle {
+  flex: 1;
   font-size: 10px;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+.windowTask {
+  font-size: 9px;
+  color: var(--accent-cyan);
+  background: rgba(0, 212, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.floatingAvatar {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  padding: 4px 10px 4px 4px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  z-index: 5;
+}
+
+.floatingAvatarImg {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--bg-deep);
+}
+
+.floatingStatus {
+  position: absolute;
+  bottom: 4px;
+  left: 24px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.7);
+}
+
+.floatingName {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .codeLine {
   display: flex;
   gap: 8px;
-  color: var(--text-muted);
   line-height: 1.6;
 }
 
@@ -1771,6 +1854,22 @@
   opacity: 0.5;
   width: 16px;
   text-align: right;
+  flex-shrink: 0;
+}
+
+.codeText {
+  color: var(--text-secondary);
+  white-space: pre;
+}
+
+.cursor {
+  color: var(--accent-cyan);
+  animation: blink 0.8s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 .activityFeed {
@@ -1780,6 +1879,12 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  max-height: 100%;
+}
+
+.activityList {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .activityHeader {
@@ -1789,6 +1894,17 @@
   padding: 12px 14px;
   border-bottom: 1px solid var(--border);
   font-size: 13px;
+  flex-shrink: 0;
+}
+
+.activityCount {
+  margin-left: auto;
+  font-size: 10px;
+  background: var(--accent-green);
+  color: black;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -1806,10 +1922,35 @@
   gap: 10px;
   padding: 10px 14px;
   border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+
+.activityItem.newest {
+  background: rgba(16, 185, 129, 0.05);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .activityItem:last-child {
   border-bottom: none;
+}
+
+.activityAvatarImg {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .activityAvatar {
