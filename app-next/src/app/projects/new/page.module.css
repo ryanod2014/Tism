@@ -161,14 +161,13 @@
 }
 
 .optionIcon {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 20px;
-  border-radius: var(--radius-lg);
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  color: var(--text-secondary);
 }
 
 .optionName {
@@ -181,6 +180,35 @@
   font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.5;
+}
+
+.optionCard.comingSoon {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.optionCard.comingSoon:hover {
+  transform: none;
+  border-color: var(--border);
+}
+
+.optionCard.comingSoon:hover::before {
+  opacity: 0;
+}
+
+.comingSoonBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
 }
 
 .selectHint {

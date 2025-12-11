@@ -509,7 +509,7 @@ export default function ProjectPage() {
     <div className={styles.app} ref={appRef} style={{ '--inbox-width': `${panelWidth}px` } as React.CSSProperties}>
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <Link href="/home" className={styles.backToProjects}>←</Link>
+          <Link href="/" className={styles.backToProjects}>←</Link>
           <div className={styles.headerDivider} />
           <div className={styles.projectTitle}>{projectTitle}</div>
         </div>

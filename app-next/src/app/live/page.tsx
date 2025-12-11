@@ -102,7 +102,7 @@ export default function LivePage() {
 
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <Link href="/home" className={styles.backToProjects}>←</Link>
+          <Link href="/" className={styles.backToProjects}>←</Link>
           <div className={styles.headerDivider} />
           <div className={styles.projectTitle}>SaaS Dashboard</div>
         </div>
