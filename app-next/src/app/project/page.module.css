@@ -1,6 +1,6 @@
 .app {
   display: grid;
-  grid-template-columns: var(--inbox-width, 420px) 6px 1fr;
+  grid-template-columns: var(--inbox-width, 420px) 2px 1fr;
   grid-template-rows: 56px 1fr;
   height: 100vh;
   overflow: hidden;
@@ -158,8 +158,34 @@
 
 .messagesFeed {
   flex: 1;
+  overflow-y: overlay;
   overflow-y: auto;
   padding: 0;
+  scrollbar-width: none;
+}
+
+.messagesFeed::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+.messagesFeed::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+.messagesFeed::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  min-height: 40px;
+}
+
+.messagesFeed::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 .dateDivider {
@@ -545,6 +571,31 @@
   flex: 1;
   overflow-y: auto;
   padding: 16px;
+  scrollbar-width: none;
+}
+
+.threadMessages::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+.threadMessages::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+.threadMessages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  min-height: 40px;
+}
+
+.threadMessages::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 .threadOriginal {
@@ -702,15 +753,27 @@
 .panelResizer {
   grid-row: 2;
   grid-column: 2;
-  background: var(--border);
+  background: transparent;
   cursor: col-resize;
   position: relative;
   z-index: 200;
-  transition: background 0.15s;
 }
 
-.panelResizer:hover {
+.panelResizer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--border);
+  opacity: 0.5;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.panelResizer:hover::after {
   background: var(--accent-cyan);
+  opacity: 1;
 }
 
 .panelResizer::before {
@@ -718,8 +781,8 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: -8px;
-  right: -8px;
+  left: -6px;
+  right: -6px;
   z-index: 200;
 }
 
@@ -1544,6 +1607,27 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  scrollbar-width: none;
+}
+
+.kanbanColumnBody::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+
+.kanbanColumnBody::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.kanbanColumnBody::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  min-height: 30px;
+}
+
+.kanbanColumnBody::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .kanbanCard {
@@ -1885,6 +1969,27 @@
 .activityList {
   flex: 1;
   overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.activityList::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+
+.activityList::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.activityList::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  min-height: 30px;
+}
+
+.activityList::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .activityHeader {

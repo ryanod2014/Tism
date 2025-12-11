@@ -109,7 +109,6 @@ export default function LivePage() {
         <div className={styles.headerRight}>
           <div className={styles.viewTabs}>
             <Link href="/project" className={styles.viewTab}>Preview</Link>
-            <Link href="/tickets" className={styles.viewTab}>Pipeline</Link>
             <span className={`${styles.viewTab} ${styles.active}`}>Live</span>
           </div>
           <Button variant="primary" size="sm">🚀 Launch</Button>

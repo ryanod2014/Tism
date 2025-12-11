@@ -540,7 +540,7 @@ function ChatContent() {
   };
 
   const handleFinish = () => {
-    router.push('/tickets');
+    router.push('/');
   };
 
   // Render folder tree
